@@ -51,16 +51,20 @@ C19deaths <- read_subset_covid(zippath = "Data/inputDB.zip",
   pivot_wider(names_from = Sex, values_from = Value) %>% 
   mutate(b = case_when(is.na(b) & !is.na(f) & !is.na(m) ~ f + m,
                        TRUE ~ b)) %>% 
-  select(Country, Date, Age, AgeInt, Deaths = b) %>% 
+  dplyr::select(Country, Date, Age, AgeInt, Deaths = b) %>% 
     mutate(Date = dmy(Date),
            DateDiff = abs(Date - ymd("2020-12-31"))) %>% 
     group_by(Country) %>% 
-    dplyr::filter(DateDiff == min(DateDiff),
-                  Date >= ymd("2020-08-01")) %>% 
+    dplyr::filter(DateDiff == min(DateDiff)) %>% 
   mutate(AgeInt = case_when(Country == "Slovenia" & Age == 0 & AgeInt == 45L ~ 5L,
                             TRUE ~AgeInt)) %>% 
   dplyr::filter(!(Country == "Slovenia" & Age == 0 & AgeInt == 35L)) %>% 
-  mutate(Deaths = ifelse(is.na(Deaths),0,Deaths))
+  mutate(Deaths = ifelse(is.na(Deaths),0,Deaths)) %>% 
+  group_by(Country) %>% 
+  mutate(total_deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  dplyr::filter(total_deaths> 100) %>% 
+  dplyr::select(-total_deaths)
  
 # to avoid some preprocessing just now, we can
 # keep it to both-sex data
@@ -94,7 +98,8 @@ C19_use <-
   group_by(Country) %>% 
   mutate(total_deaths = case_when(is.na(total_deaths) ~ sum(Deaths),
                                   TRUE ~ total_deaths)) %>% 
-  dplyr::filter(total_deaths > 200) %>% 
+  ungroup() %>% 
+  dplyr::filter(total_deaths > 100) %>% 
   group_by(Country) %>% 
   mutate(Deaths = Deaths / sum(Deaths) * total_deaths,
          Age = as.integer(Age))
