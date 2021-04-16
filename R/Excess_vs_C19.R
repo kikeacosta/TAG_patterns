@@ -162,18 +162,24 @@ Compare %>%
        and scaled to Hopkins total") +
   theme(plot.title = element_text(size=35))
 
-
+Cdat <- 
 Compare %>% 
   mutate(Excess = CumExc / Exposure,
-         C19 = C19_deaths / Exposure) %>% 
+         C19 = C19_deaths / Exposure,
+         C19 = ifelse(C19 == 0, NA_real_,C19)) %>% 
   select(Country, Sex, Age, Excess, C19) %>% 
-  pivot_longer(Excess:C19, names_to = "Measure", values_to = "Rate") %>% 
+  pivot_longer(Excess:C19, names_to = "Measure", values_to = "Rate")
+
+
+# Full picture:
+p1 <- 
+  Cdat %>% 
   ggplot(aes(x = Age, 
              y = Rate, 
              group = interaction(Sex, Measure), 
              color = Sex,
              linetype = Measure)) + 
-  geom_line(alpha = .5, size = 1) +
+  geom_line(size = 1.2) +
   facet_wrap(~Country) + 
   scale_y_log10()  +
   labs(title = "Total Excess vs C19 rates",
@@ -181,7 +187,100 @@ Compare %>%
        includes negative and positive deviations
        C19 data from COVerAGE-DB, dates close to Dec 31, 2020
        and scaled to Hopkins total") +
-  theme(plot.title = element_text(size=35))
+  theme(plot.title = element_text(size=35)) + 
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC"))
+p1
+
+# Full picture, just places with meaningful comparisons
+p2 <- 
+  Cdat %>% 
+  dplyr::filter(!Country %in% c("Iceland","Northern Ireland", "New Zealand","Denmark","Finland","Australia")) %>% 
+  ggplot(aes(x = Age, 
+             y = Rate, 
+             group = interaction(Sex, Measure), 
+             color = Sex,
+             linetype = Measure)) + 
+  geom_line(size = 1.2) +
+  facet_wrap(~Country) + 
+  scale_y_log10()  +
+  labs(title = "Total Excess vs C19 rates",
+       caption = "Excess by Enrique Acosta based on STMF
+       includes negative and positive deviations
+       C19 data from COVerAGE-DB, dates close to Dec 31, 2020
+       and scaled to Hopkins total") +
+  theme(plot.title = element_text(size=35)) + 
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC"))
+p2
+
+# showing discrepancies:
+p3 <- Cdat %>% 
+  dplyr::filter(Country %in% c("Canada","Portugal","Slovenia")) %>% 
+  ggplot(aes(x = Age, 
+             y = Rate, 
+             group = interaction(Sex, Measure), 
+             color = Sex,
+             linetype = Measure)) + 
+  geom_line(size = 1.2) +
+  facet_wrap(~Country) + 
+  scale_y_log10()  +
+  labs(title = "Total Excess vs C19 rates",
+       caption = "Excess by Enrique Acosta based on STMF
+       includes negative and positive deviations
+       C19 data from COVerAGE-DB, dates close to Dec 31, 2020
+       and scaled to Hopkins total") +
+  theme(plot.title = element_text(size=35)) + 
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC"))
+p3
+
+# Peru Mexico
+p4 <- Cdat %>% 
+  dplyr::filter(Country %in% c("Peru", "Mexico")) %>% 
+  ggplot(aes(x = Age, 
+             y = Rate, 
+             group = interaction(Sex, Measure), 
+             color = Sex,
+             linetype = Measure)) + 
+  geom_line(size = 1.2) +
+  facet_wrap(~Country) + 
+  scale_y_log10()  +
+  labs(title = "Total Excess vs C19 rates",
+       caption = "Excess by Enrique Acosta based on STMF
+       includes negative and positive deviations
+       C19 data from COVerAGE-DB, dates close to Dec 31, 2020
+       and scaled to Hopkins total") +
+  theme(plot.title = element_text(size=35)) + 
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC"))
+p4
+
+# Peru Mexico
+p5 <- Cdat %>% 
+  dplyr::filter(Country %in% c("France", "Chile","Czechia",
+                               "Hungary","Israel","Italy",
+                               "Netherlands","Spain","Germany",
+                               "Switzerland")) %>% 
+  ggplot(aes(x = Age, 
+             y = Rate, 
+             group = interaction(Sex, Measure), 
+             color = Sex,
+             linetype = Measure)) + 
+  geom_line(size = 1.2) +
+  facet_wrap(~Country) + 
+  scale_y_log10()  +
+  labs(title = "Total Excess vs C19 rates",
+       caption = "Excess by Enrique Acosta based on STMF
+       includes negative and positive deviations
+       C19 data from COVerAGE-DB, dates close to Dec 31, 2020
+       and scaled to Hopkins total") +
+  theme(plot.title = element_text(size=35)) + 
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC")) + 
+  xlim(30,90)
+p5
+
+p1
+p2
+p3
+p5
+p4
 # --------------------------------------- #
 # Repeat with confidence intervals!       #
 # --------------------------------------- #
