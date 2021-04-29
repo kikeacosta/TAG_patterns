@@ -51,7 +51,7 @@ C19deaths <- read_subset_covid(zippath = "Data/inputDB.zip",
   pivot_wider(names_from = Sex, values_from = Value) %>% 
   mutate(b = case_when(is.na(b) & !is.na(f) & !is.na(m) ~ f + m,
                        TRUE ~ b)) %>% 
-  dplyr::select(Country, Date, Age, AgeInt, Deaths = b) %>% 
+  dplyr::select(Country, Date, Age, AgeInt, Deaths = b,f,m) %>% 
     mutate(Date = dmy(Date),
            DateDiff = abs(Date - ymd("2020-12-31"))) %>% 
     group_by(Country) %>% 
@@ -144,3 +144,11 @@ errors[errors == "try-error"]
 C_big <- do.call("rbind",C_big)
 
 # Now you take it from here!
+
+
+
+
+
+
+
+
