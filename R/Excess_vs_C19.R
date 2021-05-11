@@ -188,7 +188,8 @@ p1 <-
        C19 data from COVerAGE-DB, dates close to Dec 31, 2020
        and scaled to Hopkins total") +
   theme(plot.title = element_text(size=35)) + 
-  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC"))
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC")) + 
+  theme(strip.text.x = element_text(size = tx-2), strip.text.y = element_text(size = tx-2))
 p1
 
 # Full picture, just places with meaningful comparisons
@@ -449,5 +450,30 @@ CompareCI %>%
 
 ExcessCI %>% 
   ggplot(aes(x = Date, y = Deaths)) + 
-  geom_line() +
+  geom_line() 
+  
+
+  tx = 14
+  
+  Cdat %>% 
+  dplyr::filter(!Country %in% c("Denmark", "Iceland", "Northern Ireland", "New Zealand","Sweden","Finland","Australia","Switzlernad")) %>% 
+  ggplot(aes(x = Age, 
+             y = Rate, 
+             group = interaction(Sex, Measure), 
+             color = Sex,
+             linetype = Measure)) + 
+  geom_line(size = 1.2) +
+  facet_wrap(~Country) + 
+  scale_y_log10()  +
+  labs(title = "Total Excess vs C19 rates",
+       caption = "Excess by Enrique Acosta based on STMF
+       includes negative and positive deviations
+       C19 data from COVerAGE-DB, dates close to Dec 31, 2020
+       and scaled to Hopkins total") +
+  theme(plot.title = element_text(size=35)) + 
+  scale_color_manual(values=c("#66CC99","#CC6666", "#9999CC")) + 
+  theme(strip.text.x = element_text(size = tx), strip.text.y = element_text(size = tx-2),
+        legend.text = element_text(size=tx-1)) 
+  
+  
   

@@ -1,37 +1,4 @@
 
-make_C <- function(Age, AgeInt, exposure){
-  
- 
-  Agei  <- Age + 1
-  m     <- sum(AgeInt)
-  
-  k     <- length(Age)
-   
-   if (length(exposure) == length(Age)){
-     exposure <- rep(exposure, AgeInt)
-   }
-  if (length(exposure) > m){
-    exposure[m] <- sum(exposure[m:length(exposure)])
-    exposure <- exposure[1:m]
-  }
-   
-   stopifnot(length(exposure) == m)
-   
-   
-  C_out <- matrix(0,
-                  nrow = k, 
-                  ncol = m, 
-                  dimnames = list(Age, 0:(sum(AgeInt) - 1)))
-  
-  Agei_top <- c(Agei[-1] - 1, m)  
-  for (i in 1:k){
-    ind <- Agei[i]:Agei_top[i]
-  # cat(ind,"\n\n")  
-   C_out[i,ind] <- exposure[ind]
-  }
-  
-  C_out
-}
 
 # Note: repo name != package name!
 # remotes::install_github("eshom/covid-age-data")
@@ -44,18 +11,18 @@ download_covid("inputDB", dest = "Data", download_only = TRUE)
 
 
 C19deaths <- read_subset_covid(zippath = "Data/inputDB.zip",
-                  data = "inputDB",
-                  Region = "All") %>% 
+                               data = "inputDB",
+                               Region = "All") %>% 
   dplyr::filter(Measure == "Deaths",
                 !(Metric == "Fraction" & Age == "TOT")) %>% 
   pivot_wider(names_from = Sex, values_from = Value) %>% 
   mutate(b = case_when(is.na(b) & !is.na(f) & !is.na(m) ~ f + m,
                        TRUE ~ b)) %>% 
   dplyr::select(Country, Date, Age, AgeInt, Deaths = b,f,m) %>% 
-    mutate(Date = dmy(Date),
-           DateDiff = abs(Date - ymd("2020-12-31"))) %>% 
-    group_by(Country) %>% 
-    dplyr::filter(DateDiff == min(DateDiff)) %>% 
+  mutate(Date = dmy(Date),
+         DateDiff = abs(Date - ymd("2020-12-31"))) %>% 
+  group_by(Country) %>% 
+  dplyr::filter(DateDiff == min(DateDiff)) %>% 
   mutate(AgeInt = case_when(Country == "Slovenia" & Age == 0 & AgeInt == 45L ~ 5L,
                             TRUE ~AgeInt)) %>% 
   dplyr::filter(!(Country == "Slovenia" & Age == 0 & AgeInt == 35L)) %>% 
@@ -65,8 +32,8 @@ C19deaths <- read_subset_covid(zippath = "Data/inputDB.zip",
   ungroup() %>% 
   dplyr::filter(total_deaths> 100) %>% 
   dplyr::select(-total_deaths)
- 
-  # to avoid some preprocessing just now, we can
+
+# to avoid some preprocessing just now, we can
 # keep it to both-sex data
 
 
@@ -126,26 +93,18 @@ C19_use <-
   C19_use %>% 
   dplyr::filter(Country %in% offsets$Country)
 
-countries_loop <- C19_use$Country %>% unique()
 
-C_big <- list()
-  for (i in countries_loop){
-    
-    C19d <- C19_use %>% dplyr::filter(Country == i, Age < 105)
-    exposure <- offsets %>% 
-      dplyr::filter(Country == i) %>% 
-      dplyr::pull(Population)
-    
-    C_i <- try(make_C(Age = C19d$Age, AgeInt = C19d$AgeInt, exposure = exposure)) 
-    C_big[[i]] <- C_i
-  }
-errors <- lapply(C_big,class) %>% unlist()
-errors[errors == "try-error"]
 
-# This is how we stack them, right?
-C_big <- do.call("rbind",C_big)
+lower_bound <- 30
+upper_bound  <- 70
 
-# Now you take it from here!
+
+
+C19_use %>% 
+  mutate(Age_upper = Age + AgeInt,
+         ind = Age >= lower_bound & Age <= upper_bound) %>% 
+  select(Country, Age, Age_upper, AgeInt, ind) %>% 
+  saveRDS(file= "Data/C19_bounds.rds")
 
 
 
