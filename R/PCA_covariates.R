@@ -10,7 +10,7 @@ WPP <-
   filter(MidPeriod == 2018)
 
 gc()
-1:10 + lag(1:10)
+
 WPP_calcs <-
   WPP %>% 
   arrange(LocID, SexID, AgeGrpStart) %>% 
@@ -36,14 +36,15 @@ wpp_locs <- WPP_calcs$Location %>% unique()
 c19countries[!c19countries %in% wpp_locs]
 
 library(HMDHFDplus)
-getHMDcountries()
+# getHMDcountries()
 get_these <- c("GBRTENW", "GBR_SCO", "GBR_NIR")
 get_names <- c("England and Wales", "Scotland","Northern Ireland")
 names(get_names) <- get_these
 HMD_calcs <- tibble(Country = character(),
                     Sex = character(),
                     e0 = double(),
-                    edagger = double())
+                    edagger = double(),
+                    b = double())
 for (xyz in get_these){
   for (s in c("f","m","b")){
     this_chunk<- readHMDweb(xyz,paste0(s,"ltper_1x1"),us,pw)
@@ -52,7 +53,8 @@ for (xyz in get_these){
       dplyr::filter(Year == 2018) %>% 
       mutate(ex_mid = approx(x = Age, y = ex, xout = (Age + ax), rule = 2)$y) %>% 
       summarize(e0 = ex[Age == 0],
-                edagger = sum(dx*ex_mid) / sum(dx)) %>% 
+                edagger = sum(dx*ex_mid) / sum(dx),
+                b = get_b(chunk = .data)) %>% 
       mutate(Sex = s,
              Country = get_names[xyz]) %>% 
       bind_rows(HMD_calcs) 
@@ -63,3 +65,43 @@ Covariates <- bind_rows(WPP_calcs, HMD_calcs)
 
 saveRDS(Covariates, file = "Data/Covariates.rds")
 
+# -------------------------------------------------------------
+# get Gompertz b parameter for each country
+library(tidyverse)
+library(readr)
+
+WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
+WPP$MidPeriod %>% unique()
+WPP <- 
+  WPP %>% 
+  filter(MidPeriod == 2018)
+
+
+get_b <- function(chunk){
+  MortalityLaw(x = chunk$AgeGrpStart, 
+               Dx = chunk$dx, 
+               Ex = chunk$Lx,
+               opt.method ="poissonL",
+               law = "makeham", 
+               fit.this.x = seq(30,85,by=5))$coefficients["B"]
+}
+
+adds_b <-
+  WPP %>% 
+  group_by(LocID, Location, Sex) %>% 
+  summarize(b = get_b(chunk = .data),
+            .groups = "drop") %>% 
+  ungroup() %>% 
+  mutate(Location = case_when(Location == "United States of America" ~ "USA",
+                              Location == "Republic of Moldova" ~ "Moldova",
+                              Location == "Republic of Korea" ~ "South Korea",
+                              TRUE ~ Location),
+         Sex = recode(Sex,
+                      "Female" = "f",
+                      "Male" = "m", 
+                      "Total" = "b")) %>% 
+  select(Country = Location, Sex, b)
+
+Covariates <- left_join(WPP_calcs, adds_b)
+
+saveRDS(Covariates, file = "Data/WPP_Covariates.rds")
