@@ -28,3 +28,4 @@ vignettes/*.pdf
 .Renviron
 TAG_patterns.Rproj
 Data
+excess_vs_c19.png
