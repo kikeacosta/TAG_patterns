@@ -1,11 +1,227 @@
 library(readxl)
 library(tidyverse)
 library(countrycode)
+
+# assorted helper functions written on the fly
+has_total <- function(age_vec){
+  "total age" %in% age_vec
+}
+has_not_total <- function(age_vec){
+  any(age_vec != "total age")
+}
+
+has_annual <- function(time_units){
+  any(time_units == "annual")
+}
+is_complete <- function(time, time_unit){
+  if (any(time_unit == "annual")){
+    return(TRUE)
+  }
+  if (any(time_unit == "month")){
+    return(all(1:12 %in% time))
+  }
+  if (any(time_unit == "week")){
+    return(all(1:52 %in% time))
+  }
+  NA_integer_
+}
+rescale_age <- function(chunk){
+  TOT <- chunk %>% dplyr::filter(age_cat_s == "total age") %>% dplyr::pull(deaths)
+  chunk %>% 
+    dplyr::filter(age_cat_s != "total age") %>% 
+    mutate(deaths = deaths + (deaths / sum(deaths)) * TOT)
+}
+age2int2 <- function(Age){
+  OA <- 105
+  OAvalue <- 105 - max(Age)
+  DemoTools::age2int(Age, OAG = TRUE, OAvalue = OAvalue)
+}
+# -------------------------------------
+# read in May 10 data
 WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_10.05.2021.xlsx")
 
-str(WHOin)
-iso3 <- WHOin$country %>% unique()
 
+# filter down to incl age and 2020
+WHO_age_2020 <-
+  WHOin %>% 
+  group_by(country, year, time_unit, time, sex) %>%
+  mutate(ageq = has_not_total(age_cat_s)) %>% 
+  ungroup() %>% 
+  dplyr::filter(ageq) %>% 
+  group_by(country, sex) %>%
+  mutate(has2020 = any(year == 2020)) %>% 
+  ungroup() %>% 
+  dplyr::filter(has2020,
+                year > 2015,
+                year < 2021)
+
+
+# WHO_age_2020 %>% 
+#   group_by(country, year, sex, time_unit) %>% 
+#   mutate(consistent_age = unique(format_age) %>% length()) %>% 
+#   ungroup() 
+
+
+# if has annual, prefer it.
+# if not, ensure that the year is complete (all weeks or months)
+# aggregate within year and age
+WHO_age_2020_annual <-
+  WHO_age_2020 %>% 
+  group_by(country, year, sex) %>% 
+  mutate(annual = has_annual(time_unit)) %>% 
+  ungroup() %>% 
+  filter(!(annual & time_unit != "annual")) %>% 
+  select(-ageq, -has2020, -annual) %>% 
+  group_by(country, year, sex, time_unit) %>% 
+  mutate(compl = is_complete(time, time_unit)) %>% 
+  filter(compl) %>% 
+  group_by(country, year, sex, time_unit, age_cat_s) %>% 
+  summarize(deaths = sum(deaths), .groups = "drop") 
+
+# This produces a auxiliary selector dataset
+# consisting in just subsets where  2020 deaths > 2019 deaths
+# discarded in end.
+
+# WHO_selector_excess <-
+#   WHO_age_2020_annual %>% 
+#   mutate(time_unit = "annual") %>% 
+#   filter(age_cat_s != "total age",
+#          sex != "Unknown") %>% 
+#   group_by(country, sex, year) %>% 
+#   summarize(tot = sum(deaths),
+#             .groups = "drop") %>% 
+#   pivot_wider(names_from = year, values_from = tot) %>% 
+#   mutate(excess = `2020` > `2019`,
+#          excess = ifelse(is.na(excess),TRUE, excess)) %>% 
+#   filter(excess,
+#          `2020` > 2000) %>% 
+#   pivot_longer(`2016`:`2020`, names_to = "year", values_to = "tot") %>% 
+#   filter(!is.na(tot)) %>% 
+#   select(-excess, -tot) %>% 
+#   mutate(year = as.double(year))
+
+# leave off with rescale operations.
+
+# Filter to useful categories,
+# then rescale to total age
+# then scale sex-specific data to sum to stated totals
+WHO_selection <-
+  WHO_age_2020_annual %>% 
+  filter(age_cat_s != "Unknown",
+         sex != "Unknown") %>% 
+  select(-time_unit) %>% 
+  group_by(country, sex, year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>% 
+  pivot_wider(names_from = sex, values_from = deaths) %>%
+  mutate(PM = Male / (Male + Female),
+         PF = Female / (Male + Female),
+         PM = ifelse(is.nan(PM),0,PM),
+         PF = ifelse(is.nan(PF),0,PF),
+         Total = ifelse(is.na(Total), Male + Female, Total),
+         Male = PM * Total,
+         Female = PF * Total) %>% 
+  select(-PM, -PF) %>% 
+  pivot_longer(Female:Total, 
+               values_to = "deaths", 
+               names_to = "sex",
+               values_drop_na = TRUE) %>% 
+  dplyr::filter(age_cat_s != "total age")
+
+# need to summarize years < 2020 as mean to deliver just two
+# time points per population / sex.
+WHO_2020_save <- 
+  WHO_selection %>% 
+  dplyr::filter(year == 2020)
+
+# merge, then recode values and colnames to standards 
+WHO_compare <-
+  WHO_selection %>% 
+  dplyr::filter(year < 2020) %>% 
+  group_by(country, sex, age_cat_s) %>% 
+  summarize(deaths = mean(deaths),
+         year = mean(year) + .5,
+         .groups="drop") %>% 
+  bind_rows(WHO_2020_save) %>% 
+  mutate(Age = recode(age_cat_s,
+                        "0"     = 0L,           
+                        "1-4"   = 1L,
+                        "10-14" = 10L,
+                        "15-19" = 15L,
+                        "20-24" = 20L,
+                        "25-29" = 25L,
+                        "30-34" = 30L,
+                        "35-39" = 35L,
+                        "40-44" = 40L,
+                        "45-49" = 45L,
+                        "5-9"   = 5L,
+                        "50-54" = 50L,
+                        "55-59" = 55L,
+                        "60-64" = 60L,
+                        "65-69" = 65L,
+                        "70-74" = 70L,
+                        "75-79" = 75L,
+                        "80-84" = 80L,
+                        "85+"   = 85L,
+                        "0-44"  = 0L,
+                        "45-64" = 45L,
+                        "65-74" = 65L,
+                        "75-84" = 75L,
+                        "< 5"   = 0L,     
+                        "85-89" = 85L,
+                        "90+"   = 90L,
+                        "0-30"  = 0L ,
+                        "85-89" = 85L,
+                        "90-94" = 90L,
+                        "95+"   = 95L,
+                        "0-4"   = 0L ,
+                        "100+"  = 100L ,
+                        "95-100"= 95L,
+                        "0-64"  = 0L ,
+                        "65-79" = 65L,
+                        "80+"   = 80L,
+                        "100+"  = 100L,
+                      "85-90" = 85L),
+         Sex = recode(sex,"m" = "Male","f" = "Female","b" = "Total") ) %>% 
+  dplyr::select(country, year, Sex, Age, deaths) %>% 
+  dplyr::filter(!country %in% c("AND")) %>% 
+  mutate(Country =countrycode(sourcevar = country, 
+                              origin = "iso3c", 
+                              destination = "country.name"),
+         Country = ifelse(Country == "United States","USA",Country)) %>% 
+  arrange(Country, year, Sex, Age) %>% 
+  group_by(Country, Sex, year) %>% 
+  mutate( AgeInt = age2int2(Age)) %>% 
+  ungroup()
+
+# save out
+saveRDS(WHO_compare, file = "Data/WHO_compare.rds")  
+
+
+# who_countries <- WHO_compare$Country %>% unique()
+# 
+# who_countries[!who_countries%in%offsets$Country]
+# offsets$Country %>% unique()
+# "Armenia"   "Georgia"   "Mauritius"
+
+# WPP <- read_csv("Data/WPP2019_PopulationBySingleAgeSex_1950-2019.csv") %>% 
+#   dplyr::filter(MidPeriod == 2018.5,
+#                 Location %in% c("Armenia",   "Georgia",   "Mauritius"))
+# offsets <-
+# WPP %>% 
+#   pivot_longer(PopMale:PopTotal, names_to = "Sex", values_to = "Population") %>% 
+#   mutate(Sex = recode(Sex, 
+#                       "PopMale" = "m",
+#                       "PopFemale" = "f",
+#                       "PopTotal" = "b"),
+#          Region = "All") %>% 
+#   select(Age = AgeGrpStart, Population, Country = Location, Region,  Sex) %>% 
+#   bind_rows(readRDS("Data/Offsets.rds")) %>% 
+#   arrange(Country, Region, Sex, Age)
+# 
+# 
+# saveRDS(offsets, "Data/Offsets.rds")
+#   
 WHOin %>% 
   filter(country == "ZMB",
          sex == "Total") %>% 
@@ -36,9 +252,8 @@ WHOin %>%
   filter(country == "ECU",
          sex == "Total") %>% 
   ggplot(aes(x = time, y = deaths, group = year)) + 
-  geom_line(  ) %>% 
-  View()
-  
+  geom_line(  ) 
+
 WHOin %>% 
   filter(country == "MUS",
          age_cat_s != "total age",
@@ -52,158 +267,4 @@ WHOin %>%
   filter(country == "PER",
          sex == "Total",
          year == 2020) %>% 
- pull(age_cat_s)
-
-
-# %>% 
- # ggplot(aes(x=time, y=deaths,group = year))+
- #  geom_line()
-
-# LBN is out
-# MDV out, ZMB out
-
-# programmatic filters
-# throw out anyone without age (OMN)
-# throw out anyone without 2020 (LBN, ECU, PAN)
-
-# visual filters
-# throw out anyone where 2020 doesn't look complete
-# ZMB, MDV, 
-
-
-
-
-WHOin %>% 
-  filter(country == "LBN")
-
-
-WHOin %>% 
-  filter(year == 2020,
-         sex == "Total",
-         substr(age_cat_s, 1, 1) == "0",
-         !country %in% c("MUS","ZMB","MDV")) %>% 
-  pull(country) %>% unique()
-
-# merge w WPP for 2020
-# aggregate years prior to 2020
-
-# get sex, country, deaths_prior, expos_prior, deaths, expos.
-
-# Question, does each subset reliably have "total age" ?
-WHOin %>% 
-  group_by(country, year, time_unit, time, sex) %>% 
-  summarize(tots = has_total(age_cat_s), .groups = "drop") %>% 
-  pull(tots) %>% sum()
-
-has_total <- function(age_vec){
-  "total age" %in% age_vec
-}
-has_not_total <- function(age_vec){
-  any(age_vec != "total age")
-}
-
-# WHOin %>% 
-#   group_by(country, year, time_unit, time, sex) %>% 
-#   summarize(ageq = has_not_total(age_cat_s), .groups = "drop") %>% 
-#   pull(ageq) %>% sum()
-#   #nrow()
-
-# filter down to incl age
-WHO_age <- WHOin %>% 
-  group_by(country, year, time_unit, time, sex) %>%
-  mutate(ageq = has_not_total(age_cat_s)) %>% 
-  ungroup() %>% 
-  dplyr::filter(ageq)
-
-# only subsets with useful years
-WHO_age_2020 <- WHO_age %>% 
-  group_by(country, sex) %>%
-  mutate(has2020 = any(year == 2020)) %>% 
-  ungroup() %>% 
-  dplyr::filter(has2020,
-                year > 2015,
-                year < 2021)
-
-# get annual totals by sex
-
-WHO_age_2020 %>% 
-  group_by(country, year, sex, time_unit) %>% 
-  mutate(consistent_age = unique(format_age) %>% length()) %>% 
-  ungroup() 
-
-
-# if it has annual, throw out the rest :-)
-has_annual <- function(time_units){
-  any(time_units == "annual")
-}
-WHO_age_2020_anuual1 <-
-  WHO_age_2020 %>% 
-  group_by(country, year, sex) %>% 
-  mutate(annual = has_annual(time_unit)) %>% 
-  ungroup() %>% 
-  filter(!(annual & time_unit != "annual")) %>% 
-  select(-ageq, -has2020, -annual)
-  
-
-is_complete <- function(time, time_unit){
-  if (any(time_unit == "annual")){
-    return(TRUE)
-  }
-  if (any(time_unit == "month")){
-    return(all(1:12 %in% time))
-  }
-  if (any(time_unit == "week")){
-    return(all(1:52 %in% time))
-  }
-  NA_integer_
-}
-
-WHO_age_2020_complete <-
-  WHO_age_2020_anuual1 %>% 
-  group_by(country, year, sex, time_unit) %>% 
-  mutate(compl = is_complete(time, time_unit)) %>% 
-  filter(compl) 
-
-WHO_age_2020_annual <-
-  WHO_age_2020_complete %>% 
-  group_by(country, year, sex, time_unit, age_cat_s) %>% 
-  summarize(deaths = sum(deaths), .groups = "drop") 
-
-# before this, ensure
-
-# 2020 at least as many deaths as 2019
-
-WHO_selector <-
-  WHO_age_2020_annual %>% 
-  mutate(time_unit = "annual") %>% 
-  filter(age_cat_s != "total age",
-         sex != "Unknown") %>% 
-  group_by(country, sex, year) %>% 
-  summarize(tot = sum(deaths),
-            .groups = "drop") %>% 
-  pivot_wider(names_from = year, values_from = tot) %>% 
-  mutate(excess = `2020` > `2019`,
-         excess = ifelse(is.na(excess),TRUE, excess)) %>% 
-  filter(excess,
-         `2020` > 2000) %>% 
-  pivot_longer(`2016`:`2020`, names_to = "year", values_to = "tot") %>% 
-  filter(!is.na(tot)) %>% 
-  select(-excess, -tot) %>% 
-  mutate(year = as.double(year))
-
-WHO_selection <-
-  WHO_selector %>% 
-  left_join(WHO_age_2020_annual) %>% 
-  filter(age_cat_s != "Unknown") %>% 
-  select(-time_unit)
-
-
-# leave off with rescale operations.
-rescale_age <- function(chunk){
-  
-}
-
-WHO_selection %>% 
-  pull(age_cat_s) %>% unique()
-
-
+  pull(age_cat_s)
