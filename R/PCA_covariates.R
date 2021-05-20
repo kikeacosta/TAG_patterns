@@ -2,6 +2,26 @@
 
 library(tidyverse)
 library(readr)
+library(HMDHFDplus)
+library(MortalityLaws)
+
+emp.der <- function(x, y){
+  # simple function for "empirical" derivatives\
+  # courtesy of GC
+  m <- length(x)
+  a <- c(diff(y), 1)
+  b <- c(diff(x), 1)
+  ab <- a/b
+  wei <- c(rep(1, m-1), 0)
+  
+  a1 <- c(1, -1*diff(y))
+  b1 <- c(1, -1*diff(x))
+  ab1 <- a1/b1
+  wei1 <- c(0, rep(1, m-1))
+  
+  y1emp <- (ab*wei + ab1*wei1)/(wei+wei1)
+  return(y1emp)
+}
 
 WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
 WPP$MidPeriod %>% unique()
@@ -35,7 +55,7 @@ wpp_locs <- WPP_calcs$Location %>% unique()
 
 c19countries[!c19countries %in% wpp_locs]
 
-library(HMDHFDplus)
+
 # getHMDcountries()
 get_these <- c("GBRTENW", "GBR_SCO", "GBR_NIR")
 get_names <- c("England and Wales", "Scotland","Northern Ireland")
@@ -67,8 +87,7 @@ saveRDS(Covariates, file = "Data/Covariates.rds")
 
 # -------------------------------------------------------------
 # get Gompertz b parameter for each country
-library(tidyverse)
-library(readr)
+
 
 WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
 WPP$MidPeriod %>% unique()
@@ -77,20 +96,39 @@ WPP <-
   filter(MidPeriod == 2018)
 
 
-get_b <- function(chunk){
-  MortalityLaw(x = chunk$AgeGrpStart, 
+  
+get_rates_of_aging <- function(chunk){
+  abc <- MortalityLaw(x = chunk$AgeGrpStart, 
                Dx = chunk$dx, 
                Ex = chunk$Lx,
                opt.method ="poissonL",
                law = "makeham", 
-               fit.this.x = seq(30,85,by=5))$coefficients["B"]
+               fit.this.x = seq(30,85,by=5))$coefficients
+  a5 <- seq(30,85,by=5)
+  mx <- 
+  chunk %>% 
+    dplyr::filter(AgeGrpStart >= 30, AgeGrpStart <= 85) %>% 
+    dplyr::pull(mx)
+   ftd <- loess(log(mx) ~ a5)$fitted 
+   
+   rout <- emp.der(x = a5,y = ftd)
+   
+  tibble(A = abc[1], B = abc[2], C = abc[3], r30 = rout[1], r35 = rout[2], r40= rout[3],
+         r45 = rout[4], r50= rout[5],
+         r55 = rout[6], r60= rout[7],
+         r65 = rout[8], r70= rout[9],
+         r75 = rout[10], r80= rout[11],
+         r85= rout[12])
 }
+
+
+
+
 
 adds_b <-
   WPP %>% 
   group_by(LocID, Location, Sex) %>% 
-  summarize(b = get_b(chunk = .data),
-            .groups = "drop") %>% 
+  do(get_rates_of_aging(chunk = .data)) %>% 
   ungroup() %>% 
   mutate(Location = case_when(Location == "United States of America" ~ "USA",
                               Location == "Republic of Moldova" ~ "Moldova",
@@ -100,8 +138,11 @@ adds_b <-
                       "Female" = "f",
                       "Male" = "m", 
                       "Total" = "b")) %>% 
-  select(Country = Location, Sex, b)
+  rename(Country = Location)
 
-Covariates <- left_join(WPP_calcs, adds_b)
+
+Covariates <- readRDS("Data/Covariates.rds")
+Covariates <- left_join(Covariates, adds_b) %>% 
+  select(-LocID)
 
 saveRDS(Covariates, file = "Data/WPP_Covariates.rds")

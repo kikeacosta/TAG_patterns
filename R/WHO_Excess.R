@@ -65,18 +65,46 @@ WHO_age_2020 <-
 # if has annual, prefer it.
 # if not, ensure that the year is complete (all weeks or months)
 # aggregate within year and age
+
+
 WHO_age_2020_annual <-
   WHO_age_2020 %>% 
-  group_by(country, year, sex) %>% 
-  mutate(annual = has_annual(time_unit)) %>% 
-  ungroup() %>% 
-  filter(!(annual & time_unit != "annual")) %>% 
-  select(-ageq, -has2020, -annual) %>% 
+  dplyr::filter(time_unit != "annual") %>% 
   group_by(country, year, sex, time_unit) %>% 
   mutate(compl = is_complete(time, time_unit)) %>% 
-  filter(compl) %>% 
+  dplyr::filter(compl) %>% 
   group_by(country, year, sex, time_unit, age_cat_s) %>% 
   summarize(deaths = sum(deaths), .groups = "drop") 
+
+WHO_age_2020_annual_pre <-
+  WHO_age_2020 %>% 
+  dplyr::filter(time_unit == "annual") %>% 
+  select(all_of(colnames(WHO_age_2020_annual))) %>% 
+  filter(!(country == "GEO" & year == 2020))
+
+
+check <- 
+  WHO_age_2020_annual_pre %>% 
+  select(country, sex, year) %>% 
+  distinct() %>% 
+  mutate(check = paste(country, sex, year)) %>% 
+  pull(check)
+
+WHO_age_2020_annual <-
+  WHO_age_2020_annual %>% 
+  mutate(check2 = paste(country, sex, year)) %>% 
+  filter(!check2 %in% check) %>% 
+  bind_rows(WHO_age_2020_annual_pre) %>% 
+  select(-check2) %>% 
+  filter(country == "GEO", year == 2020) 
+  
+
+# Fix Armenia 0 + 1-4 oddity
+WHO_age_2020_annual <- 
+WHO_age_2020_annual %>% 
+  filter(!(age_cat_s == "0" & country == "ARM")) %>% 
+  mutate(age_cat_s = ifelse(country == "ARM" & age_cat_s == "1-4","0",age_cat_s))
+
 
 # This produces a auxiliary selector dataset
 # consisting in just subsets where  2020 deaths > 2019 deaths
@@ -204,6 +232,9 @@ saveRDS(WHO_compare, file = "Data/WHO_compare.rds")
 # offsets$Country %>% unique()
 # "Armenia"   "Georgia"   "Mauritius"
 
+# offsets <- readRDS("Data/Offsets.rds")  %>% 
+#   dplyr::filter(Region == "All")
+# 
 # WPP <- read_csv("Data/WPP2019_PopulationBySingleAgeSex_1950-2019.csv") %>% 
 #   dplyr::filter(MidPeriod == 2018.5,
 #                 Location %in% c("Armenia",   "Georgia",   "Mauritius"))
@@ -216,7 +247,8 @@ saveRDS(WHO_compare, file = "Data/WHO_compare.rds")
 #                       "PopTotal" = "b"),
 #          Region = "All") %>% 
 #   select(Age = AgeGrpStart, Population, Country = Location, Region,  Sex) %>% 
-#   bind_rows(readRDS("Data/Offsets.rds")) %>% 
+#   mutate(Population = Population * 1000) %>% 
+#   bind_rows(offsets) %>% 
 #   arrange(Country, Region, Sex, Age)
 # 
 # 
