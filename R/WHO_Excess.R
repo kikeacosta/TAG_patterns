@@ -66,7 +66,8 @@ WHO_age_2020 <-
 # if not, ensure that the year is complete (all weeks or months)
 # aggregate within year and age
 
-
+# First aggregate based on complete weeks or months,
+# ignoring annual
 WHO_age_2020_annual <-
   WHO_age_2020 %>% 
   dplyr::filter(time_unit != "annual") %>% 
@@ -76,28 +77,30 @@ WHO_age_2020_annual <-
   group_by(country, year, sex, time_unit, age_cat_s) %>% 
   summarize(deaths = sum(deaths), .groups = "drop") 
 
+# get annual data, ignoring georgia
 WHO_age_2020_annual_pre <-
   WHO_age_2020 %>% 
   dplyr::filter(time_unit == "annual") %>% 
-  select(all_of(colnames(WHO_age_2020_annual))) %>% 
-  filter(!(country == "GEO" & year == 2020))
+  dplyr::select(all_of(colnames(WHO_age_2020_annual))) %>% 
+  dplyr::filter(!(country == "GEO" & year == 2020)) %>% 
+  distinct()
 
-
-check <- 
+# which are the combos we have annual data for already?
+check1 <- 
   WHO_age_2020_annual_pre %>% 
   select(country, sex, year) %>% 
   distinct() %>% 
   mutate(check = paste(country, sex, year)) %>% 
-  pull(check)
+  dplyr::pull(check) %>% 
+  unique()
 
+# remove self-aggregated combos, bind on annual data
 WHO_age_2020_annual <-
   WHO_age_2020_annual %>% 
   mutate(check2 = paste(country, sex, year)) %>% 
-  filter(!check2 %in% check) %>% 
+  dplyr::filter(!check2 %in% check1) %>% 
   bind_rows(WHO_age_2020_annual_pre) %>% 
-  select(-check2) %>% 
-  filter(country == "GEO", year == 2020) 
-  
+  dplyr::select(-check2)
 
 # Fix Armenia 0 + 1-4 oddity
 WHO_age_2020_annual <- 
@@ -141,7 +144,7 @@ WHO_selection <-
   group_by(country, sex, year) %>% 
   do(rescale_age(chunk = .data)) %>% 
   ungroup() %>% 
-  pivot_wider(names_from = sex, values_from = deaths) %>%
+  pivot_wider(names_from = sex, values_from = deaths) %>% 
   mutate(PM = Male / (Male + Female),
          PF = Female / (Male + Female),
          PM = ifelse(is.nan(PM),0,PM),
