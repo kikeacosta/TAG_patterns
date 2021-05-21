@@ -146,3 +146,9 @@ Covariates <- left_join(Covariates, adds_b) %>%
   select(-LocID)
 
 saveRDS(Covariates, file = "Data/WPP_Covariates.rds")
+
+
+
+
+
+

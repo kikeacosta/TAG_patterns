@@ -464,16 +464,21 @@ read.table("Data/SingularValues.txt",
            sep = " ") %>% data.matrix() %>% 
   reshape2::melt(varnames = c("name","component"), value.name = "singular value")
 
-
+SVmapdata <- readr::read_delim("Data/ResponsesCovariates.txt",delim = " ") %>% 
+  pivot_longer(sv1:roa.r85, names_to = "variable", values_to = "value") %>% 
+  rename(name = Country)  
+  
+dev.new()
+test <-
 World %>% 
-  left_join(SVmapdata) %>% 
-  dplyr::filter(component == "V1") %>% 
+  left_join(SVmapdata, by = "name") %>% 
+  dplyr::filter(variable == "sv1") %>% 
   ggplot() + 
-  geom_sf(data = World,col = "white", size = 0.2, fill = gray(.8)) + 
-  geom_sf(mapping = aes(fill = `singular value`, geometry = geometry), col = "white", size = 0.2)+
+  #geom_sf(data = World,col = "white", size = 0.2, fill = gray(.8)) + 
+  geom_sf(mapping = aes(fill = value, geometry = geometry), col = "white", size = 0.2)+
   scale_x_continuous(expand=c(0.03,0.03)) +
   scale_y_continuous(expand=c(0.03,0.03)) +
-  scale_fill_continuous_diverging("Purple-Green", na.value = gray(.8), limits = c(0,1)) +
+  scale_fill_continuous_diverging("Purple-Green", na.value = gray(.8)) +
   guides(fill = guide_legend(title.position = "bottom",
                              keywidth = .5,
                              keyheight = .4))
@@ -481,32 +486,128 @@ World %>%
 
 SV1 <-
   World %>% 
-  left_join(SVmapdata) %>% 
-  dplyr::filter(component == "V1") %>% 
+  left_join(SVmapdata, by = "name") %>% 
+  dplyr::filter(variable == "sv1") %>% 
   ggplot() + 
   geom_sf(data = World,col = "white", size = 0.2, fill = gray(.8)) + 
-  geom_sf(mapping = aes(fill = -`singular value`, geometry = geometry), col = "white", size = 0.2) + 
+  geom_sf(mapping = aes(fill = -value, geometry = geometry), col = "white", size = 0.2) + 
   scale_fill_continuous_diverging("Purple-Green", na.value = gray(.8)) 
 
 SV2 <-
   World %>% 
-  left_join(SVmapdata) %>% 
-  dplyr::filter(component == "V2") %>% 
+  left_join(SVmapdata, by = "name") %>% 
+  dplyr::filter(variable == "sv2") %>% 
   ggplot() + 
   geom_sf(data = World,col = "white", size = 0.2, fill = gray(.8)) + 
-  geom_sf(mapping = aes(fill = `singular value`, geometry = geometry), col = "white", size = 0.2) + 
+  geom_sf(mapping = aes(fill = value, geometry = geometry), col = "white", size = 0.2) + 
   scale_fill_continuous_diverging("Purple-Green", na.value = gray(.8)) 
 
 
 SV3 <-
 World %>% 
-  left_join(SVmapdata) %>% 
-  dplyr::filter(component == "V3") %>% 
+  left_join(SVmapdata, by = "name") %>% 
+  dplyr::filter(variable == "sv2") %>% 
   ggplot() + 
   geom_sf(data = World,col = "white", size = 0.2, fill = gray(.8)) + 
-  geom_sf(mapping = aes(fill = `singular value`, geometry = geometry), col = "white", size = 0.2) + 
+  geom_sf(mapping = aes(fill = value, geometry = geometry), col = "white", size = 0.2) + 
   scale_fill_continuous_diverging("Purple-Green", na.value = gray(.8), limits = c(-.25,.25)) 
 
 plot_grid(SV1, SV2, SV3, ncol = 1, labels = c('1st','2nd','3rd'))
 
-        
+
+  
+  load("Data/ETA1fit.rda")
+  ETA1 <-
+  ETA1array %>% 
+    reshape2::melt(varnames = c("Age","Country","variable"), value.name = "value") %>% 
+    mutate(Country = as.character(Country), variable = as.character(variable)) %>% 
+    pivot_wider(names_from = "variable", values_from = "value")
+  
+
+  
+  e0sv1 <- 
+  SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = e0, y = sv1)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  e0sv2 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = e0, y = sv2)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  e0sv3 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = e0, y = sv3)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  
+  edsv1 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = ed, y = sv1)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  edsv2 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = ed, y = sv2)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  edsv3 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = ed, y = sv3)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  
+  
+  bsv1 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = b, y = sv1)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  bsv2 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = b, y = sv2)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  bsv3 <- 
+    SVmapdata %>% 
+    pivot_wider(names_from = "variable", values_from = "value") %>% 
+    ggplot(aes(x = b, y = sv3)) +
+    geom_text(mapping = aes(label = name)) + 
+    geom_smooth()
+  
+  
+  (e0sv1 | e0sv2 | e0sv3) /
+    (edsv1 | edsv2 | edsv3) /
+    (bsv1 | bsv2 | bsv3)
+  
+ A <-  plot_grid(e0sv1,e0sv2,e0sv3, labels = c("1st","2nd","3rd"), nrow = 1)
+ B <-  plot_grid(edsv1,edsv2,edsv3, labels = c("1st","2nd","3rd"), nrow = 1)
+ C <-  plot_grid(bsv1,bsv2,bsv3, labels = c("1st","2nd","3rd"), nrow = 1)
+ 
+ Fits <-
+   ETA1 %>% 
+   ggplot(aes(x = Age, y = Obs)) +
+   geom_line() + 
+   #geom_line(data = ETA1, mapping = aes(x = Age, y = Mod1), color = "orange")+
+   #geom_line(data = ETA1, mapping = aes(x = Age, y = Mod2), color = "red")+
+   geom_line(data = ETA1, mapping = aes(x = Age, y = Mod3), color = "red")+
+   facet_wrap(~Country)
+ 
+ A
+ ggsave(filename = "Data/A.png")  
+ B
+ ggsave(filename = "Data/B.png")  
+ C
+ ggsave(filename = "Data/C.png")  
+ 
+ Fits
+ ggsave(filename = "Data/Fits.png") 
+ 
