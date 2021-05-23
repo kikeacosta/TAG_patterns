@@ -29,7 +29,7 @@ rescale_age <- function(chunk){
   TOT <- chunk %>% dplyr::filter(age_cat_s == "total age") %>% dplyr::pull(deaths)
   chunk %>% 
     dplyr::filter(age_cat_s != "total age") %>% 
-    mutate(deaths = deaths + (deaths / sum(deaths)) * TOT)
+    mutate(deaths = (deaths / sum(deaths)) * TOT)
 }
 age2int2 <- function(Age){
   OA <- 105
@@ -257,6 +257,9 @@ saveRDS(WHO_compare, file = "Data/WHO_compare.rds")
 # 
 # saveRDS(offsets, "Data/Offsets.rds")
 #   
+
+exploratory <- FALSE
+if (exploratory){
 WHOin %>% 
   filter(country == "ZMB",
          sex == "Total") %>% 
@@ -303,3 +306,4 @@ WHOin %>%
          sex == "Total",
          year == 2020) %>% 
   pull(age_cat_s)
+}
