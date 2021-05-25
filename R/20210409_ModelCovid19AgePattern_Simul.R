@@ -135,8 +135,8 @@ rany <- c(-15, -3)
 plot(x, etaT, t="l", lwd=2, ylim=rany, axes=FALSE,
      xlab="age", ylab="mortality, log-scale",
      main="'typical' C19 mortality age-pattern")
-points(x, lmx1, col=2)
-points(x, lmx2, col=3, pch=2)
+#points(x, lmx1, col=2)
+#points(x, lmx2, col=3, pch=2)
 yy <- 10^seq(-7, -2)
 axis(2, at=log(yy), labels=yy)
 axis(1);box()
@@ -175,7 +175,7 @@ C <- rbind(C1,C2)
 ## penalty stuff
 D <- diff(diag(m), diff=2)
 tDD <- t(D)%*%D
-lambda <- 10^2.5
+lambda <- 10^2
 P <- lambda*tDD
 
 ## starting eta
@@ -208,6 +208,14 @@ for(it in 1:max.it){
 }
 ## fitted common log-mortality
 eta.hat <- eta
+## standard errors
+H0 <- solve(GpP)
+H1 <- H0 %*% G %*% H0
+se <- sqrt(diag(H1))
+
+## upper and lower bound for gamma.hat
+eta.hatL <- eta.hat - 2*se
+eta.hatU <- eta.hat + 2*se
 
 ## plotting outcomes
 rany <- c(-15, -3)
@@ -226,6 +234,9 @@ for(i in 1:n2){
            y0=lmx2g[i], y1=lmx2g[i], col=3, lwd=3)
 }
 lines(x, eta.hat, col=4, lwd=4)
+lines(x, eta.hatL, col=4, lwd=2, lty=2)
+lines(x, eta.hatU, col=4, lwd=2, lty=2)
+
 legend("top", c("True", "Obs 1", "Obs 2", "Fitted"),
        col=1:4, lwd=c(2,2,2,4))
 
@@ -377,6 +388,16 @@ for(it in 1:max.it){
 ## fitted common log-mortality
 eta.hat <- eta
 
+## standard errors
+H0 <- solve(GpP)
+H1 <- H0 %*% G %*% H0
+se <- sqrt(diag(H1))
+
+## upper and lower bound for gamma.hat
+eta.hatL <- eta.hat - 2*se
+eta.hatU <- eta.hat + 2*se
+
+
 ## plotting outcomes
 rany <- c(-15, -3)
 plot(1,1, t="n", ylim=rany, xlim=range(x), axes=FALSE,
@@ -394,8 +415,284 @@ for(i in 1:n2){
            y0=lmx2g[i], y1=lmx2g[i], col=3, lwd=3)
 }
 lines(x, eta.hat, col=4, lwd=4)
+lines(x, eta.hatL, col=4, lwd=2, lty=2)
+lines(x, eta.hatU, col=4, lwd=2, lty=2)
 lege <- c("England & Wales","USA","Fitted common pattern")
 legend("top", legend=lege, col=2:4, lwd=2)
+
+
+## assuming the same pattern and a scaling factor
+## assuming the same pattern and a scaling factor
+
+## clearing workspace
+rm(list = ls())
+## plotting in a difference device
+options(device="X11")
+## R-studio to get the same dir as for the .R file
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+
+## exposures population 1
+e1 <- c(29588,29295,29002,28707,28410,28111,27809,27504,27196,26883,26566,26245,25919,25587,25251,24909,24561,24208,23849,23484,23113,22736,22353,21965,21570,21170,20800,20489,20227,20006,19819,19657,19514,19383,19258,19131,18996,18848,18681,18489,18266,18008,17711,17370,16984,16549,16065,15531,14948,14320,13648,12991,12394,11848,11340,10863,10410,9973,9547,9128,8713,8297,7878,7456,7029,6598,6164,5726,5289,4853,4422,4000,3589,3193,2815,2458,2131,1839,1579,1349,1147,969,815,681,566,468,384,313,254,204,163,129,102,80,62,48,36,28,21,15,11)
+## exposures population 2
+e2 <- c(38233,38253,38274,38295,38316,38337,38357,38375,38392,38406,38418,38427,38431,38432,38429,38420,38406,38386,38359,38326,38286,38238,38182,38118,38045,37962,37935,38020,38205,38476,38823,39234,39696,40198,40726,41267,41806,42329,42820,43261,43637,43930,44123,44199,44142,43937,43571,43033,42314,41410,40318,39212,38243,37382,36603,35881,35197,34528,33856,33165,32437,31660,30820,29907,28914,27836,26670,25417,24080,22669,21192,19663,18098,16516,14935,13375,11892,10526,9273,8129,7090,6152,5309,4556,3887,3296,2779,2327,1937,1601,1314,1072,867,697,556,440,345,269,208,159,121)
+
+## increasing sample size?
+e1 <- e1*100
+e2 <- e2*100
+## dimension & age
+m <- length(e1)
+x <- 1:m-1
+
+## plotting exposures
+rany <- range(e1,e2)
+plot(x, e1, t="l", lwd=2, ylim=rany)
+lines(x, e2, col=2, lwd=2)
+
+## known common Covid-19 age pattern
+
+## for illustrative purposes: 
+## assuming as combination of two components (in a log-scale)
+## component 1: simple exponential
+alpha1 <- -11
+alpha2 <- -0.7
+alphas <- c(alpha1, alpha2)
+X1 <- cbind(1, x)
+eta1 <- X1%*%alphas
+## component 2: exponential + cos
+ome <- pi/45
+beta1 <- -16
+beta2 <- 0.11
+beta3 <- 1.1
+betas <- c(beta1, beta2, beta3)
+X2 <- cbind(1, x, cos(x*ome))
+eta2 <- X2%*%betas
+## overall (log-)mortality
+thetaT <- 1
+## pop 1
+muT1 <- exp(eta1) + exp(eta2)
+etaT1 <- log(muT1)
+etaT2 <- etaT1 + thetaT
+muT2 <- exp(etaT2)
+
+
+## plotting true log-mortality
+## with components that we will disregard afterward
+rany <- c(-16, -4)
+plot(x, eta2, t="l", lwd=2, col=2, ylim=rany, axes=FALSE)
+yy <- 10^seq(-7, -2)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+lines(x, eta1, t="l", lwd=2, col=1)
+lines(x, etaT1, col=4, lwd=2)
+lines(x, etaT2, col=5, lwd=2)
+
+## simulating deaths for both populations
+## as realization from a Poisson distribution
+dT1 <- e1*muT1
+d1 <- rpois(m, dT1)
+lmx1 <- log(d1/e1)
+dT2 <- e2*muT2
+d2 <- rpois(m, dT2)
+lmx2 <- log(d2/e2)
+
+## plotting simulated and true log-mortality
+rany <- c(-16, -2)
+plot(x, etaT1, t="l", col=2, lwd=2, ylim=rany, axes=FALSE)
+points(x, lmx1, col=2)
+lines(x, etaT2, col=3, lwd=2)
+points(x, lmx2, col=3, pch=2)
+yy <- 10^seq(-7, -1)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+
+## assuming different grouping structure
+
+## grouping for pop 1
+low1 <- c(0, 1, seq(5, 90,5))
+up1  <- c(0, seq(4, 89,5), 100)
+n1 <- length(low1)
+age.gr1 <- paste(low1,up1,sep="-")
+len1 <- up1-low1+1
+## matrix to group both deaths and exposures
+## (grouped expoures will be used only for plotting purposes)
+G1 <- matrix(0, n1, m)
+rownames(G1) <- age.gr1
+colnames(G1) <- x
+for(i in 1:n1){
+  age.low.i <- low1[i]
+  age.up.i <- up1[i]
+  whi <- which(x>=age.low.i & x<=age.up.i)
+  G1[i,whi] <- 1
+}
+all(colSums(G1)==1)
+## what we would observed in an actual world for pop 1
+d1g <- G1%*%d1
+e1g <- G1%*%e1
+lmx1g <- log(d1g/e1g)
+## grouping for pop 2
+low2 <- seq(0, 80, 20)
+up2  <- c(seq(19, 79, 20), 100)
+n2 <- length(low2)
+age.gr2 <- paste(low2,up2,sep="-")
+len2 <- up2-low2+1
+G2 <- matrix(0, n2, m)
+rownames(G2) <- age.gr2
+colnames(G2) <- x
+for(i in 1:n2){
+  age.low.i <- low2[i]
+  age.up.i <- up2[i]
+  whi <- which(x>=age.low.i & x<=age.up.i)
+  G2[i,whi] <- 1
+}
+all(colSums(G2)==1)
+## what we would observed in an actual world for pop 2
+d2g <- G2%*%d2
+e2g <- G2%*%e2
+lmx2g <- log(d2g/e2g)
+
+## plotting what we actually observed
+
+# pdf("C19agepattern.pdf", width = 10, height = 10)
+rany <- c(-15, -3)
+plot(x, etaT1, t="l", col=2, lwd=2, ylim=rany, axes=FALSE,
+     xlab="age", ylab="mortality, log-scale",
+     main="'typical' C19 mortality age-pattern")
+lines(x, etaT2, col=3, lwd=2)
+#points(x, lmx1, col=2)
+#points(x, lmx2, col=3, pch=2)
+yy <- 10^seq(-7, -2)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+for(i in 1:n1){
+  segments(x0=low1[i], x1=up1[i],
+           y0=lmx1g[i], y1=lmx1g[i], col=2, lwd=3)
+}
+for(i in 1:n2){
+  segments(x0=low2[i], x1=up2[i],
+           y0=lmx2g[i], y1=lmx2g[i], col=3, lwd=3)
+}
+# dev.off()
+
+
+## what one observe in a single response vector
+y <- c(d1g, d2g)
+
+## build composite matrices for the two population
+C1 <- G1
+for(i in 1:n1){
+  age.low.i <- low1[i]
+  age.up.i <- up1[i]
+  whi <- which(x>=age.low.i & x<=age.up.i)
+  C1[i,whi] <- e1[whi]
+}
+C2 <- G2
+for(i in 1:n2){
+  age.low.i <- low2[i]
+  age.up.i <- up2[i]
+  whi <- which(x>=age.low.i & x<=age.up.i)
+  C2[i,whi] <- e2[whi]
+}
+## composite matrix for the overall model
+library(magic)
+C <- adiag(C1, C2)
+## penalty stuff
+D <- diff(diag(m), diff=2)
+tDD <- t(D)%*%D
+lambda <- 10^2.5
+P0 <- lambda*tDD
+P <- adiag(P0,0)
+
+U <- kronecker(rep(1,2), diag(m))
+U <- cbind(U, c(rep(0,m), rep(1,m)))
+## starting eta
+library(MortalitySmooth)
+d1.st0 <- rep(d1g/len1, len1)
+fit10 <- Mort1Dsmooth(x=x, y=d1.st0,
+                      offset=log(e1),
+                      method=3, lambda=10^3)
+eta1.st <- fit10$logmortality
+
+d2.st0 <- rep(d2g/len2, len2)
+fit20 <- Mort1Dsmooth(x=x, y=d2.st0,
+                      offset=log(e2),
+                      method=3, lambda=10^3)
+theta.st <- mean(fit20$logmortality-eta1.st)
+plot(x, log(d1.st0/e1), col=2, ylim=rany)
+lines(x, eta1.st, col=2, lwd=2)
+points(x, log(d2.st0/e2), col=3, pch=2)
+eta2.st <- eta1.st + theta.st
+lines(x, eta2.st, lwd=2, col=3)
+
+## starting betas
+
+eta.st <- c(eta1.st, eta2.st)
+## PCLM regression
+eta <- eta.st
+max.it <- 100
+for(it in 1:max.it){
+  gamma   <- exp(eta)
+  mu      <- c(C %*% gamma)
+  X       <- (C * ((1 / mu) %*% t(gamma)) ) %*% U
+  w       <- as.vector(mu)
+  r       <- y - mu + C %*% (gamma * eta)
+  G       <- t(X) %*% (w * X) 
+  GpP     <- G + P
+  tXr     <- t(X) %*% r
+  beta    <- solve(GpP, tXr) 
+  eta.old <- eta
+  eta     <- U%*%beta
+  dif.eta <- max(abs((eta - eta.old)/eta.old) )
+  if(dif.eta < 1e-04 & it > 4) break
+  cat(it, dif.eta, "\n")
+}
+## fitted log-mortality
+eta1.hat <- eta[1:m]
+eta2.hat <- eta[1:m+m]
+theta.hat <- beta[m+1]
+## standard errors
+H0 <- solve(GpP)
+H1 <- H0 %*% G %*% H0
+se <- sqrt(diag(U %*% H1 %*% t(U)))
+
+
+## upper and lower bound for gamma.hat
+eta1.hatL <- eta1.hat - 2*se[1:m]
+eta1.hatU <- eta1.hat + 2*se[1:m]
+eta2.hatL <- eta2.hat - 2*se[1:m+m]
+eta2.hatU <- eta2.hat + 2*se[1:m+m]
+
+## plotting outcomes
+rany <- c(-15, -3)
+plot(x, etaT1, t="n", col=2, lwd=2, ylim=rany, axes=FALSE,
+     xlab="age", ylab="mortality, log-scale",
+     main="'typical' C19 mortality age-pattern")
+
+yy <- 10^seq(-7, -2)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+
+xx <- c(x, rev(x))
+yy1 <- c(eta1.hatL, rev(eta1.hatU))
+yy2 <- c(eta2.hatL, rev(eta2.hatU))
+polygon(xx, yy1, col=adjustcolor(4, 0.5), border=adjustcolor(4, 0.5))
+lines(x, eta1.hat, col=4, lwd=4)
+polygon(xx, yy2, col=adjustcolor(5, 0.5), border=adjustcolor(5, 0.5))
+lines(x, eta2.hat, col=5, lwd=4)
+
+for(i in 1:n1){
+  segments(x0=low1[i], x1=up1[i],
+           y0=lmx1g[i], y1=lmx1g[i], col=2, lwd=3)
+}
+for(i in 1:n2){
+  segments(x0=low2[i], x1=up2[i],
+           y0=lmx2g[i], y1=lmx2g[i], col=3, lwd=3)
+}
+lines(x, etaT1, col=2, lwd=2)
+lines(x, etaT2, col=3, lwd=2)
+
+legend("top", c("True", "Obs 1", "Obs 2", "Fitted"),
+       col=1:4, lwd=c(2,2,2,4))
 
 
 
