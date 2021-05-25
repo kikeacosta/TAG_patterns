@@ -220,7 +220,7 @@ db_who <-
   select(Country, Code, Year, Sex, Age, Deaths, Source)
 
 # save out
-write_csv(db_who, file = "Data/who.csv")  
+write_csv(db_who, file = "Output/who.csv")  
 
 
 # who_countries <- WHO_compare$Country %>% unique()
