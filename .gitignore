@@ -28,3 +28,6 @@ vignettes/*.pdf
 .Renviron
 TAG_patterns.Rproj
 Data
+.Rproj.user
+.Rdata
+.DS_Store
