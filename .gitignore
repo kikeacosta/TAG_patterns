@@ -28,6 +28,10 @@ vignettes/*.pdf
 .Renviron
 TAG_patterns.Rproj
 Data
+<<<<<<< HEAD
 .Rproj.user
 .Rdata
 .DS_Store
+=======
+excess_vs_c19.png
+>>>>>>> e00e93515286ea5437480b4fb672b5ed7b9171d5

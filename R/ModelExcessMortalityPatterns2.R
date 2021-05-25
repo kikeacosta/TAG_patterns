@@ -11,8 +11,9 @@ library(MortalitySmooth)
 library(colorspace)
 library(gridExtra)
 
-source("R/EmpiricDeriv.R")
 
+source("R/EmpiricDeriv.R")
+## trial
 
 Y0 <- readRDS("R/WHO_compare.rds", refhook = NULL)
 ## select totals
