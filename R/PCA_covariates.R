@@ -151,4 +151,14 @@ saveRDS(Covariates, file = "Data/WPP_Covariates.rds")
 
 
 
+library(data.table, readxl, httr)
 
+url1 <- 'https://population.un.org/wpp/Download/Files/4_Metadata/WPP2019_F02_METADATA.XLSX'
+
+GET(url1, write_disk(myfile <- tempfile(fileext = ".xlsx")))
+
+
+
+wpp_metadata_Overall_Mortality <- data.table(read_excel(path= myfile, sheet = "Overall_Mortality", col_names = TRUE, col_types = NULL, na = "", skip = 16))
+
+wpp_metadata_Overall_Mortality <- unique(wpp_metadata_Overall_Mortality[, .(LocID, Location, Age_Specific_Type_of_Pattern, Age_Specific_Type_of_Model, Age_Specific_Type_of_Inputs, Derived_from_Child_Mortality, Use_Adult_Mortality, HIV_AIDS_Mortality_Impact)])

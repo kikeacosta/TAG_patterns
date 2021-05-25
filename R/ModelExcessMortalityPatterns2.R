@@ -2,19 +2,18 @@
 rm(list = ls())
 ## plotting in a difference device
 options(device="X11")
-## R-studio to get the same dir as for the .R file
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
 library(magic)
 library(colorspace)
 library(MortalitySmooth)
 library(colorspace)
 library(gridExtra)
 
-source("EmpiricDeriv.R")
 
+source("R/EmpiricDeriv.R")
 ## trial
 
-Y0 <- readRDS("WHO_compare.rds", refhook = NULL)
+Y0 <- readRDS("R/WHO_compare.rds", refhook = NULL)
 ## select totals
 Y <- subset(Y0, Sex=="Total")
 
