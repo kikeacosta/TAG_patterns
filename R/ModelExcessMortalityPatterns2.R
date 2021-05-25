@@ -3,8 +3,6 @@ rm(list = ls())
 ## plotting in a difference device
 options(device="X11")
 
-## trial 
-
 library(magic)
 library(colorspace)
 library(MortalitySmooth)
