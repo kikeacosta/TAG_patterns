@@ -51,18 +51,22 @@ C19deaths <- read_subset_covid(zippath = "Data/inputDB.zip",
   pivot_wider(names_from = Sex, values_from = Value) %>% 
   mutate(b = case_when(is.na(b) & !is.na(f) & !is.na(m) ~ f + m,
                        TRUE ~ b)) %>% 
-  select(Country, Date, Age, AgeInt, Deaths = b) %>% 
+  dplyr::select(Country, Date, Age, AgeInt, Deaths = b,f,m) %>% 
     mutate(Date = dmy(Date),
            DateDiff = abs(Date - ymd("2020-12-31"))) %>% 
     group_by(Country) %>% 
-    dplyr::filter(DateDiff == min(DateDiff),
-                  Date >= ymd("2020-08-01")) %>% 
+    dplyr::filter(DateDiff == min(DateDiff)) %>% 
   mutate(AgeInt = case_when(Country == "Slovenia" & Age == 0 & AgeInt == 45L ~ 5L,
                             TRUE ~AgeInt)) %>% 
   dplyr::filter(!(Country == "Slovenia" & Age == 0 & AgeInt == 35L)) %>% 
-  mutate(Deaths = ifelse(is.na(Deaths),0,Deaths))
+  mutate(Deaths = ifelse(is.na(Deaths),0,Deaths)) %>% 
+  group_by(Country) %>% 
+  mutate(total_deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  dplyr::filter(total_deaths> 100) %>% 
+  dplyr::select(-total_deaths)
  
-# to avoid some preprocessing just now, we can
+  # to avoid some preprocessing just now, we can
 # keep it to both-sex data
 
 
@@ -94,7 +98,8 @@ C19_use <-
   group_by(Country) %>% 
   mutate(total_deaths = case_when(is.na(total_deaths) ~ sum(Deaths),
                                   TRUE ~ total_deaths)) %>% 
-  dplyr::filter(total_deaths > 200) %>% 
+  ungroup() %>% 
+  dplyr::filter(total_deaths > 100) %>% 
   group_by(Country) %>% 
   mutate(Deaths = Deaths / sum(Deaths) * total_deaths,
          Age = as.integer(Age))
@@ -102,11 +107,13 @@ C19_use <-
 # Finally need ideally single age pops for these countries,
 # let's see what we got:
 
-osf_code <-"unf6v"
-osf_retrieve_file(osf_code) %>%
-  osf_download(conflicts = "overwrite",
-               path = "Data")
-offsets <-  read_csv("Data/offsets.csv", skip = 1) %>% 
+# osf_code <-"unf6v"
+# osf_retrieve_file(osf_code) %>%
+#   osf_download(conflicts = "overwrite",
+#                path = "Data")
+# offsets <-  read_csv("Data/offsets.csv", skip = 1) 
+offsets <-
+  readRDS("Data/Offsets.rds") %>% 
   dplyr::filter(Region == "All") %>% 
   pivot_wider(names_from = Sex, values_from = Population) %>% 
   mutate(b = case_when(is.na(b) & !is.na(f) & !is.na(m) ~ f + m,
@@ -350,6 +357,7 @@ errors[errors == "try-error"]
 C_big <- do.call("rbind",C_big)
 
 # Now you take it from here!
+
 
 
 
