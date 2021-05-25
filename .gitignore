@@ -27,5 +27,5 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 TAG_patterns.Rproj
-Data
 excess_vs_c19.png
+Data/STMFinput.zip
