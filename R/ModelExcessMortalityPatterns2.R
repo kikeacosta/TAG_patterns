@@ -463,6 +463,7 @@ matplot(xs, ETAas, col=colocou, t="l", lty=1)
 matplot(xs, ETAa1s, col=colocou, t="l", lty=1)
 par(mfrow=c(1,1))
 
+
 ## clustering
 library(factoextra)
 library(cluster)
