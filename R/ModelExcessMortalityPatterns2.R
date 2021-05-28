@@ -10,6 +10,14 @@ library(colorspace)
 library(gridExtra)
 
 
+
+stmf <- readr::read_csv("Output/stmf.csv")
+who <- readr::read_csv("Output/who.csv")
+eurs <- readr::read_csv("Output/eurs.csv")
+bra <- readr::read_csv("Output/brazil.csv")
+
+
+
 source("R/EmpiricDeriv.R")
 ## trial
 
