@@ -1,0 +1,63 @@
+Country,Code,Source,Best
+Albania,ALB,eurs,1
+Andorra,AND,eurs,1
+Armenia,ARM,eurs,1
+Australia,AUS,stmf,1
+Austria,AUT,stmf,1
+Belgium,BEL,stmf,1
+Brazil,BRA,brazil,1
+Bulgaria,BGR,stmf,1
+Canada,CAN,who,1
+Chile,CHL,stmf,1
+Croatia,HRV,stmf,1
+Cyprus,CYP,eurs,1
+Czechia,CZE,stmf,1
+Denmark,DNK,stmf,1
+England and Wales,GBRTENW,stmf,1
+Estonia,EST,stmf,1
+Finland,FIN,stmf,1
+France,FRA,stmf,1
+Georgia,GEO,who,1
+Germany,DEU,stmf,1
+Greece,GRC,stmf,1
+Guatemala,GTM,who,1
+Hungary,HUN,stmf,1
+Iceland,ISL,stmf,1
+Iraq,IRQ,who,1
+Ireland,IRL,who,1
+Israel,ISR,stmf,1
+Italy,ITA,stmf,1
+Japan,JPN,who,1
+Latvia,LVA,stmf,1
+Liechtenstein,LIE,eurs,1
+Lithuania,LTU,stmf,1
+Luxembourg,LUX,stmf,1
+Malta,MLT,eurs,1
+Mauritius,MUS,who,1
+Mexico,MEX,mexico,1
+Moldova,MDA,who,1
+Montenegro,MNE,eurs,1
+Netherlands,NLD,stmf,1
+New Zealand,NZL,stmf,1
+Northern Ireland,GBR_NIR,stmf,1
+Norway,NOR,stmf,1
+Paraguay,PRY,who,1
+Peru,PER,peru,1
+Poland,POL,stmf,1
+Portugal,PRT,stmf,1
+Romania,ROU,eurs,1
+Russia,RUS,stmf,1
+Scotland,GBR_SCO,stmf,1
+Serbia,SRB,eurs,1
+Slovakia,SVK,stmf,1
+Slovenia,SVN,stmf,1
+South Korea,KOR,stmf,1
+Spain,ESP,stmf,1
+Sweden,SWE,stmf,1
+Switzerland,CHE,stmf,1
+Taiwan,TWN,stmf,1
+Ukraine,UKR,who,1
+United Kingdom,GBR,eurs,1
+Uruguay,URY,who,1
+USA,USA,who,1
+Zambia,ZMB,who,1
