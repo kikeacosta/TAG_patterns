@@ -50,12 +50,34 @@ db2 <-
   mutate(Age = as.double(Age)) %>% 
   arrange(Source, Country, Year, Sex, Age)
 
-# merge all data together
-# create a table with data availability by population, including age groups and years
 
+# Adding data in 2020 for the UK
+# grouping deaths for the UK in 2020 from the STMF
+# 5-year age groups and 90+
+
+uk2020 <- 
+  db2 %>% 
+  filter(Code %in% c("GBR_SCO", "GBR_NIR", "GBRTENW"),
+         Year == 2020) %>% 
+  mutate(Age = case_when(Age > 90 ~ 90, 
+                         Age < 5 ~ 0,
+                         TRUE ~ Age)) %>% 
+  group_by(Year, Sex, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Country = "United Kingdom", 
+         Code = "GBR",
+         Source = "stmf modified")
+
+# merge all data together
 db3 <- 
-  bind_rows(db2, who) %>% 
+  bind_rows(db2, 
+            who,
+            uk2020) %>% 
   mutate(Deaths = ifelse(is.na(Deaths), 0, Deaths))
+
+
+# create a table with data availability by population, including age groups and years
 
 unique(db3$Age)
 unique(db3$Sex)
@@ -100,24 +122,44 @@ summ2 <-
 
 # only Greece has two equal best sources: stmf and eurostat, lets choose stmf :)
 
-best_source <- 
-  summ1 %>% 
-  mutate(Periods = Ymax - Ymin + 1) %>% 
-  group_by(Country) %>% 
+best_source_year <- 
+  db3 %>% 
+  group_by(Country, Code, Year, Source, Sex) %>% 
+  summarise(Age_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Year, Source, Age_groups) %>% 
+  summarise(Sex_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-"),
+         Deaths = sum(Deaths), 
+         Periods = max(Year) - min(Year) + 1) %>% 
+  group_by(Country, Year) %>% 
   filter(Sex_groups == max(Sex_groups),
          Age_groups == max(Age_groups)) %>% 
-  group_by(Country) %>% 
+  group_by(Country, Year) %>% 
   filter(Periods == max(Periods)) %>% 
   mutate(n = n()) %>% 
   ungroup() %>% 
   filter(n == 1 | Source == "stmf") %>% 
-  select(Country, Code, Source) %>% 
+  group_by(Country, Code, Source, Age_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-")) %>% 
+  ungroup() %>% 
+  mutate(Best = 1)
+
+best_source_summ <- 
+  best_source_year %>% 
+  select(Country, Code, Source, Period, Age_groups) %>% 
+  unique() %>% 
   mutate(Best = 1)
   
 # filtering best sources in each country
 db_best <- 
   db3 %>% 
-  left_join(best_source) %>% 
+  left_join(best_source_year %>% 
+              select(Code, Source, Year, Best)) %>% 
   filter(Best == 1)
 
 unique(db_best$Country)
@@ -143,6 +185,6 @@ available <-
 
 write_csv(db_best, "Output/annual_deaths_countries_best_source.csv")
 write_csv(summ1, "Output/summary_sources_by_country.csv")
-write_csv(best_source, "Output/country_list_best_source.csv")
+write_csv(best_source_summ, "Output/country_list_best_source.csv")
 write_csv(available, "Output/annual_deaths_countries_best_source.csv")
 
