@@ -166,14 +166,8 @@ WHO_2020_save <-
   dplyr::filter(year == 2020)
 
 # merge, then recode values and colnames to standards 
-WHO_compare <-
+db_who <-
   WHO_selection %>% 
-  dplyr::filter(year < 2020) %>% 
-  group_by(country, sex, age_cat_s) %>% 
-  summarize(deaths = mean(deaths),
-         year = mean(year) + .5,
-         .groups="drop") %>% 
-  bind_rows(WHO_2020_save) %>% 
   mutate(Age = recode(age_cat_s,
                         "0"     = 0L,           
                         "1-4"   = 1L,
@@ -213,20 +207,20 @@ WHO_compare <-
                         "80+"   = 80L,
                         "100+"  = 100L,
                       "85-90" = 85L),
-         Sex = recode(sex,"m" = "Male","f" = "Female","b" = "Total") ) %>% 
-  dplyr::select(country, year, Sex, Age, deaths) %>% 
-  dplyr::filter(!country %in% c("AND")) %>% 
-  mutate(Country =countrycode(sourcevar = country, 
+         Sex = recode(sex, "Male" = "m","Female" = "f", "Total" = "t") ) %>% 
+  dplyr::select(Code = country, Year = year, Sex, Age, Deaths = deaths) %>% 
+  dplyr::filter(!Code %in% c("AND")) %>% 
+  mutate(Country =countrycode(sourcevar = Code, 
                               origin = "iso3c", 
                               destination = "country.name"),
-         Country = ifelse(Country == "United States","USA",Country)) %>% 
-  arrange(Country, year, Sex, Age) %>% 
-  group_by(Country, Sex, year) %>% 
-  mutate( AgeInt = age2int2(Age)) %>% 
-  ungroup()
+         Country = ifelse(Country == "United States","USA",Country),
+         Source = "who") %>% 
+  arrange(Country, Year, Sex, Age) %>% 
+  ungroup() %>% 
+  select(Country, Code, Year, Sex, Age, Deaths, Source)
 
 # save out
-saveRDS(WHO_compare, file = "Data/WHO_compare.rds")  
+write_csv(db_who, file = "Output/who.csv")  
 
 
 # who_countries <- WHO_compare$Country %>% unique()
