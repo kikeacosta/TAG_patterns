@@ -9,22 +9,44 @@ library(MortalitySmooth)
 library(colorspace)
 library(gridExtra)
 
-
-
-stmf <- readr::read_csv("Output/stmf.csv")
-who <- readr::read_csv("Output/who.csv")
-eurs <- readr::read_csv("Output/eurs.csv")
-bra <- readr::read_csv("Output/brazil.csv")
-
-
-
 source("R/EmpiricDeriv.R")
-## trial
 
-Y0 <- readRDS("R/WHO_compare.rds", refhook = NULL)
-## select totals
-Y <- subset(Y0, Sex=="Total")
+stmf0 <- readr::read_csv("Output/stmf.csv")
+who0 <- readr::read_csv("Output/who.csv")
+eurs0 <- readr::read_csv("Output/eurs.csv")
+bra0 <- readr::read_csv("Output/brazil.csv")
 
+## only totals
+stmf1 <- subset(stmf0, Sex=="t")
+who1 <- subset(who0, Sex=="t")
+eurs1 <- subset(eurs0, Sex=="t")
+bra1 <- subset(bra0, Sex=="t")
+
+## exclude TOT, useful later for re-scaling
+stmf2 <- subset(stmf1, Age!="TOT")
+who2 <- subset(who1, Age!="TOT")
+eurs2 <- subset(eurs1, Age!="TOT")
+bra2 <- subset(bra1, Age!="TOT")
+
+table(stmf2$Country, stmf2$Year)
+table(eurs2$Country, eurs2$Year)
+table(who2$Country, who2$Year)
+
+
+## ranking in preferences: stmf, eurs, who, others (now bra)
+pop <- unique(stmf2$Country)
+eurs3 <- subset(eurs2, !Country%in%pop)
+Y0 <- rbind(stmf2, eurs3)
+pop <- unique(Y0$Country)
+who3 <- subset(who2, !Country%in%pop)
+Y1 <- rbind(Y0, who3)
+## adding others
+Y2 <- rbind(Y1, bra2)
+## delete
+no <- c("Northern Ireland", "Scotland", "England and Wales")
+Y <- subset(Y2, !Country%in%no)
+## enforce age to be numeric
+Y$Age <- as.numeric(Y$Age)
 
 ## offset
 E0 <- readRDS("R/OffsetsNew.rds", refhook = NULL)
@@ -36,42 +58,37 @@ E2 <- subset(E1, Region=="All")
 E3 <- subset(E2, Age<=100)
 ## select E where we have data in D
 E <- subset(E3, Country%in%unique(Y$Country))
-
+## some pop in deaths are not available for the offset
+Y <- subset(Y, Country%in%unique(E$Country))
+## sorting by name
+Y <- Y[order(Y$Country, Y$Year, Y$Age),]
+E <- E[order(E$Country),]
 ## check pop
 cbind(unique(E$Country), unique(Y$Country))
 
-last <- Y$Age + Y$AgeInt 
-Y$last <- last
-table(Y$last)
-
-Y$AgeInt[which(Y$last==105)] <- 100 - Y$Age[which(Y$last==105)] +1
-
-last1 <- Y$Age + Y$AgeInt
-Y$last1 <- last1
-
 ## issue with pop in  Georgia, Armenia, and Mauritius
-E <- E[-c(seq(2,by=2,length=101),
-          seq(1214,by=2,length=101),
-          seq(2123,by=2,length=101)),]
-
-## sorting by name
-Y <- Y[order(Y$Country),]
-E <- E[order(E$Country),]
+E <- E[-c(seq(103,by=2,length=101),
+          seq(1719,by=2,length=101),
+          seq(3335,by=2,length=101)),]
 
 
-## before 2020
-Ya <- subset(Y, year!=2020)
-## 2020
-Yb <- subset(Y, year==2020)
+## do we miss 2020 for some populations?
+which(table(Y$Country, Y$Year==2020)[,2]==0)
 
+## can we can from somewhere?
+table(eurs2$Country, eurs2$Year)
+table(who2$Country, who2$Year)
+## no UK, delete it
+Y <- subset(Y, Country!="United Kingdom")
+## yes Georgia
+geog <- subset(who2, Country=="Georgia" & Year==2020)
+## add georgia
+Y <- rbind(Y, geog)
+## sorting again
+Y <- Y[order(Y$Country, Y$Year, Y$Age),]
+## 
+E <- subset(E, Country%in%unique(Y$Country))
 
-
-table(Ya$country, Ya$year)
-table(Yb$country, Yb$year)
-## define the age range on which we aim to do our analysis
-x1 <- 0
-x2 <- 100
-xs <- x1:x2
 
 ## populations
 pop <- unique(E$Country)
@@ -80,13 +97,42 @@ p <- length(pop)
 ## country colors
 colocou <- rainbow_hcl(p)
 
+## re-check
+table(Y$Country, Y$Year)
 
 
+## create the age interval variable for the deaths
+Y$AgeInt <- NA
+for(i in 1:p){
+  whi <- which(Y$Country==pop[i])
+  Y.i <- Y[whi,]
+  Y.i$AgeInt1 <- c(diff(Y.i$Age),-10)
+  Y.i$AgeInt1[Y.i$AgeInt1<0] <- 100 - Y.i$Age[Y.i$AgeInt1<0]
+  Y$AgeInt[whi] <- Y.i$AgeInt1
+}
+
+## before 2020
+Ya0 <- subset(Y, Year!=2020)
+## for before 2020 summing up all years
+library(data.table)
+Ya1 <- data.table(Ya0)
+Ya <- Ya1[,.(Deaths=sum(Deaths)), by=.(Country, Code, Age, AgeInt)]
+# ny <- Ya1[,.(NYr=length(unique(Year))), by=.(Country)]
+ny <- rowSums(table(Ya0$Country, Ya0$Year)!=0)
+
+## 2020
+Yb <- subset(Y, Year==2020)
+
+## define the age range on which we aim to do our analysis
+x1 <- 15
+x2 <- 100
+xs <- x1:x2
+m <- length(xs)
 
 ## pre-2020
 CLISTa <- GLISTa <- LMXa <- EGRa <- list()
 ETAa <- ETA.LOWa <- ETA.UPa <- ETA1a <- list()
-ETAsa <- ETA1sa <- matrix(0, length(x1:x2), p)
+ETAsa <- ETA1sa <- matrix(0, m, p)
 colnames(ETAsa) <- colnames(ETA1sa) <- pop
 
 ## whether to plot outcomes 
@@ -105,24 +151,23 @@ for(i in 1:p){
   }
   
   Y.i <- Y.i0[pmin:pmax, ]
-  y.i <- Y.i$deaths
+  y.i <- Y.i$Deaths
   
   ## number of age-group for the ith pop
   n <- length(y.i) 
   
   age.low.i <- Y.i$Age
-  age.up.i <- Y.i$Age+Y.i$AgeInt-1
+  age.up.i <- Y.i$Age+Y.i$AgeInt
   age.min <- min(age.low.i)
   age.max <- max(age.up.i)
   ## select exposures
   E.i <- subset(E, Country==pop[i])
   e.i0 <- E.i$Population
   whi.ar <- which(E.i$Age>=age.min & E.i$Age<=age.max)
-  e.i <- e.i0[whi.ar]
+  e.i <- e.i0[whi.ar]*ny[i]
   ## ages for the latent pattern
   x <- E.i$Age[whi.ar]
   m <- length(x)
-  
   
   C.i <- matrix(0, n, m)
   age.gr.i <- paste(age.low.i, age.up.i, sep="-")
@@ -131,7 +176,8 @@ for(i in 1:p){
   G.i <- C.i
   for(j in 1:n){
     age.low.ij <- age.low.i[j]
-    age.up.ij <- age.up.i[j]
+    age.up.ij <- age.up.i[j]-1
+    if(j==n) age.up.ij <- age.up.i[j]
     whi <- which(x>=age.low.ij & x<=age.up.ij)
     C.i[j,whi] <- e.i[whi]
     G.i[j,whi] <- 1
@@ -146,6 +192,7 @@ for(i in 1:p){
   ## starting values
   e.i[e.i==0] <- 0.5
   len.i <- Y.i$AgeInt
+  len.i[n] <- len.i[n]+1
   ## before 2020
   dst.i <- rep(y.i/len.i, len.i)
   fit0.i <- Mort1Dsmooth(x=x, y=dst.i,
@@ -160,7 +207,7 @@ for(i in 1:p){
   tDD <- t(D)%*%D
   
   ## optimizing lambda??
-  lambdas <- 10^seq(5, 7, 1)
+  lambdas <- 10^seq(4, 7, 1)
   nl <- length(lambdas)
   BICs <- numeric(nl)
   k=1
@@ -223,7 +270,7 @@ for(i in 1:p){
   cat(pop[i], lambda.hat, "\n")
   if(PLOT){
     ## population specific colors
-    rany <- c(-10, -1)
+    rany <- c(-10, 1)
     ranx <- range(x)
     plot(1,1, t="n", col=2, lwd=2, ylim=rany, xlim=ranx,
          axes=TRUE,
@@ -258,9 +305,8 @@ colnames(ETAsb) <- colnames(ETA1sb) <- pop
 ## whether to plot outcomes 
 PLOT <- FALSE
 
-i=1
+i=17
 for(i in 1:p){
-  
   ## select age-grouped deaths (we know it's the same for both years)
   Y.i0 <- subset(Yb, Country==pop[i])
   pmin <- max(which(Y.i0$Age<=x1))
@@ -271,13 +317,13 @@ for(i in 1:p){
   }
   
   Y.i <- Y.i0[pmin:pmax, ]
-  y.i <- Y.i$deaths
+  y.i <- Y.i$Deaths
   
   ## number of age-group for the ith pop
   n <- length(y.i) 
   
   age.low.i <- Y.i$Age
-  age.up.i <- Y.i$Age+Y.i$AgeInt-1
+  age.up.i <- Y.i$Age+Y.i$AgeInt
   age.min <- min(age.low.i)
   age.max <- max(age.up.i)
   ## select exposures
@@ -289,7 +335,6 @@ for(i in 1:p){
   x <- E.i$Age[whi.ar]
   m <- length(x)
   
-  
   C.i <- matrix(0, n, m)
   age.gr.i <- paste(age.low.i, age.up.i, sep="-")
   rownames(C.i) <- age.gr.i
@@ -297,7 +342,8 @@ for(i in 1:p){
   G.i <- C.i
   for(j in 1:n){
     age.low.ij <- age.low.i[j]
-    age.up.ij <- age.up.i[j]
+    age.up.ij <- age.up.i[j]-1
+    if(j==n) age.up.ij <- age.up.i[j]
     whi <- which(x>=age.low.ij & x<=age.up.ij)
     C.i[j,whi] <- e.i[whi]
     G.i[j,whi] <- 1
@@ -312,6 +358,7 @@ for(i in 1:p){
   ## starting values
   e.i[e.i==0] <- 0.5
   len.i <- Y.i$AgeInt
+  len.i[n] <- len.i[n]+1
   ## before 2020
   dst.i <- rep(y.i/len.i, len.i)
   fit0.i <- Mort1Dsmooth(x=x, y=dst.i,
@@ -326,7 +373,7 @@ for(i in 1:p){
   tDD <- t(D)%*%D
   
   ## optimizing lambda??
-  lambdas <- 10^seq(5, 7, 1)
+  lambdas <- 10^seq(4, 7, 1)
   nl <- length(lambdas)
   BICs <- numeric(nl)
   k=1
@@ -389,7 +436,7 @@ for(i in 1:p){
   cat(pop[i], lambda.hat, "\n")
   if(PLOT){
     ## population specific colors
-    rany <- c(-10, -1)
+    rany <- c(-10, 1)
     ranx <- range(x)
     plot(1,1, t="n", col=2, lwd=2, ylim=rany, xlim=ranx,
          axes=TRUE,
@@ -409,7 +456,8 @@ for(i in 1:p){
     abline(v=c(x1,x2), col=2, lwd=2, lty=2)
     #locator(1)
   }
-}
+} 
+  
 
 names(ETAa) <- names(ETA.LOWa) <- names(ETA.UPa) <- names(ETA1a) <- pop
 names(ETAb) <- names(ETA.LOWb) <- names(ETA.UPb) <- names(ETA1b) <- pop
@@ -417,21 +465,37 @@ names(ETAb) <- names(ETA.LOWb) <- names(ETA.UPb) <- names(ETA1b) <- pop
 
 
 par(mfrow=c(1,3))
-i=5
+i=39
 for(i in 1:p){
   plot(x, ETAsa[,i], col=1, t="l", lwd=3,
        main=paste(pop[i]))
   lines(x, ETAsb[,i], col=2, lwd=3)
   legend("topleft", inset=0.1, legend=c("pre 2020", "2020"), col=1:2, lwd=3, lty=1)
   
-  Y.i <- subset(Ya, Country==pop[i])
+  Y.i0 <- subset(Ya, Country==pop[i])
+  pmin <- max(which(Y.i0$Age<=x1))
+  if(max(Y.i0$Age)>=x2){
+    pmax <- max(which(Y.i0$Age<=x2))
+  }else{
+    pmax <- which.max(Y.i0$Age)
+  }
+  Y.i <- Y.i0[pmin:pmax, ]
+  n <- nrow(Y.i)
   age.low.i <- Y.i$Age
   age.up.i <- Y.i$Age+Y.i$AgeInt
   lmx.i <- LMXa[[i]]
   for(j in 1:n){
     segments(x0=age.low.i[j], x1=age.up.i[j],y0=lmx.i[j], y1=lmx.i[j], col=1, lwd=3)
   }
-  Y.i <- subset(Yb, Country==pop[i])
+  
+  Y.i0 <- subset(Yb, Country==pop[i])
+  pmin <- max(which(Y.i0$Age<=x1))
+  if(max(Y.i0$Age)>=x2){
+    pmax <- max(which(Y.i0$Age<=x2))
+  }else{
+    pmax <- which.max(Y.i0$Age)
+  }
+  Y.i <- Y.i0[pmin:pmax, ]
   age.low.i <- Y.i$Age
   age.up.i <- Y.i$Age+Y.i$AgeInt
   lmx.i <- LMXb[[i]]
@@ -451,7 +515,7 @@ for(i in 1:p){
 }
 
 rany <- range(-0.16, 0.16)
-par(mfrow=c(4,8))
+par(mfrow=c(6,9))
 par(mar=c(2,2,2,0))
 for(i in 1:p){
   plot(x, ETA1sa[,i]-ETA1sb[,i], col=4, t="l", lwd=4, ylim=rany,
