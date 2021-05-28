@@ -19,7 +19,7 @@ Y <- subset(Y0, Sex=="Total")
 
 
 ## offset
-E0 <- readRDS("OffsetsNew.rds", refhook = NULL)
+E0 <- readRDS("R/OffsetsNew.rds", refhook = NULL)
 ## only both sex
 E1 <- subset(E0, Sex=="b")
 # delete specific Regions
@@ -409,7 +409,7 @@ names(ETAb) <- names(ETA.LOWb) <- names(ETA.UPb) <- names(ETA1b) <- pop
 
 
 par(mfrow=c(1,3))
-i=1
+i=5
 for(i in 1:p){
   plot(x, ETAsa[,i], col=1, t="l", lwd=3,
        main=paste(pop[i]))
