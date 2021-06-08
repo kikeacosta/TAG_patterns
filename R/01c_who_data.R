@@ -11,16 +11,16 @@ has_not_total <- function(age_vec){
 }
 
 has_annual <- function(time_units){
-  any(time_units == "annual")
+  any(time_units == "Annual")
 }
 is_complete <- function(time, time_unit){
-  if (any(time_unit == "annual")){
+  if (any(time_unit == "Annual")){
     return(TRUE)
   }
-  if (any(time_unit == "month")){
+  if (any(time_unit == "Month")){
     return(all(1:12 %in% time))
   }
-  if (any(time_unit == "week")){
+  if (any(time_unit == "Week")){
     return(all(1:52 %in% time))
   }
   NA_integer_
@@ -38,7 +38,7 @@ age2int2 <- function(Age){
 }
 # -------------------------------------
 # read in May 10 data
-WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_10.05.2021.xlsx")
+WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_01.06.2021.xlsx")
 
 
 # filter down to incl age and 2020
@@ -70,7 +70,7 @@ WHO_age_2020 <-
 # ignoring annual
 WHO_age_2020_annual <-
   WHO_age_2020 %>% 
-  dplyr::filter(time_unit != "annual") %>% 
+  dplyr::filter(time_unit != "Annual") %>% 
   group_by(country, year, sex, time_unit) %>% 
   mutate(compl = is_complete(time, time_unit)) %>% 
   dplyr::filter(compl) %>% 
@@ -102,11 +102,12 @@ WHO_age_2020_annual <-
   bind_rows(WHO_age_2020_annual_pre) %>% 
   dplyr::select(-check2)
 
+# 01-06 version fixes this.
 # Fix Armenia 0 + 1-4 oddity
-WHO_age_2020_annual <- 
-WHO_age_2020_annual %>% 
-  filter(!(age_cat_s == "0" & country == "ARM")) %>% 
-  mutate(age_cat_s = ifelse(country == "ARM" & age_cat_s == "1-4","0",age_cat_s))
+# WHO_age_2020_annual <- 
+# WHO_age_2020_annual %>% 
+#   filter(!(age_cat_s == "0" & country == "ARM")) %>% 
+#   mutate(age_cat_s = ifelse(country == "ARM" & age_cat_s == "1-4","0",age_cat_s))
 
 
 # This produces a auxiliary selector dataset
