@@ -188,7 +188,8 @@ db_best <-
   db3 %>% 
   left_join(best_source_year %>% 
               select(Code, Source, Year, Best)) %>% 
-  filter(Best == 1)
+  filter(Best == 1) %>% 
+  select(-Best)
 
 
 # summary of selected sources by country 
