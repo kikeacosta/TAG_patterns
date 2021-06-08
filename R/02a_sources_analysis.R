@@ -1,3 +1,4 @@
+library(here)
 source(here("R", "00_functions.R"))
 
 # loading data
@@ -88,6 +89,7 @@ eurs_test <-
   group_by() %>% 
   summarise(Deaths = sum(Deaths))
 
+
 # variable characteristics by country and source 
 summ1 <- 
   db3 %>% 
@@ -100,19 +102,23 @@ summ1 <-
             Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
   group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
-  summarise(Ymin = min(Year),
-         Ymax = max(Year),
+  summarise(Period = paste(min(Year), max(Year), sep = "-"),
          Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  group_by(Country) %>% 
+  mutate(n_sources = n()) %>% 
   ungroup()
+
   
 # variable configuration by source
 summ2 <- 
   summ1 %>% 
-  group_by(Country, Code, Source) %>% 
-  summarise(n = n())
+  select(Country, Code, Source, n_sources) %>% 
+  unique()
 
-# best source by country
-# ~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# selecting best source for each country
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # criteria:
 # 1. Three sex groups
@@ -145,26 +151,47 @@ best_source_year <-
   ungroup() %>% 
   filter(n == 1 | Source == "stmf") %>% 
   group_by(Country, Code, Source, Age_groups) %>% 
-  mutate(Period = paste(min(Year), max(Year), sep = "-")) %>% 
+  mutate(max_year = max(Year),
+         min_year = min(Year)) %>% 
   ungroup() %>% 
+  # filtering countries with at least data for 2019 and 2020  
+  group_by(Country) %>% 
+  mutate(max_year = max(max_year),
+         min_year = min(min_year)) %>% 
+  filter(max_year == 2020 & min_year <= 2019) %>% 
+  mutate(Age_groups_2019 = Age_groups[Year == 2019],
+         ratio_ages = Age_groups_2019 / Age_groups) %>% 
+  ungroup() %>% 
+  # excluding years with less than half of the age groups in 2019
+  filter(ratio_ages < 2) %>% 
+  select(Country, Code, Year, Source, Age_groups, Sex_groups) %>% 
   mutate(Best = 1)
 
 best_source_summ <- 
   best_source_year %>% 
-  select(Country, Code, Source, Period, Age_groups) %>% 
+  group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-")) %>% 
+  ungroup() %>% 
+  select(Country, Code, Source, Age_groups, Sex_groups, Period) %>% 
   unique() %>% 
-  mutate(Best = 1)
-  
-# filtering best sources in each country
+  group_by(Country) %>% 
+  mutate(n_sources = n()) %>% 
+  ungroup() %>% 
+  arrange(-n_sources)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# filtering best sources by country
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 db_best <- 
   db3 %>% 
   left_join(best_source_year %>% 
               select(Code, Source, Year, Best)) %>% 
   filter(Best == 1)
 
-unique(db_best$Country)
 
-# data available
+# summary of selected sources by country 
 available <- 
   db_best %>% 
   group_by(Country, Code, Year, Source, Sex) %>% 
@@ -176,15 +203,24 @@ available <-
             Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
   group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
-  summarise(Ymin = min(Year),
-            Ymax = max(Year),
+  summarise(Period = paste(min(Year), max(Year), sep = "-"),
             Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
   group_by(Country) %>% 
-  mutate(n = n())
+  mutate(n_sources = n()) %>% 
+  ungroup() 
 
-write_csv(db_best, "Output/annual_deaths_countries_best_source.csv")
-write_csv(summ1, "Output/summary_sources_by_country.csv")
-write_csv(best_source_summ, "Output/country_list_best_source.csv")
-write_csv(available, "Output/annual_deaths_countries_best_source.csv")
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# saving 3 output data objects
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# 1) summary of all available sources by country 
+write_csv(summ1, "Output/summary_all_sources_by_country.csv")
+
+# 2) summary of selected sources by country
+write_csv(available, "Output/summary_selected_sources_by_country.csv")
+
+# 3) output mortality data based on selected sources
+write_csv(db_best, "Output/annual_deaths_countries_selected_sources.csv")
 
