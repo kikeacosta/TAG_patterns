@@ -80,7 +80,7 @@ WHO_age_2020_annual <-
 # get annual data, ignoring georgia
 WHO_age_2020_annual_pre <-
   WHO_age_2020 %>% 
-  dplyr::filter(time_unit == "annual") %>% 
+  dplyr::filter(time_unit == "Annual") %>% 
   dplyr::select(all_of(colnames(WHO_age_2020_annual))) %>% 
   dplyr::filter(!(country == "GEO" & year == 2020)) %>% 
   distinct()
@@ -141,8 +141,7 @@ WHO_selection <-
   WHO_age_2020_annual %>% 
   filter(age_cat_s != "Unknown",
          sex != "Unknown") %>% 
-  select(-time_unit) %>% 
-  group_by(country, sex, year) %>% 
+  group_by(country, time_unit, sex, year) %>% 
   do(rescale_age(chunk = .data)) %>% 
   ungroup() %>% 
   pivot_wider(names_from = sex, values_from = deaths) %>% 
@@ -160,15 +159,32 @@ WHO_selection <-
                values_drop_na = TRUE) %>% 
   dplyr::filter(age_cat_s != "total age")
 
+
+# need to have just Week or Month or Year
+
+WHO_selection_2 <- 
+  WHO_selection %>% 
+  group_by(country, sex, year) %>% 
+  mutate(priority = case_when(time_unit == "Annual" ~ 1,
+                              time_unit == "Month" ~ 2,
+                              time_unit == "Week" ~ 3)) %>% 
+  dplyr::filter(priority == min(priority)) %>% 
+  ungroup() %>% 
+  select(-priority) 
+
+
+
+
+
 # need to summarize years < 2020 as mean to deliver just two
 # time points per population / sex.
-WHO_2020_save <- 
-  WHO_selection %>% 
-  dplyr::filter(year == 2020)
+# WHO_2020_save <- 
+#   WHO_selection_2 %>% 
+#   dplyr::filter(year == 2020)
 
 # merge, then recode values and colnames to standards 
 db_who <-
-  WHO_selection %>% 
+  WHO_selection_2 %>% 
   mutate(Age = recode(age_cat_s,
                         "0"     = 0L,           
                         "1-4"   = 1L,
@@ -207,7 +223,9 @@ db_who <-
                         "65-79" = 65L,
                         "80+"   = 80L,
                         "100+"  = 100L,
-                      "85-90" = 85L),
+                      "85-90" = 85L,
+                      "15-30" = 15L,
+                      "0-15" = 0L),
          Sex = recode(sex, "Male" = "m","Female" = "f", "Total" = "t") ) %>% 
   dplyr::select(Code = country, Year = year, Sex, Age, Deaths = deaths) %>% 
   dplyr::filter(!Code %in% c("AND")) %>% 
