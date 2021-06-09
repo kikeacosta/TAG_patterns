@@ -11,16 +11,16 @@ has_not_total <- function(age_vec){
 }
 
 has_annual <- function(time_units){
-  any(time_units == "annual")
+  any(time_units == "Annual")
 }
 is_complete <- function(time, time_unit){
-  if (any(time_unit == "annual")){
+  if (any(time_unit == "Annual")){
     return(TRUE)
   }
-  if (any(time_unit == "month")){
+  if (any(time_unit == "Month")){
     return(all(1:12 %in% time))
   }
-  if (any(time_unit == "week")){
+  if (any(time_unit == "Week")){
     return(all(1:52 %in% time))
   }
   NA_integer_
@@ -38,7 +38,7 @@ age2int2 <- function(Age){
 }
 # -------------------------------------
 # read in May 10 data
-WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_10.05.2021.xlsx")
+WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_01.06.2021.xlsx")
 
 
 # filter down to incl age and 2020
@@ -70,7 +70,7 @@ WHO_age_2020 <-
 # ignoring annual
 WHO_age_2020_annual <-
   WHO_age_2020 %>% 
-  dplyr::filter(time_unit != "annual") %>% 
+  dplyr::filter(time_unit != "Annual") %>% 
   group_by(country, year, sex, time_unit) %>% 
   mutate(compl = is_complete(time, time_unit)) %>% 
   dplyr::filter(compl) %>% 
@@ -80,7 +80,7 @@ WHO_age_2020_annual <-
 # get annual data, ignoring georgia
 WHO_age_2020_annual_pre <-
   WHO_age_2020 %>% 
-  dplyr::filter(time_unit == "annual") %>% 
+  dplyr::filter(time_unit == "Annual") %>% 
   dplyr::select(all_of(colnames(WHO_age_2020_annual))) %>% 
   dplyr::filter(!(country == "GEO" & year == 2020)) %>% 
   distinct()
@@ -102,11 +102,12 @@ WHO_age_2020_annual <-
   bind_rows(WHO_age_2020_annual_pre) %>% 
   dplyr::select(-check2)
 
+# 01-06 version fixes this.
 # Fix Armenia 0 + 1-4 oddity
-WHO_age_2020_annual <- 
-WHO_age_2020_annual %>% 
-  filter(!(age_cat_s == "0" & country == "ARM")) %>% 
-  mutate(age_cat_s = ifelse(country == "ARM" & age_cat_s == "1-4","0",age_cat_s))
+# WHO_age_2020_annual <- 
+# WHO_age_2020_annual %>% 
+#   filter(!(age_cat_s == "0" & country == "ARM")) %>% 
+#   mutate(age_cat_s = ifelse(country == "ARM" & age_cat_s == "1-4","0",age_cat_s))
 
 
 # This produces a auxiliary selector dataset
@@ -140,8 +141,7 @@ WHO_selection <-
   WHO_age_2020_annual %>% 
   filter(age_cat_s != "Unknown",
          sex != "Unknown") %>% 
-  select(-time_unit) %>% 
-  group_by(country, sex, year) %>% 
+  group_by(country, time_unit, sex, year) %>% 
   do(rescale_age(chunk = .data)) %>% 
   ungroup() %>% 
   pivot_wider(names_from = sex, values_from = deaths) %>% 
@@ -159,15 +159,32 @@ WHO_selection <-
                values_drop_na = TRUE) %>% 
   dplyr::filter(age_cat_s != "total age")
 
+
+# need to have just Week or Month or Year
+
+WHO_selection_2 <- 
+  WHO_selection %>% 
+  group_by(country, sex, year) %>% 
+  mutate(priority = case_when(time_unit == "Annual" ~ 1,
+                              time_unit == "Month" ~ 2,
+                              time_unit == "Week" ~ 3)) %>% 
+  dplyr::filter(priority == min(priority)) %>% 
+  ungroup() %>% 
+  select(-priority) 
+
+
+
+
+
 # need to summarize years < 2020 as mean to deliver just two
 # time points per population / sex.
-WHO_2020_save <- 
-  WHO_selection %>% 
-  dplyr::filter(year == 2020)
+# WHO_2020_save <- 
+#   WHO_selection_2 %>% 
+#   dplyr::filter(year == 2020)
 
 # merge, then recode values and colnames to standards 
 db_who <-
-  WHO_selection %>% 
+  WHO_selection_2 %>% 
   mutate(Age = recode(age_cat_s,
                         "0"     = 0L,           
                         "1-4"   = 1L,
@@ -206,7 +223,9 @@ db_who <-
                         "65-79" = 65L,
                         "80+"   = 80L,
                         "100+"  = 100L,
-                      "85-90" = 85L),
+                      "85-90" = 85L,
+                      "15-30" = 15L,
+                      "0-15" = 0L),
          Sex = recode(sex, "Male" = "m","Female" = "f", "Total" = "t") ) %>% 
   dplyr::select(Code = country, Year = year, Sex, Age, Deaths = deaths) %>% 
   dplyr::filter(!Code %in% c("AND")) %>% 
