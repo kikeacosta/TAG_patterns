@@ -1,6 +1,5 @@
 Country,Code,Source,Age_groups,Sex_groups,Period,Deaths,n_sources
 Albania,ALB,eurs,19,3,2016-2020,229410,1
-Armenia,ARM,eurs,19,3,2016-2020,283108,1
 Australia,AUS,stmf,5,3,2015-2020,1696610,1
 Austria,AUT,stmf,19,3,2015-2020,996446,1
 Belgium,BEL,stmf,19,3,2015-2020,1354078,1
@@ -8,6 +7,7 @@ Brazil,BRA,brazil,101,3,2015-2020,16226440,1
 Bulgaria,BGR,stmf,19,3,2015-2020,1342112,1
 Canada,CAN,who,19,3,2016-2020,2812810,1
 Chile,CHL,stmf,20,3,2016-2020,1106694,1
+Costa Rica,CRI,who,19,3,2016-2020,239420,1
 Croatia,HRV,stmf,19,3,2015-2020,643480,1
 Cyprus,CYP,eurs,19,3,2016-2020,60218,1
 Czechia,CZE,stmf,19,3,2015-2020,1375108,1
@@ -18,7 +18,7 @@ Estonia,EST,stmf,19,3,2015-2020,187012,1
 Finland,FIN,stmf,19,3,2015-2020,650022,1
 France,FRA,stmf,21,3,2015-2020,7239820,1
 Georgia,GEO,who,19,3,2016-2020,484626,1
-Germany,DEU,stmf,15,3,2016-2020,9452792,1
+Germany,DEU,who,16,3,2016-2020,9445760,1
 Greece,GRC,stmf,19,3,2016-2020,1239282,1
 Guatemala,GTM,who,19,3,2019-2020,69030,1
 Hungary,HUN,stmf,19,3,2015-2020,1589166,1
