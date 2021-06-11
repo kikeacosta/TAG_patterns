@@ -1,5 +1,10 @@
-## simple R-code for estimating mortality age-pattern for
-## two populations with different mortality (and grouping structures?)
+## simple R-code for estimating log-mortality age-pattern 
+## in a population, as sum of the 
+## log-mortality of another population + 
+## scaling factor +
+## smooth age-factor
+## issue: grouping structures which could be eventually be different
+## in the two populations
 ## 1) simulated data
 ## by C.G. Camarda 2021.06.11
 
