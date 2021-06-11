@@ -2,6 +2,7 @@
 rm(list = ls())
 ## plotting in a difference device
 options(device="X11")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 library(magic)
 library(colorspace)
@@ -21,6 +22,7 @@ Dfun <- function(m){
   return(D)
 }
 
+setwd("/home/gccamarda/WORK/TAG_patterns")
 Y0 <- readr::read_csv("Output/annual_deaths_countries_selected_sources.csv")
 ## only totals
 Y1 <- subset(Y0, Sex=="t")
@@ -551,7 +553,7 @@ for(i in 1:p){
 
 ## collect info for Tim
 
-DATA <- expand.grid(country=pop, age=xs)
+DATA <- expand.grid(age=xs, country=pop)
 DATA$eta.1 <- c(ETAsa)
 DATA$eta.1.low <- c(ETAsa.LOW)
 DATA$eta.1.up <- c(ETAsa.UP)
