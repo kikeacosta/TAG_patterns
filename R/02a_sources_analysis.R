@@ -138,18 +138,22 @@ best_source_year <-
   summarise(Sex_groups = n(),
             Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
+  mutate(priority = case_when(Source == "stmf" ~ 1,
+                              Source == "eurs" ~ 2,
+                              Source == "who" ~ 3,
+                              TRUE ~ 4)) %>% 
   group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
   mutate(Period = paste(min(Year), max(Year), sep = "-"),
          Deaths = sum(Deaths), 
          Periods = max(Year) - min(Year) + 1) %>% 
   group_by(Country, Year) %>% 
-  filter(Sex_groups == max(Sex_groups),
-         Age_groups == max(Age_groups)) %>% 
-  group_by(Country, Year) %>% 
+  filter(Sex_groups == max(Sex_groups)) %>% 
+  filter(Age_groups == max(Age_groups)) %>% 
   filter(Periods == max(Periods)) %>% 
+  filter(Deaths == max(Deaths)) %>% 
+  filter(priority == min(priority)) %>% 
   mutate(n = n()) %>% 
   ungroup() %>% 
-  filter(n == 1 | Source == "stmf") %>% 
   group_by(Country, Code, Source, Age_groups) %>% 
   mutate(max_year = max(Year),
          min_year = min(Year)) %>% 
@@ -178,7 +182,6 @@ best_source_summ <-
   mutate(n_sources = n()) %>% 
   ungroup() %>% 
   arrange(-n_sources)
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # filtering best sources by country
