@@ -1,10 +1,12 @@
 ## simple R-code for estimating log-mortality age-pattern 
-## in a population, as sum of the 
-## log-mortality of another population + 
+## in two populations, in which the first 
+## is simply a smooth function over age 
+## and the second is the log-mortality of the first + 
 ## scaling factor +
 ## smooth age-factor
-## issue: grouping structures which could be eventually be different
-## in the two populations
+## issues: 
+## grouping structures which could be eventually be different
+## !! underdetermined linear system of equation
 ## 1) simulated data
 ## by C.G. Camarda 2021.06.11
 
@@ -16,17 +18,6 @@ options(device="X11")
 ## R-studio to get the same dir as for the .R file
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(MortalitySmooth)
-
-## function to compute matrix for computing 1st derivative for equally-spaced x
-Dfun <- function(m){
-  D0 <- diff(diag(m), diff=1)
-  D1 <- diff(diag(m), diff=1, lag=2)*0.5
-  D <- rbind(D0[1,],
-             D1,
-             D0[nrow(D0),])
-  return(D)
-}
-
 
 ## assuming same exposures
 ## exposures population 1
@@ -72,9 +63,9 @@ etaT1 <- log(muT1)
 
 ## plotting true log-mortality
 ## with components that we will disregard afterward
-rany <- c(-16, -4)
+rany <- c(-10, 1)
 plot(x, eta2, t="l", lwd=2, col=2, ylim=rany, axes=FALSE)
-yy <- 10^seq(-7, -2)
+yy <- 10^seq(-10, 2)
 axis(2, at=log(yy), labels=yy)
 axis(1);box()
 lines(x, eta1, t="l", lwd=2, col=1)
@@ -101,24 +92,13 @@ etaT2 <- log(muT2)
 
 ## plotting true log-mortality
 ## with components that we will disregard afterward
-rany <- c(-16, -4)
+rany <- c(-10, 1)
 plot(x, eta2, t="l", lwd=2, col=2, ylim=rany, axes=FALSE)
-yy <- 10^seq(-7, -2)
+yy <- 10^seq(-20, 2)
 axis(2, at=log(yy), labels=yy)
 axis(1);box()
 lines(x, eta1, t="l", lwd=2, col=1)
 lines(x, etaT2, col=4, lwd=2)
-
-
-
-rany <- range(etaT1, etaT2)
-plot(x, etaT1, t="l", lwd=2, col=2, ylim=rany, axes=TRUE)
-yy <- 10^seq(-7, -2)
-# axis(2, at=log(yy), labels=log(yy))
-# axis(1);box()
-lines(x, etaT2, col=4, lwd=2)
-
-
 
 
 ## simulating deaths for both populations
@@ -131,15 +111,14 @@ d2 <- rpois(m, d2T)
 lmx2 <- log(d2/e2)
 
 ## plotting simulated and true log-mortality
-rany <- c(-16, -2)
-plot(x, etaT1, t="l", lwd=2, ylim=rany, axes=FALSE)
-points(x, lmx1, col=2)
-lines(x, etaT2, col=3, lwd=2)
-points(x, lmx2, col=3, pch=2)
-yy <- 10^seq(-7, -2)
+rany <- range(etaT1, etaT2)
+plot(x, etaT1, t="l", lwd=2, col=2, ylim=rany, axes=TRUE)
+yy <- 10^seq(-20, 2)
 axis(2, at=log(yy), labels=yy)
 axis(1);box()
-
+points(x, lmx1, col=2)
+points(x, lmx2, col=3, pch=2)
+lines(x, etaT2, col=3, lwd=2)
 ## assuming different grouping structure
 
 ## grouping for pop 1
@@ -188,9 +167,6 @@ e2g <- G2%*%e2
 lmx2g <- log(d2g/e2g)
 
 ## plotting what we actually observed
-
-# pdf("C19agepattern.pdf", width = 10, height = 10)
-par(mfrow=c(1,2))
 rany <-range(etaT1, etaT2, lmx1, lmx2, lmx1g, lmx2g, finite=TRUE)
 plot(x, etaT1, t="l", lwd=2, ylim=rany, axes=FALSE, col=2,
      xlab="age", ylab="mortality, log-scale",
@@ -209,8 +185,6 @@ for(i in 1:n2){
   segments(x0=low2[i], x1=up2[i],
            y0=lmx2g[i], y1=lmx2g[i], col=3, lwd=3)
 }
-plot(m0)#x, eta1.hat-eta2.hat)
-# dev.off()
 
 
 ## build composite matrices for the two population
@@ -229,57 +203,120 @@ for(i in 1:n2){
   C2[i,whi] <- e2[whi]
 }
 
+
+## estimation
+y <- c(d1g, d2g)
+C <- adiag(C1, C2)
+y1.st0 <- rep(d1g/len1, len1)
+fit1.0 <- Mort1Dsmooth(x=x, y=y1.st0,
+                       offset=log(e1),
+                       method=3, lambda=10^3)
+plot(fit1.0)
+y2.st0 <- rep(d2g/len2, len2)
+fit2.0 <- Mort1Dsmooth(x=x, y=y2.st0,
+                       offset=log(e2),
+                       method=3, lambda=10^3)
+plot(fit2.0)
+
+eta.st <- c(fit1.0$logmortality, fit2.0$logmortality)
 ## penalty stuff
-D <- diff(diag(m), diff=2)
-tDD <- t(D)%*%D
-lambda <- 10^2.5
-P <- lambda*tDD
+Deta1 <- diff(diag(m), diff=2)
+tDDeta1 <- t(Deta1)%*%Deta1
+Ddelta <- diff(diag(m), diff=2)
+tDDdelta <- t(Ddelta)%*%Ddelta
 
-## PCLM independent to each population
+lambda.eta1 <- 10^2
+lambda.delta <- 10^4
 
-## population 1
-y <- d1g
-e <- e1
-C <- C1
-y.st0 <- rep(y/len1, len1)
-fit0 <- Mort1Dsmooth(x=x, y=y.st0,
-                     offset=log(e),
-                     method=3, lambda=10^3)
-plot(fit0)
-eta.st <- fit0$logmortality
+P <- adiag(lambda.eta1*tDDeta1,
+           0,
+           lambda.delta*tDDdelta)
+## ridge penalty
+Pr <- 1e-6*diag(ncol(P))
+
+## model matrix
+U0 <- rbind(diag(m), diag(m))
+U1 <- matrix(c(rep(0,m), rep(1,m)), 2*m)
+U2 <- rbind(0*diag(m), diag(m))
+U <- cbind(U0,U1,U2)
+
 eta <- eta.st
 max.it <- 100
 for(it in 1:max.it){
   gamma   <- exp(eta)
   mu      <- c(C %*% gamma)
-  X       <- C * ((1 / mu) %*% t(gamma)) 
+  X       <- ( C * ((1 / mu) %*% t(gamma)) ) %*% U
   w       <- as.vector(mu)
   r       <- y - mu + C %*% (gamma * eta)
   G       <- t(X) %*% (w * X) 
-  GpP     <- G + P
+  GpP     <- G + P + Pr
   tXr     <- t(X) %*% r
+  betas   <- solve(GpP, tXr)
   eta.old <- eta
-  eta    <- solve(GpP, tXr)
+  eta     <- U%*%betas
   dif.eta <- max(abs((eta - eta.old)/eta.old) )
   if(dif.eta < 1e-04 & it > 4) break
   cat(it, dif.eta, "\n")
 }
+eta1.hat <- betas[1:m]
+c.hat <- betas[m+1]
+delta.hat <- betas[1:m+1+m]
+eta2.hat <- eta1.hat + c.hat + delta.hat
+
+
+par(mfrow=c(1,3))
+## eta1
+rany <-range(etaT1, etaT2, lmx1g, lmx2g, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="age", ylab="mortality, log-scale",
+     main="mortality age-pattern")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+lines(x, eta1.hat, col=2, lwd=4)
+lines(x, etaT1, col=4, lwd=2, lty=2)
+for(i in 1:n1){
+  segments(x0=low1[i], x1=up1[i],
+           y0=lmx1g[i], y1=lmx1g[i], col=4, lwd=3)
+}
+## eta2
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="age", ylab="mortality, log-scale",
+     main="mortality age-pattern")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+lines(x, eta2.hat, col=2, lwd=4)
+lines(x, etaT2, col=4, lwd=2, lty=2)
+for(i in 1:n1){
+  segments(x0=low2[i], x1=up2[i],
+           y0=lmx2g[i], y1=lmx2g[i], col=4, lwd=3)
+}
+
+plot(x, delta.hat, col=4, lwd=4, t="l",
+     main=paste("c = ", signif(c.hat,4)))
+abline(h=0, col=8, lty=3, lwd=2)
+par(mfrow=c(1,1))
+
 H0 <- solve(GpP)
-Veta1 <- H0 %*% G %*% H0
-se.eta1 <- sqrt(diag(Veta1))
+Vbetas <- H0 %*% G %*% H0
+
+se.betas <- sqrt(diag(Vbetas))
+se.eta1 <- se.betas[1:m]
+se.c <- se.betas[m+1]
+
+M <- 
+
 eta1.hat <- eta
 eta1.hatL <- eta1.hat - 2*se.eta1
 eta1.hatU <- eta1.hat + 2*se.eta1
-## rate-of-aging
-Droa <- Dfun(m)
-Vroa1 <- Droa %*% Veta1 %*% t(Droa)
-se.roa1 <- sqrt(diag(Vroa1))
-roa1.hat <- Droa%*%eta1.hat
-roa1.hatL <- roa1.hat - 2*se.roa1
-roa1.hatU <- roa1.hat + 2*se.roa1
 
 
-## population 2
+
+## population 2: 
+## ln(e_2 * \mu_2) = ln(e_2) + \eta_2(x) = ln(e_2) + \eta_1(x) + c + \delta(x)
+## with ln(e_2) + \eta_1(x) as offset
 y <- d2g
 e <- e2
 C <- C2
@@ -291,17 +328,27 @@ plot(fit0)
 eta.st <- fit0$logmortality
 eta <- eta.st
 max.it <- 100
+U <- cbind(1, diag(m))
+## penalty stuff
+D0 <- diff(diag(m), diff=2)
+D <- adiag(0, D0)
+tDD <- t(D)%*%D
+lambda <- 10^2.5
+P <- lambda*tDD
+Pr <- 1e-6*diag(ncol(P))
 for(it in 1:max.it){
   gamma   <- exp(eta)
   mu      <- c(C %*% gamma)
-  X       <- C * ((1 / mu) %*% t(gamma)) 
+  X       <- ( C * ((1 / mu) %*% t(gamma)) ) %*% U
   w       <- as.vector(mu)
   r       <- y - mu + C %*% (gamma * eta)
   G       <- t(X) %*% (w * X) 
-  GpP     <- G + P
+  GpP     <- G + P +Pr
   tXr     <- t(X) %*% r
+  
+  betas   <- solve(GpP, tXr)
   eta.old <- eta
-  eta    <- solve(GpP, tXr)
+  eta <- U%*%betas
   dif.eta <- max(abs((eta - eta.old)/eta.old) )
   if(dif.eta < 1e-04 & it > 4) break
   cat(it, dif.eta, "\n")
