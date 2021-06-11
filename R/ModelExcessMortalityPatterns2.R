@@ -8,56 +8,36 @@ library(colorspace)
 library(MortalitySmooth)
 library(colorspace)
 library(gridExtra)
+library(here)
 
-source("R/EmpiricDeriv.R")
 
-stmf0 <- readr::read_csv("Output/stmf.csv")
-who0 <- readr::read_csv("Output/who.csv")
-eurs0 <- readr::read_csv("Output/eurs.csv")
-bra0 <- readr::read_csv("Output/brazil.csv")
+## function to compute matrix for computing 1st derivative for equally-spaced x
+Dfun <- function(m){
+  D0 <- diff(diag(m), diff=1)
+  D1 <- diff(diag(m), diff=1, lag=2)*0.5
+  D <- rbind(D0[1,],
+             D1,
+             D0[nrow(D0),])
+  return(D)
+}
 
+Y0 <- readr::read_csv("Output/annual_deaths_countries_selected_sources.csv")
 ## only totals
-stmf1 <- subset(stmf0, Sex=="t")
-who1 <- subset(who0, Sex=="t")
-eurs1 <- subset(eurs0, Sex=="t")
-bra1 <- subset(bra0, Sex=="t")
+Y1 <- subset(Y0, Sex=="t")
 
-## exclude TOT, useful later for re-scaling
-stmf2 <- subset(stmf1, Age!="TOT")
-who2 <- subset(who1, Age!="TOT")
-eurs2 <- subset(eurs1, Age!="TOT")
-bra2 <- subset(bra1, Age!="TOT")
+table(Y1$Country, Y1$Year)
+table(Y1$Country, Y1$Source)
 
-table(stmf2$Country, stmf2$Year)
-table(eurs2$Country, eurs2$Year)
-table(who2$Country, who2$Year)
-
-
-## ranking in preferences: stmf, eurs, who, others (now bra)
-pop <- unique(stmf2$Country)
-eurs3 <- subset(eurs2, !Country%in%pop)
-Y0 <- rbind(stmf2, eurs3)
-pop <- unique(Y0$Country)
-who3 <- subset(who2, !Country%in%pop)
-Y1 <- rbind(Y0, who3)
-## adding others
-Y2 <- rbind(Y1, bra2)
 ## delete
 no <- c("Northern Ireland", "Scotland", "England and Wales")
-Y <- subset(Y2, !Country%in%no)
-## enforce age to be numeric
-Y$Age <- as.numeric(Y$Age)
+Y <- subset(Y1, !Country%in%no)
 
 ## offset
-E0 <- readRDS("R/OffsetsNew.rds", refhook = NULL)
-## only both sex
+E0 <- readRDS("R/Offsets.rds", refhook = NULL)
+## only totals
 E1 <- subset(E0, Sex=="b")
-# delete specific Regions
-E2 <- subset(E1, Region=="All")
-## take up to age 100, problem for older ages in Georgia, Armenia, and Mauritius
-E3 <- subset(E2, Age<=100)
 ## select E where we have data in D
-E <- subset(E3, Country%in%unique(Y$Country))
+E <- subset(E1, Country%in%unique(Y$Country))
 ## some pop in deaths are not available for the offset
 Y <- subset(Y, Country%in%unique(E$Country))
 ## sorting by name
@@ -66,29 +46,14 @@ E <- E[order(E$Country),]
 ## check pop
 cbind(unique(E$Country), unique(Y$Country))
 
-## issue with pop in  Georgia, Armenia, and Mauritius
-E <- E[-c(seq(103,by=2,length=101),
-          seq(1719,by=2,length=101),
-          seq(3335,by=2,length=101)),]
-
-
 ## do we miss 2020 for some populations?
 which(table(Y$Country, Y$Year==2020)[,2]==0)
 
-## can we can from somewhere?
-table(eurs2$Country, eurs2$Year)
-table(who2$Country, who2$Year)
-## no UK, delete it
-Y <- subset(Y, Country!="United Kingdom")
-## yes Georgia
-geog <- subset(who2, Country=="Georgia" & Year==2020)
-## add georgia
-Y <- rbind(Y, geog)
-## sorting again
-Y <- Y[order(Y$Country, Y$Year, Y$Age),]
-## 
-E <- subset(E, Country%in%unique(Y$Country))
+table(E$Country)
 
+## cut at 100
+E <- subset(E, Age<=100)
+table(E$Country)
 
 ## populations
 pop <- unique(E$Country)
@@ -127,13 +92,16 @@ Yb <- subset(Y, Year==2020)
 x1 <- 15
 x2 <- 100
 xs <- x1:x2
-m <- length(xs)
+mc <- length(xs)
 
 ## pre-2020
 CLISTa <- GLISTa <- LMXa <- EGRa <- list()
-ETAa <- ETA.LOWa <- ETA.UPa <- ETA1a <- list()
-ETAsa <- ETA1sa <- matrix(0, m, p)
-colnames(ETAsa) <- colnames(ETA1sa) <- pop
+ETAa <- ETA.LOWa <- ETA.UPa <- ROAa <- ROA.LOWa <- ROA.UPa <- VETAa <- list()
+ETAsa <- matrix(0, mc, p)
+colnames(ETAsa) <- pop
+ROAsa <- ETAsa
+ETAsa.LOW <- ROAsa.LOW <- ETAsa
+ETAsa.UP <- ROAsa.UP <- ETAsa
 
 ## whether to plot outcomes 
 PLOT <- FALSE
@@ -251,25 +219,38 @@ for(i in 1:p){
     if(dif.eta < 1e-04 & it > 4) break
     #cat(it, dif.eta, "\n")
   }
-  eta.hat <- eta
   H0 <- solve(GpP)
-  H1 <- H0 %*% G %*% H0
-  se <- sqrt(diag(H1))
-  eta.hatL <- eta.hat - 2*se
-  eta.hatU <- eta.hat + 2*se
+  Veta <- H0 %*% G %*% H0
+  VETAa[[i]] <- Veta
+  se.eta <- sqrt(diag(Veta))
+  eta.hat <- eta
+  eta.hatL <- eta.hat - 2*se.eta
+  eta.hatU <- eta.hat + 2*se.eta
   ETAa[[i]] <- eta.hat
   ETA.LOWa[[i]] <- eta.hatL
   ETA.UPa[[i]] <- eta.hatU
   ## compute rate-of-aging
-  eta1 <- emp.der(x=x, y=eta)
-  ETA1a[[i]] <- eta1
+  Dder <- Dfun(m)
+  roa <- Dder%*%eta
+  Vroa <- Dder %*% Veta %*% t(Dder)
+  se.roa <- sqrt(diag(Vroa))
+  roa.L <- roa - 2*se.roa
+  roa.U <- roa + 2*se.roa
+  ROAa[[i]] <- roa
+  ROA.LOWa[[i]] <- roa.L
+  ROA.UPa[[i]] <- roa.U
+  
   ## take only the selected ages
   sel <- which(c(age.min:age.max)%in%xs)
   ETAsa[,i] <- eta.hat[sel]
-  ETA1sa[,i] <- eta1[sel]
+  ROAsa[,i] <- roa[sel]
+  ETAsa.LOW[,i] <- eta.hatL[sel]
+  ETAsa.UP[,i] <- eta.hatU[sel]
+  ROAsa.LOW[,i] <- roa.L[sel]
+  ROAsa.UP[,i] <- roa.U[sel]
   cat(pop[i], lambda.hat, "\n")
   if(PLOT){
-    ## population specific colors
+    par(mfrow=c(2,1))
     rany <- c(-10, 1)
     ranx <- range(x)
     plot(1,1, t="n", col=2, lwd=2, ylim=rany, xlim=ranx,
@@ -289,6 +270,20 @@ for(i in 1:p){
     lines(x, ETAa[[i]], col=colocou[i], lwd=4)
     abline(v=c(x1,x2), col=2, lwd=2, lty=2)
     #locator(1)
+    
+    rany <- c(-0.2, 0.2)
+    ranx <- range(x)
+    plot(1,1, t="n", col=2, lwd=2, ylim=rany, xlim=ranx,
+         axes=TRUE,
+         xlab="age", ylab="rate-of-aging",
+         main=paste(pop[i], " <2020"))
+    abline(h=0, col=8, lty=3)
+    xx <- c(x, rev(x))
+    yy <- c(ROA.LOWa[[i]], rev(ROA.UPa[[i]]))
+    polygon(xx, yy, col=adjustcolor(colocou[i], 0.5), border=adjustcolor(colocou[i], 0.5))
+    lines(x, ROAa[[i]], col=colocou[i], lwd=4)
+    abline(v=c(x1,x2), col=2, lwd=2, lty=2)
+    locator(1)
   }
 }
 
@@ -298,15 +293,19 @@ for(i in 1:p){
 
 ## 2020
 CLISTb <- GLISTb <- LMXb <- EGRb <- list()
-ETAb <- ETA.LOWb <- ETA.UPb <- ETA1b <- list()
-ETAsb <- ETA1sb <- matrix(0, length(x1:x2), p)
-colnames(ETAsb) <- colnames(ETA1sb) <- pop
+ETAb <- ETA.LOWb <- ETA.UPb <- ROAb <- ROA.LOWb <- ROA.UPb <- VETAb <- list()
+ETAsb <- matrix(0, mc, p)
+colnames(ETAsb) <- pop
+ROAsb <- ETAsb
+ETAsb.LOW <- ROAsb.LOW <- ETAsb
+ETAsb.UP <- ROAsb.UP <- ETAsb
 
 ## whether to plot outcomes 
 PLOT <- FALSE
 
-i=17
+i=3
 for(i in 1:p){
+  
   ## select age-grouped deaths (we know it's the same for both years)
   Y.i0 <- subset(Yb, Country==pop[i])
   pmin <- max(which(Y.i0$Age<=x1))
@@ -330,7 +329,7 @@ for(i in 1:p){
   E.i <- subset(E, Country==pop[i])
   e.i0 <- E.i$Population
   whi.ar <- which(E.i$Age>=age.min & E.i$Age<=age.max)
-  e.i <- e.i0[whi.ar]
+  e.i <- e.i0[whi.ar]*ny[i]
   ## ages for the latent pattern
   x <- E.i$Age[whi.ar]
   m <- length(x)
@@ -417,25 +416,38 @@ for(i in 1:p){
     if(dif.eta < 1e-04 & it > 4) break
     #cat(it, dif.eta, "\n")
   }
-  eta.hat <- eta
   H0 <- solve(GpP)
-  H1 <- H0 %*% G %*% H0
-  se <- sqrt(diag(H1))
-  eta.hatL <- eta.hat - 2*se
-  eta.hatU <- eta.hat + 2*se
+  Veta <- H0 %*% G %*% H0
+  VETAb[[i]] <- Veta
+  se.eta <- sqrt(diag(Veta))
+  eta.hat <- eta
+  eta.hatL <- eta.hat - 2*se.eta
+  eta.hatU <- eta.hat + 2*se.eta
   ETAb[[i]] <- eta.hat
   ETA.LOWb[[i]] <- eta.hatL
   ETA.UPb[[i]] <- eta.hatU
   ## compute rate-of-aging
-  eta1 <- emp.der(x=x, y=eta)
-  ETA1b[[i]] <- eta1
+  Dder <- Dfun(m)
+  roa <- Dder%*%eta
+  Vroa <- Dder %*% Veta %*% t(Dder)
+  se.roa <- sqrt(diag(Vroa))
+  roa.L <- roa - 2*se.roa
+  roa.U <- roa + 2*se.roa
+  ROAb[[i]] <- roa
+  ROA.LOWb[[i]] <- roa.L
+  ROA.UPb[[i]] <- roa.U
+  
   ## take only the selected ages
   sel <- which(c(age.min:age.max)%in%xs)
   ETAsb[,i] <- eta.hat[sel]
-  ETA1sb[,i] <- eta1[sel]
+  ROAsb[,i] <- roa[sel]
+  ETAsb.LOW[,i] <- eta.hatL[sel]
+  ETAsb.UP[,i] <- eta.hatU[sel]
+  ROAsb.LOW[,i] <- roa.L[sel]
+  ROAsb.UP[,i] <- roa.U[sel]
   cat(pop[i], lambda.hat, "\n")
   if(PLOT){
-    ## population specific colors
+    par(mfrow=c(2,1))
     rany <- c(-10, 1)
     ranx <- range(x)
     plot(1,1, t="n", col=2, lwd=2, ylim=rany, xlim=ranx,
@@ -455,12 +467,111 @@ for(i in 1:p){
     lines(x, ETAb[[i]], col=colocou[i], lwd=4)
     abline(v=c(x1,x2), col=2, lwd=2, lty=2)
     #locator(1)
+    
+    rany <- c(-0.2, 0.2)
+    ranx <- range(x)
+    plot(1,1, t="n", col=2, lwd=2, ylim=rany, xlim=ranx,
+         axes=TRUE,
+         xlab="age", ylab="rate-of-aging",
+         main=paste(pop[i], " 2020"))
+    abline(h=0, col=8, lty=3)
+    xx <- c(x, rev(x))
+    yy <- c(ROA.LOWb[[i]], rev(ROA.UPb[[i]]))
+    polygon(xx, yy, col=adjustcolor(colocou[i], 0.5), border=adjustcolor(colocou[i], 0.5))
+    lines(x, ROAb[[i]], col=colocou[i], lwd=4)
+    abline(v=c(x1,x2), col=2, lwd=2, lty=2)
+    locator(1)
   }
-} 
   
+}
 
-names(ETAa) <- names(ETA.LOWa) <- names(ETA.UPa) <- names(ETA1a) <- pop
-names(ETAb) <- names(ETA.LOWb) <- names(ETA.UPb) <- names(ETA1b) <- pop
+
+names(ETAa) <- names(ETA.LOWa) <- names(ETA.UPa) <- pop
+names(ROAa) <- names(ROA.LOWa) <- names(ROA.UPa) <- pop
+
+names(ETAb) <- names(ETA.LOWb) <- names(ETA.UPb) <- pop
+names(ROAb) <- names(ROA.LOWb) <- names(ROA.UPb) <- pop
+
+
+
+## compute differences in roa and associated CI
+DELTA <- DELTA.UP <- DELTA.LOW <- list()
+DELTAs <- matrix(0, mc, p)
+colnames(DELTAs) <- pop
+DELTAs.UP <- DELTAs.LOW <- DELTAs
+
+i=3
+for(i in 1:p){
+  eta12 <- c(ETAa[[i]], ETAb[[i]])
+  Veta.a <- VETAa[[i]]
+  Veta.b <- VETAb[[i]]
+  m <- nrow(Veta.a)
+  Droa <- Dfun(m)
+  Veta.ab <- adiag(Veta.a, Veta.b)
+  U <- adiag(Droa, Droa)
+  H <- cbind(diag(m), -diag(m))
+  HU <- H%*%U
+  delta <- HU%*%eta12
+  V.delta <- HU %*% Veta.ab %*% t(HU)
+  se.delta <- sqrt(diag(V.delta))
+  delta.up <- delta + 2*se.delta
+  delta.low <- delta - 2*se.delta
+  DELTA[[i]] <- delta
+  DELTA.LOW[[i]] <- delta.low
+  DELTA.UP[[i]] <- delta.up
+  
+  ## select
+  ## select age-grouped deaths (we know it's the same for both years)
+  Y.i0 <- subset(Yb, Country==pop[i])
+  pmin <- max(which(Y.i0$Age<=x1))
+  if(max(Y.i0$Age)>=x2){
+    pmax <- max(which(Y.i0$Age<=x2))
+  }else{
+    pmax <- which.max(Y.i0$Age)
+  }
+  
+  Y.i <- Y.i0[pmin:pmax, ]
+  y.i <- Y.i$Deaths
+  
+  ## number of age-group for the ith pop
+  n <- length(y.i) 
+  
+  age.low.i <- Y.i$Age
+  age.up.i <- Y.i$Age+Y.i$AgeInt
+  age.min <- min(age.low.i)
+  age.max <- max(age.up.i)
+  sel <- which(c(age.min:age.max)%in%xs)
+  DELTAs[,i] <- delta[sel]
+  DELTAs.LOW[,i] <- delta.low[sel]
+  DELTAs.UP[,i] <- delta.up[sel]
+  cat(i, "\n")
+}
+
+
+
+## collect info for Tim
+
+DATA <- expand.grid(country=pop, age=xs)
+DATA$eta.1 <- c(ETAsa)
+DATA$eta.1.low <- c(ETAsa.LOW)
+DATA$eta.1.up <- c(ETAsa.UP)
+DATA$roa.1 <- c(ROAsa)
+DATA$roa.1.low <- c(ROAsa.LOW)
+DATA$roa.1.up <- c(ROAsa.UP)
+
+DATA$eta.2 <- c(ETAsb)
+DATA$eta.2.low <- c(ETAsb.LOW)
+DATA$eta.2.up <- c(ETAsb.UP)
+DATA$roa.2 <- c(ROAsb)
+DATA$roa.2.low <- c(ROAsb.LOW)
+DATA$roa.2.up <- c(ROAsb.UP)
+
+DATA$delta <- c(DELTAs)
+DATA$delta.low <- c(DELTAs.LOW)
+DATA$delta.up <- c(DELTAs.UP)
+
+
+write.table(DATA, "EstDiffRateAging.txt")
 
 
 
