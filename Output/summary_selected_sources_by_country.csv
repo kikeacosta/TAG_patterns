@@ -1,5 +1,6 @@
 Country,Code,Source,Age_groups,Sex_groups,Period,Deaths,n_sources
 Albania,ALB,eurs,19,3,2016-2020,229410,1
+Armenia,ARM,eurs,19,3,2016-2020,283108,1
 Australia,AUS,stmf,5,3,2015-2020,1696610,1
 Austria,AUT,stmf,19,3,2015-2020,996446,1
 Belgium,BEL,stmf,19,3,2015-2020,1354078,1
