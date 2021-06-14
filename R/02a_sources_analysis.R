@@ -8,11 +8,13 @@ eurs <- read_csv("Output/eurs.csv")
 brazil <- read_csv("Output/brazil.csv") 
 mexico <- read_csv("Output/mexico.csv") 
 peru <- read_csv("Output/peru.csv") 
+safr <- read_csv("Output/south_africa.csv")
+
 
 # solving issue with age in Eurostat data
-unique(eurs$Age)
-unique(peru$Age)
-unique(mexico$Age)
+unique(safr$Age)
+unique(safr$Sex)
+unique(safr$Year)
 
 eurs2 <- 
   eurs %>% 
@@ -24,7 +26,19 @@ brazil2 <-
   brazil %>% 
   mutate(Source = "brazil")
 
-unique(eurs2$Age)
+safr2 <- 
+  safr %>% 
+  tidyr::complete(Country, Code, Year, Sex, Age, fill = list(Deaths = 0)) %>% 
+  group_by(Country, Code, Year, Sex) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Age = "TOT") %>% 
+  bind_rows(safr %>% 
+              mutate(Age = as.character(Age))) %>% 
+  arrange(Year, Sex) %>% 
+  mutate(Source = "south_africa")
+
+unique(safr2$Age)
 
 # Adjust for unknown ages and sex
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +51,8 @@ db <-
             eurs2,
             brazil2,
             peru,
-            mexico)
+            mexico,
+            safr2)
 
 # imputing unknown ages and sexes
 db2 <- 
@@ -50,7 +65,6 @@ db2 <-
   ungroup() %>% 
   mutate(Age = as.double(Age)) %>% 
   arrange(Source, Country, Year, Sex, Age)
-
 
 # Adding data in 2020 for the UK
 # grouping deaths for the UK in 2020 from the STMF
@@ -68,7 +82,7 @@ uk2020 <-
   ungroup() %>% 
   mutate(Country = "United Kingdom", 
          Code = "GBR",
-         Source = "stmf modified")
+         Source = "stmf_modified")
 
 # merge all data together
 db3 <- 
