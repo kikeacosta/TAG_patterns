@@ -25,6 +25,7 @@ e1 <- c(29588,29295,29002,28707,28410,28111,27809,27504,27196,26883,26566,26245,
 ## exposures population 2
 e2 <- e1#c(38233,38253,38274,38295,38316,38337,38357,38375,38392,38406,38418,38427,38431,38432,38429,38420,38406,38386,38359,38326,38286,38238,38182,38118,38045,37962,37935,38020,38205,38476,38823,39234,39696,40198,40726,41267,41806,42329,42820,43261,43637,43930,44123,44199,44142,43937,43571,43033,42314,41410,40318,39212,38243,37382,36603,35881,35197,34528,33856,33165,32437,31660,30820,29907,28914,27836,26670,25417,24080,22669,21192,19663,18098,16516,14935,13375,11892,10526,9273,8129,7090,6152,5309,4556,3887,3296,2779,2327,1937,1601,1314,1072,867,697,556,440,345,269,208,159,121)
 
+whi <- 10:101
 ## increasing sample size?
 e1 <- e1*10
 e2 <- e2*10
@@ -72,14 +73,14 @@ lines(x, eta1, t="l", lwd=2, col=1)
 lines(x, etaT1, col=4, lwd=2)
 
 
-## population 2: etaT2 = etaT1 + c + delta
+## population 2: etaT2(x) = etaT1(x) + c + delta(x)
 ## true scaling factor
 cT <- 0.5
 ## constructing true delta vector
 ome <- pi/40
 beta1 <- 0
-beta2 <- 0.02
-beta3 <- 1
+beta2 <- 0
+beta3 <- 0
 betas <- c(beta1, beta2, beta3)
 X2 <- cbind(1, x, cos(x*ome))
 deltaT <- X2%*%betas
@@ -162,10 +163,10 @@ d1g <- G1%*%d1
 e1g <- G1%*%e1
 lmx1g <- log(d1g/e1g)
 ## grouping for pop 2
-# low2 <- seq(0, 80, 20)
-# up2  <- c(seq(19, 79, 20), 100)
-low2 <- low1
-up2  <- up1
+low2 <- seq(0, 80, 20)
+up2  <- c(seq(19, 79, 20), 100)
+# low2 <- low1
+# up2  <- up1
 n2 <- length(low2)
 age.gr2 <- paste(low2,up2,sep="-")
 len2 <- up2-low2+1
@@ -192,13 +193,13 @@ plot(x, etaT1, t="l", lwd=2, ylim=rany, axes=FALSE, col=2,
 yy <- 10^seq(-7, 2)
 axis(2, at=log(yy), labels=yy)
 axis(1);box()
-points(x, lmx1, col=2)
+#points(x, lmx1, col=2)
 for(i in 1:n1){
   segments(x0=low1[i], x1=up1[i],
            y0=lmx1g[i], y1=lmx1g[i], col=2, lwd=3)
 }
 lines(x, etaT2, lwd=2, col=3)
-points(x, lmx2, col=3, pch=2)
+#points(x, lmx2, col=3, pch=2)
 for(i in 1:n2){
   segments(x0=low2[i], x1=up2[i],
            y0=lmx2g[i], y1=lmx2g[i], col=3, lwd=3)
@@ -374,7 +375,7 @@ for(i in 1:n1){
 }
 
 ranx <- range(x)
-rany <- range(delta.hatL,delta.hatU)
+rany <- c(-2, 1)#range(delta.hatL,delta.hatU)
 plot(1, 1, t="n", xlim=ranx, ylim=rany,
      main=paste("c = ", signif(c.hat,4), "+ -", signif(2*se.c,4)), axes=FALSE,
      xlab="ages", ylab="delta")
