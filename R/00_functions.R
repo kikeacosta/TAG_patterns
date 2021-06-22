@@ -23,3 +23,8 @@ rescale_sex <- function(chunk){
                 dplyr::filter(Sex == "t"))
   
 }
+
+std_db <- function(db){
+  db2 <- db %>% 
+    select(Country, Year = YearOccurrence, Sex, Age = AgeStart, Deaths)
+}
