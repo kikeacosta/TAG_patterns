@@ -5,29 +5,22 @@ source(here("R", "00_functions.R"))
 who <- read_csv("Output/who.csv")
 stmf <- read_csv("Output/stmf.csv") 
 eurs <- read_csv("Output/eurs.csv") 
-brazil <- read_csv("Output/brazil.csv") 
-mexico <- read_csv("Output/mexico.csv") 
-peru <- read_csv("Output/peru.csv") 
-safr <- read_csv("Output/south_africa.csv")
+bra <- read_csv("Output/brazil.csv") 
+mex <- read_csv("Output/mexico.csv") 
+per <- read_csv("Output/peru.csv") 
+zaf <- read_csv("Output/south_africa.csv")
+col <- read_csv("Output/colombia.csv")
+chl <- read_csv("Output/chile.csv")
+ecu <- read_csv("Output/ecuador.csv",
+                 col_types = "ccdccdc")
 
-
-# solving issue with age in Eurostat data
 unique(safr$Age)
 unique(safr$Sex)
 unique(safr$Year)
+unique(eurs$Age)
 
-eurs2 <- 
-  eurs %>% 
-  mutate(Age = recode(Age,
-                      "Y50-54" = "50",
-                      "Y55-59" = "55"))
-
-brazil2 <- 
-  brazil %>% 
-  mutate(Source = "brazil")
-
-safr2 <- 
-  safr %>% 
+zaf2 <- 
+  zaf %>% 
   tidyr::complete(Country, Code, Year, Sex, Age, fill = list(Deaths = 0)) %>% 
   group_by(Country, Code, Year, Sex) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
@@ -36,9 +29,19 @@ safr2 <-
   bind_rows(safr %>% 
               mutate(Age = as.character(Age))) %>% 
   arrange(Year, Sex) %>% 
-  mutate(Source = "south_africa")
+  mutate(Source = "samrc/uct")
 
 unique(safr2$Age)
+
+# adjusting sources for "country_public" data
+latam <- 
+  bind_rows(bra, 
+            mex,
+            per,
+            ecu) %>% 
+  mutate(Source = "country_public")
+
+
 
 # Adjust for unknown ages and sex
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,11 +51,11 @@ unique(safr2$Age)
 
 db <- 
   bind_rows(stmf,
-            eurs2,
-            brazil2,
-            peru,
-            mexico,
-            safr2)
+            eurs,
+            latam,
+            zaf2,
+            col,
+            chl)
 
 # imputing unknown ages and sexes
 db2 <- 
@@ -89,7 +92,8 @@ db3 <-
   bind_rows(db2, 
             who,
             uk2020) %>% 
-  mutate(Deaths = ifelse(is.na(Deaths), 0, Deaths))
+  mutate(Deaths = ifelse(is.na(Deaths), 0, Deaths)) %>% 
+  filter(!Code %in% c("GBR_SCO", "GBR_NIR", "GBRTENW"))
 
 
 # create a table with data availability by population, including age groups and years

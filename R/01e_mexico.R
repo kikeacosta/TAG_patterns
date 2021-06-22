@@ -1,5 +1,5 @@
-source(here("Code", "00_functions.R"))
-library(lubridate)
+library(here)
+source(here("R", "00_functions.R"))
 # Mexico mortality data
 # ~~~~~~~~~~~~~~~~~~~~~
 # # files from OSF (Version 1) as of 15 March 2021 
@@ -100,7 +100,7 @@ db_mx2 <-
             db_mx_all_sex,
             db_mx_all_sex_age) %>% 
   arrange(Country, Year, Sex, suppressWarnings(as.numeric(Age))) %>% 
-  mutate(Code = "MEX", Source = "mexico")
+  mutate(Code = "MEX", Source = "country_public")
 
 # saving annual deaths in Mexico and Peru
 write_csv(db_mx2, "Output/mexico.csv")
