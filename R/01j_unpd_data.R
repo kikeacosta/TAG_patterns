@@ -219,10 +219,13 @@ DT %>%
          Sex = case_when(Sex == "Male" ~ "m",
                          Sex == "Female" ~ "f",
                          Sex == "Both sexes" ~ "t")) %>% 
-  dplyr::filter(Year == 2020) %>% 
   mutate(Code = countrycode::countrycode(LocID, "un", "iso3c")) %>% 
   select(-Date, -AgeSpan, -LocID)  %>% 
-  select(Country,Year,Sex,Age,Deaths,Code,Source)
+  select(Country,Year,Sex,Age,Deaths,Code,Source) %>% 
+  group_by(Country) %>% 
+  mutate(has_2020 = any(Year == 2020)) %>% 
+  dplyr::filter(has_2020) %>% 
+  select(-has_2020)
 
 
 
