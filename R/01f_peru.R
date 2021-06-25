@@ -73,7 +73,7 @@ db_pe4 <-
             db_pe_all_sex,
             db_pe_all_sex_age) %>% 
   arrange(Country, Year, Sex, suppressWarnings(as.numeric(Age))) %>% 
-  mutate(Code = "PER", Source = "peru")
+  mutate(Code = "PER", Source = "country_public")
 
 # saving annual deaths in Mexico and Peru
 write_csv(db_pe4, "Output/peru.csv")
