@@ -3,6 +3,7 @@ source(here("R", "00_functions.R"))
 
 # loading data
 who <- read_csv("Output/who.csv")
+unpd <- read_csv("Output/unpd.csv")
 stmf <- read_csv("Output/stmf.csv") 
 eurs <- read_csv("Output/eurs.csv") 
 bra <- read_csv("Output/brazil.csv") 
@@ -14,25 +15,6 @@ chl <- read_csv("Output/chile.csv")
 ecu <- read_csv("Output/ecuador.csv",
                  col_types = "ccdccdc")
 
-unique(safr$Age)
-unique(safr$Sex)
-unique(safr$Year)
-unique(eurs$Age)
-
-zaf2 <- 
-  zaf %>% 
-  tidyr::complete(Country, Code, Year, Sex, Age, fill = list(Deaths = 0)) %>% 
-  group_by(Country, Code, Year, Sex) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
-  mutate(Age = "TOT") %>% 
-  bind_rows(safr %>% 
-              mutate(Age = as.character(Age))) %>% 
-  arrange(Year, Sex) %>% 
-  mutate(Source = "samrc/uct")
-
-unique(safr2$Age)
-
 # adjusting sources for "country_public" data
 latam <- 
   bind_rows(bra, 
@@ -42,18 +24,18 @@ latam <-
   mutate(Source = "country_public")
 
 
-
 # Adjust for unknown ages and sex
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # WHO data already solved by Tim
+# UNPD does not have missing data
 # solving for stmf, eurostat, and brazil
 
 db <- 
   bind_rows(stmf,
             eurs,
             latam,
-            zaf2,
+            zaf,
             col,
             chl)
 
@@ -85,12 +67,13 @@ uk2020 <-
   ungroup() %>% 
   mutate(Country = "United Kingdom", 
          Code = "GBR",
-         Source = "stmf_modified")
+         Source = "stmf_adjusted")
 
 # merge all data together
 db3 <- 
   bind_rows(db2, 
             who,
+            unpd,
             uk2020) %>% 
   mutate(Deaths = ifelse(is.na(Deaths), 0, Deaths)) %>% 
   filter(!Code %in% c("GBR_SCO", "GBR_NIR", "GBRTENW"))
@@ -101,11 +84,6 @@ db3 <-
 unique(db3$Age)
 unique(db3$Sex)
 unique(db3$Country) %>% sort()
-
-eurs_test <- 
-  db3 %>% 
-  group_by() %>% 
-  summarise(Deaths = sum(Deaths))
 
 
 # variable characteristics by country and source 
@@ -127,7 +105,6 @@ summ1 <-
   mutate(n_sources = n()) %>% 
   ungroup()
 
-  
 # variable configuration by source
 summ2 <- 
   summ1 %>% 
@@ -148,6 +125,51 @@ summ2 <-
 
 best_source_year <- 
   db3 %>% 
+  group_by(Country, Code, Year, Source, Age) %>% 
+  summarise(Sex_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Year, Source, Sex_groups) %>% 
+  summarise(Age_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(priority = case_when(Source == "stmf" ~ 1,
+                              Source == "eurs" ~ 2,
+                              Source == "who" ~ 3,
+                              TRUE ~ 4)) %>% 
+  group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-"),
+         Deaths = sum(Deaths), 
+         Periods = max(Year) - min(Year) + 1) %>% 
+  group_by(Country, Year) %>% 
+  filter(Age_groups == max(Age_groups)) %>% 
+  filter(Sex_groups == max(Sex_groups)) %>% 
+  filter(Periods == max(Periods)) %>% 
+  filter(Deaths == max(Deaths)) %>% 
+  filter(priority == min(priority)) %>% 
+  mutate(n = n()) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Source, Age_groups) %>% 
+  mutate(max_year = max(Year),
+         min_year = min(Year)) %>% 
+  ungroup() %>% 
+  # filtering countries with at least data for 2019 and 2020  
+  group_by(Country) %>% 
+  mutate(max_year = max(max_year),
+         min_year = min(min_year)) %>% 
+  filter(max_year == 2020 & min_year <= 2019) %>% 
+  mutate(Age_groups_2019 = Age_groups[Year == 2019],
+         ratio_ages = Age_groups_2019 / Age_groups) %>% 
+  ungroup() %>% 
+  # excluding years with less than half of the age groups in 2019
+  filter(ratio_ages < 2) %>% 
+  select(Country, Code, Year, Source, Age_groups, Sex_groups) %>% 
+  mutate(Best = 1)
+
+
+
+best_source_year <- 
+  db3 %>% 
   group_by(Country, Code, Year, Source, Sex) %>% 
   summarise(Age_groups = n(),
             Deaths = sum(Deaths)) %>% 
@@ -165,8 +187,8 @@ best_source_year <-
          Deaths = sum(Deaths), 
          Periods = max(Year) - min(Year) + 1) %>% 
   group_by(Country, Year) %>% 
-  filter(Sex_groups == max(Sex_groups)) %>% 
   filter(Age_groups == max(Age_groups)) %>% 
+  filter(Sex_groups == max(Sex_groups)) %>% 
   filter(Periods == max(Periods)) %>% 
   filter(Deaths == max(Deaths)) %>% 
   filter(priority == min(priority)) %>% 
