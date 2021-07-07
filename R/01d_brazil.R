@@ -53,7 +53,7 @@ out <- list()
 for (i in 1:length(years)){
   cat(i,"\n")
   link <- paste0("https://s3-sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/Mortalidade_Geral_",years[i],".csv")
-  out[[i]] <-read_delim(link, delim = ";") %>% 
+  out[[i]] <- read_delim(link, delim = ";") %>% 
     group_by(IDADE, SEXO) %>% 
     summarize(Deaths = n(), .groups = "drop") %>% 
     mutate(age_type = substr(IDADE, 1,1),
@@ -81,7 +81,7 @@ for (i in 1:length(years)){
     mutate(Country = "Brazil",
            Code = "BRA",
            Year = years[i],
-           Source = "opendatasus.saude.gov.br") %>% 
+           Source = "country_public") %>% 
     select(Country, Code, Year, Sex, Age, Deaths, Source)
     
 }

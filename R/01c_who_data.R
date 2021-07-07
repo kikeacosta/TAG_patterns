@@ -249,11 +249,12 @@ write_csv(db_who, file = "Output/who.csv")
 # "Armenia"   "Georgia"   "Mauritius"
 
 # offsets <- readRDS("Data/Offsets.rds")  %>% 
-#   dplyr::filter(Region == "All")
+#   dplyr::filter(Region == "All",
+#                 ! Country %in%  c("Armenia",   "Georgia",   "Mauritius"))
 # 
 # WPP <- read_csv("Data/WPP2019_PopulationBySingleAgeSex_1950-2019.csv") %>% 
 #   dplyr::filter(MidPeriod == 2018.5,
-#                 Location %in% c("Armenia",   "Georgia",   "Mauritius"))
+#                 Location %in% c("Armenia",   "Georgia",   "Mauritius")) 
 # offsets <-
 # WPP %>% 
 #   pivot_longer(PopMale:PopTotal, names_to = "Sex", values_to = "Population") %>% 
