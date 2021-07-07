@@ -25,9 +25,7 @@ latam <-
 
 
 # excluding countries with missing ages from UNPD 
-# TODO: look with Tim to these cases without deaths at age 0!!
 exc_unpd <- c("Costa Rica", "Oman", "Bermuda")
-
 unpd2 <- 
   unpd %>% 
   filter(!Country %in% exc_unpd)
@@ -76,7 +74,7 @@ uk2020 <-
   ungroup() %>% 
   mutate(Country = "United Kingdom", 
          Code = "GBR",
-         Source = "stmf_adj")
+         Source = "stmf_adjusted")
 
 # merge all data together
 db3 <- 
@@ -172,14 +170,11 @@ best_source_by_country <-
   select(Country, Source) %>% 
   unique()
 
-# filtering best sources by country
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# filtering deaths in best sources
 db4 <- 
   db3 %>% 
-  left_join(source_selec %>% 
-              select(-age_groups, -min_ages) %>% 
-              mutate(Source = ifelse(Country == "United Kingdom", "eurs", Source),
-                     best_source = 1)) %>% 
+  left_join(best_source_by_country %>% 
+              mutate(best_source = 1)) %>% 
   filter(best_source == 1) %>% 
   select(-best_source)
 
@@ -221,9 +216,11 @@ age_groups <-
 
 harmonized_ages <- tibble()
 for(ct in cts_to_harmonize){
+  
   harmonized_ages <- 
     harmonized_ages %>% 
     bind_rows(assign_age_intervals(db4 , ct))
+  
 }
 
 harmonized_ages2 <- 
@@ -234,44 +231,12 @@ harmonized_ages2 <-
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup()
 
-# ~~~~~~~~~~~~~~
-# final database
-# ~~~~~~~~~~~~~~
-
-# data in 2020
-db2020 <- db3 %>% 
-  filter(Year == 2020) %>% 
-  left_join(best_source_by_country %>% 
-              mutate(Source = ifelse(Country == "United Kingdom", "stmf_adj", Source),
-                     best_source = 1)) %>% 
-  filter(best_source == 1) %>% 
-  select(-best_source)
-
-cts2020 <- db2020 %>% pull(Country) %>% unique() %>% sort()
-
-# adding harmonized <2019 and data in 2020
-out <- 
+db5 <- 
   db4 %>% 
-  # adding the harmonized ages
   filter(!Country %in% cts_to_harmonize) %>% 
-  bind_rows(harmonized_ages2) %>%
-  # selecting countries with data in 2020
-  filter(Country %in% cts2020) %>% 
-  # adding data for 2020
-  bind_rows(db2020) %>%
-  arrange(Country, Year, Sex, Age)
+  bind_rows(harmonized_ages2)
 
-unique(db5$Country) %>% sort()
 
-# comparing countries in original and output databases
-cts_diff <- 
-  db3 %>% 
-  select(Country) %>% 
-  unique() %>% 
-  left_join(out %>% 
-                select(Country) %>% 
-                unique() %>%
-                mutate(is_end = 1))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # selecting best source for each country
@@ -285,9 +250,101 @@ cts_diff <-
 
 # only Greece has two equal best sources: stmf and eurostat, lets choose stmf :)
 
+
+best_source_year <- 
+  db3 %>% 
+  group_by(Country, Code, Year, Source, Sex) %>% 
+  summarise(Age_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Year, Source, Age_groups) %>% 
+  summarise(Sex_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(priority = case_when(Source == "stmf" ~ 1,
+                              Source == "eurs" ~ 2,
+                              Source == "who" ~ 3,
+                              TRUE ~ 4)) %>% 
+  group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-"),
+         Deaths = sum(Deaths), 
+         Periods = max(Year) - min(Year) + 1) %>% 
+  group_by(Country, Year) %>% 
+  filter(Age_groups == max(Age_groups)) %>% 
+  filter(Sex_groups == max(Sex_groups)) 
+
+
+
+best_source_year <- 
+  db3 %>% 
+  group_by(Country, Code, Year, Source, Sex) %>% 
+  summarise(Age_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Year, Source, Age_groups) %>% 
+  summarise(Sex_groups = n(),
+            Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(priority = case_when(Source == "stmf" ~ 1,
+                              Source == "eurs" ~ 2,
+                              Source == "who" ~ 3,
+                              TRUE ~ 4)) %>% 
+  group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-"),
+         Deaths = sum(Deaths), 
+         Periods = max(Year) - min(Year) + 1) %>% 
+  group_by(Country, Year) %>% 
+  filter(Age_groups == max(Age_groups)) %>% 
+  filter(Sex_groups == max(Sex_groups)) %>% 
+  filter(Periods == max(Periods)) %>% 
+  filter(Deaths == max(Deaths)) %>% 
+  filter(priority == min(priority)) %>% 
+  mutate(n = n()) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Source, Age_groups) %>% 
+  mutate(max_year = max(Year),
+         min_year = min(Year)) %>% 
+  ungroup() %>% 
+  # filtering countries with at least data for 2019 and 2020  
+  group_by(Country) %>% 
+  mutate(max_year = max(max_year),
+         min_year = min(min_year)) %>% 
+  filter(max_year == 2020 & min_year <= 2019) %>% 
+  mutate(Age_groups_2019 = Age_groups[Year == 2019],
+         ratio_ages = Age_groups_2019 / Age_groups) %>% 
+  ungroup() %>% 
+  # excluding years with less than half of the age groups in 2019
+  filter(ratio_ages < 2) %>% 
+  select(Country, Code, Year, Source, Age_groups, Sex_groups) %>% 
+  mutate(Best = 1)
+
+best_source_summ <- 
+  best_source_year %>% 
+  group_by(Country, Code, Source, Age_groups, Sex_groups) %>% 
+  mutate(Period = paste(min(Year), max(Year), sep = "-")) %>% 
+  ungroup() %>% 
+  select(Country, Code, Source, Age_groups, Sex_groups, Period) %>% 
+  unique() %>% 
+  group_by(Country) %>% 
+  mutate(n_sources = n()) %>% 
+  ungroup() %>% 
+  arrange(-n_sources)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# filtering best sources by country
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+db_best <- 
+  db3 %>% 
+  left_join(best_source_year %>% 
+              select(Code, Source, Year, Best)) %>% 
+  filter(Best == 1) %>% 
+  select(-Best)
+
+
 # summary of selected sources by country 
 available <- 
-  out %>% 
+  db_best %>% 
   group_by(Country, Code, Year, Source, Sex) %>% 
   summarise(Age_groups = n(),
             Deaths = sum(Deaths)) %>% 
@@ -301,7 +358,7 @@ available <-
             Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
   group_by(Country) %>% 
-  mutate(age_groupings = n()) %>% 
+  mutate(n_sources = n()) %>% 
   ungroup() 
 
 
@@ -316,5 +373,5 @@ write_csv(summ1, "Output/summary_all_sources_by_country.csv")
 write_csv(available, "Output/summary_selected_sources_by_country.csv")
 
 # 3) output mortality data based on selected sources
-write_csv(out, "Output/annual_deaths_countries_selected_sources.csv")
+write_csv(db_best, "Output/annual_deaths_countries_selected_sources.csv")
 

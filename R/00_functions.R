@@ -28,3 +28,25 @@ std_db <- function(db){
   db2 <- db %>% 
     select(Country, Year = YearOccurrence, Sex, Age = AgeStart, Deaths)
 }
+
+assign_age_intervals <- function(db, ct){
+  
+  int <- age_groups %>% 
+    filter(Country == ct) %>% 
+    pull(Age) %>% 
+    unique()
+  
+  if(max(int) <= 110){
+    int <- c(int, 110)
+  }
+  
+  labs <- int[1:length(int)-1]
+  
+  chunk_int <- db %>% 
+    filter(Country == ct,
+           Year <= 2019) %>% 
+    mutate(Age_int = cut(Age, breaks = int, include.lowest = TRUE, right = FALSE, labels = labs),
+           Age_int = as.numeric(as.character(Age_int)))
+  
+}
+
