@@ -1,0 +1,26 @@
+\frametitle{A schematically illustration}
+	\vspace{-0.2cm}
+\only<1>{
+		\begin{center}
+		 \includegraphics[scale=.26]{Figures/SimulEta0.pdf}
+		 \includegraphics[scale=.26]{Figures/SimulDelta0.pdf}
+		\end{center}
+	}
+\only<2>{
+	\begin{center}
+		\includegraphics[scale=.26]{Figures/SimulEta1.pdf}
+		\includegraphics[scale=.26]{Figures/SimulDelta1.pdf}
+	\end{center}
+}
+\only<3>{
+	\begin{center}
+		\includegraphics[scale=.26]{Figures/SimulEta2.pdf}
+		\includegraphics[scale=.26]{Figures/SimulDelta2.pdf}
+	\end{center}
+}
+\only<4>{
+	\begin{center}
+		\includegraphics[scale=.26]{Figures/SimulEta3.pdf}
+		\includegraphics[scale=.26]{Figures/SimulDelta3.pdf}
+	\end{center}
+}
