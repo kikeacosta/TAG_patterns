@@ -1,5 +1,7 @@
-\documentclass[table,xcdraw,dvipsnames]{beamer}
+\documentclass[table,xcdraw,dvipsnames,handout]{beamer}
 % \documentclass[mathserif]{beamer}
+\usepackage{pgfpages}
+\pgfpagesuselayout{4 on 1}[a4paper,border shrink=5mm, landscape]
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta}
 \definecolor{my-grey}{RGB}{220,220,220}
@@ -192,7 +194,7 @@ $\,$\\
 	\end{itemize}	
 \end{frame}
 
-\begin{frame}[fragile]\frametitle{A schematic illustration\only<5>{: a relative risk perspective}}
+\begin{frame}[fragile]\frametitle{A schematic illustration}
 	\vspace{-0.2cm}
 \only<1>{
 		\begin{center}
@@ -200,41 +202,49 @@ $\,$\\
 		 \includegraphics[scale=.26]{Figures/SimulDelta0.pdf}
 		\end{center}
 	}
-\only<2>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/SimulEta1.pdf}
-		\includegraphics[scale=.26]{Figures/SimulDelta1.pdf}
-	\end{center}
-}
-\only<3>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/SimulEta2.pdf}
-		\includegraphics[scale=.26]{Figures/SimulDelta2.pdf}
-	\end{center}
-}
-\only<4>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/SimulEta3.pdf}
-		\includegraphics[scale=.26]{Figures/SimulDelta3.pdf}
-	\end{center}
-}
-\only<5>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/SimulEta3.pdf}
-		\includegraphics[scale=.26]{Figures/SimulDelta3a.pdf}
-	\end{center}
-}
 \end{frame}
+\begin{frame}[fragile]\frametitle{A schematic illustration}
+	\vspace{-0.2cm}
+	\only<2>{
+		\begin{center}
+			\includegraphics[scale=.26]{Figures/SimulEta1.pdf}
+			\includegraphics[scale=.26]{Figures/SimulDelta1.pdf}
+		\end{center}
+	}
+\end{frame}
+\begin{frame}[fragile]\frametitle{A schematic illustration}
+	\vspace{-0.2cm}
+	\only<3>{
+		\begin{center}
+			\includegraphics[scale=.26]{Figures/SimulEta2.pdf}
+			\includegraphics[scale=.26]{Figures/SimulDelta2.pdf}
+		\end{center}
+	}
+\end{frame}
+\begin{frame}[fragile]\frametitle{A schematic illustration}
+	\vspace{-0.2cm}
+	\only<4>{
+		\begin{center}
+			\includegraphics[scale=.26]{Figures/SimulEta3.pdf}
+			\includegraphics[scale=.26]{Figures/SimulDelta3.pdf}
+		\end{center}
+	}
+
+\end{frame}
+\begin{frame}[fragile]\frametitle{A schematic illustration: a relative risk perspective}
+	\vspace{-0.2cm}
+	\only<5>{
+		\begin{center}
+			\includegraphics[scale=.26]{Figures/SimulEta3.pdf}
+			\includegraphics[scale=.26]{Figures/SimulDelta3a.pdf}
+		\end{center}
+	}
+\end{frame}
+
 
 
 \begin{frame}[fragile]\frametitle{Actual data illustration 1: France (mainly old ages)}
 	\vspace{-0.2cm}
-	\only<1>{
-		\begin{center}
-			\includegraphics[scale=.26]{Figures/FranceObs.pdf}
-			\includegraphics[scale=.26]{Figures/Empty.pdf}
-		\end{center}
-	}
 	\only<2>{
 	\begin{center}
 		\includegraphics[scale=.26]{Figures/FranceEta.pdf}
@@ -246,12 +256,6 @@ $\,$\\
 
 \begin{frame}[fragile]\frametitle{Actual data illustration 2: Peru (middle-age hump)}
 	\vspace{-0.2cm}
-	\only<1>{
-		\begin{center}
-			\includegraphics[scale=.26]{Figures/PeruObs.pdf}
-			\includegraphics[scale=.26]{Figures/Empty.pdf}
-		\end{center}
-	}
 	\only<2>{
 		\begin{center}
 			\includegraphics[scale=.26]{Figures/PeruEta.pdf}
@@ -284,7 +288,6 @@ $\,$\\
 			\includegraphics[scale=0.8]{Figures/scale_factor_map}
 \end{frame}
 
-
 \begin{frame}[fragile]\frametitle{Age-dependent component $\delta(x)$}
 	\only<1>{
 		\begin{center}
@@ -295,28 +298,23 @@ $\,$\\
 			\end{scriptsize}
 			
 		\end{center}
+	}	
+\end{frame}
+\begin{frame}[fragile]\frametitle{Age-dependent component $\delta(x)$}
+	
+	\only<2>{
+		\begin{center}
+			\includegraphics[scale=.3]{Figures/DeltaDataIssue.pdf}
+			
+			\begin{scriptsize}
+				Parameter $\delta$ for populations with clear data issue or peculiar patterns
+			\end{scriptsize}
+			
+		\end{center}
 	}
 
-	\only<2>{
-	\begin{center}
-		\includegraphics[scale=.3]{Figures/DeltaDataIssue.pdf}
-		
-		\begin{scriptsize}
-			Parameter $\delta$ for populations with clear data issue or peculiar patterns
-		\end{scriptsize}
-		
-	\end{center}
-}
-	\only<3>{
-	\begin{center}
-		\includegraphics[scale=.3]{Figures/DeltaOther.pdf}
-		
-		\begin{scriptsize}
-			Parameter $\delta$ for populations without clear data issue or peculiar patterns
-		\end{scriptsize}
-		
-	\end{center}
-}
+\end{frame}
+\begin{frame}[fragile]\frametitle{Age-dependent component $\delta(x)$}
 	\only<4>{
 	\begin{center}
 		\includegraphics[scale=.3]{Figures/DeltaOtherNames.pdf}
@@ -329,6 +327,8 @@ $\,$\\
 
 }
 \end{frame}
+
+
 \begin{frame}[fragile]\frametitle{Age-dependent component $e^{\delta(x)}$}
 	\only<1>{
 		\begin{center}
@@ -340,6 +340,8 @@ $\,$\\
 			
 		\end{center}
 	}
+\end{frame}
+\begin{frame}[fragile]\frametitle{Age-dependent component $e^{\delta(x)}$}
 	\only<2>{
 		\vspace{-1cm}
 		\begin{center}
@@ -357,22 +359,28 @@ $\,$\\
 			\includegraphics[scale=.33]{Figures/ClusterDeltaDendo.pdf}		
 		\end{center}
 	}
-\only<2>{
-	\hspace{-2cm}
-	\includegraphics[scale=0.8]{Figures/cluster_map}
-}
-\only<3>{
-	\vspace{-0.1cm}
-	\begin{center}
-		\includegraphics[scale=.33]{Figures/ClusterDelta.pdf}		
-	\end{center}
-}
-\only<4>{
-	\vspace{-0.1cm}
-	\begin{center}
-		\includegraphics[scale=.33]{Figures/ClusterDeltaCenter.pdf}		
-	\end{center}
-}
+\end{frame}
+\begin{frame}[fragile]\frametitle{An attempt to cluster $\delta(x)$}
+	\only<2>{
+		\hspace{-2cm}
+		\includegraphics[scale=0.8]{Figures/cluster_map}
+	}
+\end{frame}
+\begin{frame}[fragile]\frametitle{An attempt to cluster $\delta(x)$}
+	\only<3>{
+		\vspace{-0.1cm}
+		\begin{center}
+			\includegraphics[scale=.33]{Figures/ClusterDelta.pdf}		
+		\end{center}
+	}
+\end{frame}
+\begin{frame}[fragile]\frametitle{An attempt to cluster $\delta(x)$}
+	\only<4>{
+		\vspace{-0.1cm}
+		\begin{center}
+			\includegraphics[scale=.33]{Figures/ClusterDeltaCenter.pdf}		
+		\end{center}
+	}
 \end{frame}
 
 

@@ -66,6 +66,8 @@ coldT <- adjustcolor(cold, 0.5)
 colc <- "violet"
 colcT <- adjustcolor(colc, 0.1)
 colcou <- rainbow_hcl(p)
+colcouT <- adjustcolor(colcou, 0.3)
+
 
 OUT <- list()
 PLOT <- FALSE
@@ -133,6 +135,8 @@ for(j in 1:p){
   e2g <- G2%*%e2
   lmx2g <- log(y2/e2g)
   
+  
+  OUT.j$t1 <- t1
   OUT.j$low1 <- low1
   OUT.j$up1 <- up1
   OUT.j$low2 <- low2
@@ -197,6 +201,9 @@ for(j in 1:p){
   U1 <- matrix(c(rep(0,m), rep(1,m)), 2*m)
   U2 <- rbind(0*diag(m), diag(m))
   U <- cbind(U0,U1,U2)
+  ## constraining delta to sum up to 0
+  H <- matrix(c(rep(0,m+1), rep(1,m)), nrow=1)
+  kappa <- 0
   
   eta <- eta.st
   max.it <- 100
@@ -209,7 +216,13 @@ for(j in 1:p){
     G       <- t(X) %*% (w * X) 
     GpP     <- G + P + Pr
     tXr     <- t(X) %*% r
-    betas   <- solve(GpP, tXr)
+    ## adding constraints
+    LHS <- rbind(cbind(GpP, t(H)),
+                 cbind(H, 0))
+    RHS <- matrix(c(tXr, kappa), ncol=1)
+    coeff   <- solve(LHS, RHS)
+    betas   <- coeff[1:(m*2+1)]
+    #betas   <- solve(GpP, tXr)
     eta.old <- eta
     eta     <- U%*%betas
     dif.eta <- max(abs((eta - eta.old)/eta.old))

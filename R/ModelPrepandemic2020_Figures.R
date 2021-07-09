@@ -18,12 +18,639 @@ options(device="X11")
 library(MortalitySmooth)
 library(magic)
 library(colorspace)
-
+library(factoextra)
 ## !!!! to be changed
 setwd("~/WORK/TAG_patterns/")
 
 ## loading outcomes
 load("Output/OutPrepandemic2020.Rdata")
+
+
+
+j=22
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1g)
+n2 <- length(OUT.j$lmx2g)
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/FranceObs.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n1){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=2, cex=1.8, bg="grey90")
+dev.off()
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/Empty.pdf",
+    width = 8, height = 8)
+plot(1,1,t="n", axes=FALSE, xlab="", ylab="")
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/FranceEta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n1){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+polygon(xx, yy, col=col1T, border=col1T)
+lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
+polygon(xx, yy, col=col2T, border=col2T)
+lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=3, cex=1.8, bg="grey90")
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/FranceDelta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.05), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+arrows(x0=-8, x1=-8, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+polygon(xx, yy, col=coldT, border=coldT)
+lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+dev.off()
+
+
+
+j=49
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1g)
+n2 <- length(OUT.j$lmx2g)
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/PeruObs.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n2){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=2, cex=1.8, bg="grey90")
+dev.off()
+
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/PeruEta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n2){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+polygon(xx, yy, col=col1T, border=col1T)
+lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
+polygon(xx, yy, col=col2T, border=col2T)
+lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=3, cex=1.8, bg="grey90")
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/PeruDelta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+arrows(x0=-8, x1=-8, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+polygon(xx, yy, col=coldT, border=coldT)
+lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+dev.off()
+
+
+j=43
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1g)
+n2 <- length(OUT.j$lmx2g)
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/MongoliaEta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n2){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+polygon(xx, yy, col=col1T, border=col1T)
+lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
+polygon(xx, yy, col=col2T, border=col2T)
+lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=3, cex=1.8, bg="grey90")
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/MongoliaDelta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=200, col=colcT, border = colcT)
+points(-8, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+arrows(x0=-8, x1=-8, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+polygon(xx, yy, col=coldT, border=coldT)
+lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+dev.off()
+
+j=31
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1g)
+n2 <- length(OUT.j$lmx2g)
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/IrelandEta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n2){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+polygon(xx, yy, col=col1T, border=col1T)
+lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
+polygon(xx, yy, col=col2T, border=col2T)
+lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=3, cex=1.8, bg="grey90")
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/IrelandDelta.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.20), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+arrows(x0=-8, x1=-8, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+polygon(xx, yy, col=coldT, border=coldT)
+lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+dev.off()
+
+
+all.c.hat <- numeric(p)
+for(j in 1:p){
+  OUT.j <- OUT[[j]]
+  all.c.hat[j] <- OUT.j$c.hat
+}
+names(all.c.hat) <- pop
+
+
+all.delta.hat <- matrix(0, m, p)
+colnames(all.delta.hat) <- pop
+for(j in 1:p){
+  OUT.j <- OUT[[j]]
+  all.delta.hat[,j] <- OUT.j$delta.hat
+}
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/DeltaAll.pdf",
+    width = 12, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(all.delta.hat,na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 1), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste(delta)), 2, cex=1.8, line=3, las=2)
+matlines(x, all.delta.hat, col=colcou, lwd=2, lty=1)
+dev.off()
+
+
+
+
+## take out data problematic case
+data.issue.pop <- c(2, 14, 18, 27, 41, 43)
+data.issue.delta.hat <- all.delta.hat[,data.issue.pop]
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/DeltaDataIssue.pdf",
+    width = 12, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(data.issue.delta.hat,na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 1), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste(delta)), 2, cex=1.8, line=3, las=2)
+matlines(x, data.issue.delta.hat, col=colcou[data.issue.pop], lwd=3, lty=1)
+legend("topleft", inset=0.1,
+       legend=pop[data.issue.pop], col=colcou[data.issue.pop],
+       lwd=3, lty=1, cex=1.8, bg="grey90")
+dev.off()
+
+
+## all the other country
+other.pop <- which(!c(1:p)%in%data.issue.pop)
+other.delta.hat <- all.delta.hat[,other.pop]
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/DeltaOther.pdf",
+    width = 12, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(other.delta.hat,na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste(delta)), 2, cex=1.8, line=3, las=2)
+matlines(x, other.delta.hat, col=colcou[other.pop], lwd=2, lty=1)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/DeltaOtherNames.pdf",
+    width = 12, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(other.delta.hat,na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste(delta)), 2, cex=1.8, line=3, las=2)
+matlines(x, other.delta.hat, col=colcou[other.pop], lwd=2, lty=1)
+text(61, 0.52, "Peru", col=colcou[49], cex=1.5)
+text(63, 0.35, "Ecuador", col=colcou[19], cex=1.5)
+text(95, 0.54, "Seychelles", col=colcou[54], cex=1.5)
+text(80, -0.15, "Iceland", col=colcou[29], cex=1.5)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/ExpDeltaOtherNames.pdf",
+    width = 12, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(exp(other.delta.hat),na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste(e^delta)), 2, cex=1.8, line=3, las=2)
+matlines(x, exp(other.delta.hat), col=colcou[other.pop], lwd=2, lty=1)
+text(61, exp(0.52), "Peru", col=colcou[49], cex=1.5)
+text(63, exp(0.35), "Ecuador", col=colcou[19], cex=1.5)
+text(95, exp(0.54), "Seychelles", col=colcou[54], cex=1.5)
+text(80, exp(-0.15), "Iceland", col=colcou[29], cex=1.5)
+dev.off()
+
+
+## all together in a panel plot
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/ExpDeltaOtherNamesAll.pdf",
+    width = 12, height = 8)
+par(mfrow=c(8,8))
+for(j in other.pop){
+  OUT.j <- OUT[[j]]
+  par(mar=c(0.5,2.5,3, 0.5))
+  ranx <- range(x)
+  rany <- c(0.6, 1.6)#exp(range(OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+  plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+       xlab="", ylab="")
+  mtext(pop[j], 3, cex=1)
+  axis(2, cex.lab=1, las=2)
+  axis(1, cex.lab=1);box()
+  abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+  abline(h=seq(-100, 100, 0.20), lty=2, col="grey85")
+  abline(h=1, col="grey40", lty=3, lwd=3)
+  #mtext("age", 1, cex=1.8, line=3)
+  #mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+  xx <- c(x, rev(x))
+  yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+  polygon(xx, yy, col=coldT, border=coldT)
+  lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+}
+dev.off()
+
+
+
+## attempt to cluster deltas
+## what to cluster
+dati <- t(other.delta.hat) 
+
+## decide the number clusters
+nc <- 4
+mycol <- c("#2E9FDF", "#00AFBB", "#E7B800", "#FC4E07", "darkblue", "darkred")[1:4]
+res.hk <- hkmeans(dati, nc)
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/ClusterDeltaDendo.pdf",
+    width = 14, height = 10)
+fviz_dend(res.hk, k = nc, # Cut in nk groups
+          cex = 1, # label size
+          k_colors = mycol,
+          color_labels_by_k = TRUE, # color labels by groups
+          rect = TRUE, # Add rectangle around groups
+          horiz=TRUE,
+          main=""
+)
+dev.off()
+
+
+fviz_cluster(res.hk, data = dati,
+             ellipse.type = "convex",
+             palette = "jco",
+             ggtheme = theme_minimal())
+
+fviz_nbclust(dati, hkmeans, method = "wss")
+
+matplot(x, t(res.hk$centers), col=mycol[c(2,1,3,4)])
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/ClusterDeltaCenter.pdf",
+    width = 12, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(exp(other.delta.hat), na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste(e^delta)), 2, cex=1.8, line=3, las=2)
+mycol1 <- mycol[c(4,2,1,3)]
+matlines(x, exp(other.delta.hat), col=adjustcolor(mycol1[res.hk$cluster],0.4), 
+         lwd=0.5, lty=1)
+matlines(x, t(exp(res.hk$centers)), col=mycol1, t="l", lwd=7, lty=1)
+
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/All.pdf",
+    width = 15, height = 8)
+for(j in 1:p){
+  OUT.j <- OUT[[j]]
+  par(mfrow=c(1,2))
+      #pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/FranceEta.pdf",
+   #   width = 8, height = 8)
+  par(mar=c(5,5,3, 0.5))
+  rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+                OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+  ranx <- range(x)
+  plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+       xlab="", ylab="")
+  mtext(pop[j], 3, cex=2)
+  yy <- 10^seq(-7, 2)
+  axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+  axis(1, cex.lab=1.3);box()
+  abline(h=log(yy), lty=2, col="grey85")
+  abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+  mtext("age", 1, cex=1.8, line=3)
+  mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+  ## 1
+  for(i in 1:n1){
+    segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+             y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+  }
+  ## 2
+  for(i in 1:n1){
+    segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+             y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+  }
+  xx <- c(x, rev(x))
+  yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+  polygon(xx, yy, col=col1T, border=col1T)
+  lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+  xx <- c(x, rev(x))
+  yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
+  polygon(xx, yy, col=col2T, border=col2T)
+  lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
+  legend("topleft", inset=0.1,
+         legend=c(paste(min(OUT.j$t1), max(OUT.j$t1), sep="-"), "2020"),
+         col=c(col1,col2), lwd=3, cex=1.8, bg="grey90")
+  par(mar=c(5,5,3, 0.5))
+  ranx <- range(-10, x)
+  rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+  plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+       xlab="", ylab="")
+  axis(2, cex.lab=1.3, las=2)
+  axis(1, cex.lab=1.3);box()
+  abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+  abline(h=seq(-100, 100, 0.05), lty=2, col="grey85")
+  abline(h=1, col="grey40", lty=3, lwd=3)
+  mtext("age", 1, cex=1.8, line=3, at=50)
+  mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+  abline(v=-1, col=8, lwd=4, lty=2)
+  rect(xleft=-15, xright=-1, ybottom=-200, ytop=200, col=colcT, border = colcT)
+  points(-8, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+  arrows(x0=-8, x1=-8, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+         angle = 90, code=3, length=0.05)
+  mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+  xx <- c(x, rev(x))
+  yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+  polygon(xx, yy, col=coldT, border=coldT)
+  lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+}
+dev.off()
+
+
 
 
 ## which pop to plot
@@ -58,19 +685,63 @@ lines(x, OUT.j$delta.hat, col=cold, lwd=3)
 }
 dev.off()
 
-## 2
+
+
+
+j=43
+OUT.j <-OUT[[j]]
+pdf("Slides/Figures/MongoliaCase.pdf", width = 12, height = 10)
+par(mfrow=c(1,2))
+## eta1 + eta2
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="age", ylab="mortality, log-scale")
+mtext(pop[j], 3, cex=1)
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy)
+axis(1);box()
+## 1
 for(i in 1:n1){
-  segments(x0=low2[i], x1=up2[i], y0=lmx2g[i], y1=lmx2g[i], col=col2, lwd=1)
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=1)
 }
 xx <- c(x, rev(x))
-yy <- c(eta2.hatL, rev(eta2.hatU))
+yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+polygon(xx, yy, col=col1T, border=col1T)
+lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+## 2
+for(i in 1:n1){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=1)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
 polygon(xx, yy, col=col2T, border=col2T)
-lines(x, eta2.hat, col=col2, lwd=2)
+lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
 legend("topleft", inset=0.1,
        legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
        col=c(col1,col2), lwd=3)
-
-
+## deltas
+ranx <- range(-10, x)
+rany <- range(OUT.j$delta.hatL,OUT.j$delta.hatU, OUT.j$c.hatU, OUT.j$c.hatL, na.rm = TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany,axes=FALSE,
+     xlab="ages", ylab="delta")
+axis(2)
+axis(1);box()
+abline(h=0, col=8, lty=3, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$delta.hatL, rev(OUT.j$delta.hatU))
+polygon(xx, yy, col=coldT, border=coldT)
+lines(x, OUT.j$delta.hat, col=cold, lwd=4)
+abline(v=-1, col=8, lwd=4, lty=2)
+points(-7, OUT.j$c.hat, col=colc, pch=3, lwd=3)
+arrows(x0=-7, x1=-7, y0=OUT.j$c.hatL, y1=OUT.j$c.hatU, col=colc, lwd=3, 
+       angle = 90, code=3, length=0.15)
+mtext("c", 1, at=-7, cex=2, line=1.5)
+par(mfrow=c(1,1))
+dev.off()
 
 
 ## loading deaths
