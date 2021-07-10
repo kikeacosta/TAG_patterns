@@ -75,12 +75,12 @@ lines(x, etaT1, col=4, lwd=2)
 
 ## population 2: etaT2(x) = etaT1(x) + c + delta(x)
 ## true scaling factor
-cT <- 0.5
+cT <- 0.4
 ## constructing true delta vector
 ome <- pi/40
-beta1 <- 0
-beta2 <- 0
-beta3 <- 0
+beta1 <- 0.3
+beta2 <- 0.02
+beta3 <- 0.5
 betas <- c(beta1, beta2, beta3)
 X2 <- cbind(1, x, cos(x*ome))
 deltaT <- X2%*%betas
@@ -259,6 +259,10 @@ U1 <- matrix(c(rep(0,m), rep(1,m)), 2*m)
 U2 <- rbind(0*diag(m), diag(m))
 U <- cbind(U0,U1,U2)
 
+## constraining delta to sum up to 0
+H <- matrix(c(rep(0,m+1), rep(1,m)), nrow=1)
+kappa <- 0
+
 eta <- eta.st
 max.it <- 100
 for(it in 1:max.it){
@@ -270,7 +274,13 @@ for(it in 1:max.it){
   G       <- t(X) %*% (w * X) 
   GpP     <- G + P + Pr
   tXr     <- t(X) %*% r
-  betas   <- solve(GpP, tXr)
+  ## adding constraints
+  LHS <- rbind(cbind(GpP, t(H)),
+               cbind(H, 0))
+  RHS <- matrix(c(tXr, kappa), ncol=1)
+  coeff   <- solve(LHS, RHS)
+  
+  betas   <- coeff[1:(m*2+1)]
   eta.old <- eta
   eta     <- U%*%betas
   dif.eta <- max(abs((eta - eta.old)/eta.old) )
@@ -375,7 +385,7 @@ for(i in 1:n1){
 }
 
 ranx <- range(x)
-rany <- c(-2, 1)#range(delta.hatL,delta.hatU)
+rany <- range(delta.hatL,delta.hatU)
 plot(1, 1, t="n", xlim=ranx, ylim=rany,
      main=paste("c = ", signif(c.hat,4), "+ -", signif(2*se.c,4)), axes=FALSE,
      xlab="ages", ylab="delta")
@@ -396,6 +406,232 @@ legend("topleft", inset=0.1,
 par(mfrow=c(1,1))
 
 
+## colors
+col1 <- "darkred"
+col1T <- adjustcolor(col1, 0.5)
+col2 <- "darkblue"
+col2T <- adjustcolor(col2, 0.5)
+cold <- "darkorange"
+coldT <- adjustcolor(cold, 0.5)
+colc <- "darkviolet"
+colcT <- adjustcolor(colc, 0.1)
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulEta0.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <-range(etaT1, etaT2, lmx1g, lmx2g, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+lines(x, etaT1, col=col1, lwd=6)
+lines(x, etaT1, col=col2, lwd=6, lty=2)
+text(90, -2.5, expression(paste(eta^1, "=")), col=col1, cex=3)
+text(100, -2.5, expression(paste(eta^2)), col=col2, cex=3)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulDelta0.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- range(cT, deltaT)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.5), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(c, " , ", delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, 0, col=colc, pch=16, cex=3, lwd=3)
+mtext("c", 1, at=-8, cex=2, line=3, col=colc)
+lines(x, rep(0,m), col=cold, lwd=6)
+text(92, 0.1, expression(delta), col=cold, cex=3)
+text(-8, 0.12, expression(c), col=colc, cex=3)
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulEta1.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <-range(etaT1, etaT2, lmx1g, lmx2g, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+lines(x, etaT1, col=col1, lwd=6)
+lines(x, etaT1+cT, col=col2, lwd=6)
+text(90, -2.5, expression(paste(eta^1)), col=col1, cex=3)
+text(25, -8, expression(paste(eta^2, "=", eta^1, "+", c)), col=col2, cex=3)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulDelta1.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- range(cT, deltaT)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.5), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(c, " , ", delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, cT, col=colc, pch=16, cex=3, lwd=3)
+mtext("c", 1, at=-8, cex=2, line=3, col=colc)
+lines(x, rep(0,m), col=cold, lwd=6)
+text(92, 0.1, expression(delta), col=cold, cex=3)
+text(-8, 0.52, expression(c), col=colc, cex=3)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulEta2.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <-range(etaT1, etaT2, lmx1g, lmx2g, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+lines(x, etaT1, col=col1, lwd=6)
+lines(x, etaT1+deltaT, col=col2, lwd=6)
+text(90, -2.5, expression(paste(eta^1)), col=col1, cex=3)
+text(60, -10, expression(paste(eta^2, "=", eta^1, "+", delta)), col=col2, cex=3)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulDelta2.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- range(cT, deltaT)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.5), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(c, " , ", delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, 0, col=colc, pch=16, cex=3, lwd=3)
+mtext("c", 1, at=-8, cex=2, line=3, col=colc)
+lines(x, deltaT, col=cold, lwd=6)
+text(60, 0.5, expression(delta), col=cold, cex=3)
+text(-8, 0.12, expression(c), col=colc, cex=3)
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulEta3.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+rany <-range(etaT1, etaT2, lmx1g, lmx2g, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+lines(x, etaT1, col=col1, lwd=6)
+lines(x, etaT1+cT+deltaT, col=col2, lwd=6)
+text(90, -2.5, expression(paste(eta^1)), col=col1, cex=3)
+text(60, -10, expression(paste(eta^2, "=", eta^1, "+", c, "+", delta)), col=col2, cex=3)
+dev.off()
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulDelta3.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- range(cT, deltaT)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.5), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(c, " , ", delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, cT, col=colc, pch=16, cex=3, lwd=3)
+mtext("c", 1, at=-8, cex=2, line=3, col=colc)
+lines(x, deltaT, col=cold, lwd=6)
+text(60, 0.5, expression(delta), col=cold, cex=3)
+text(-8, 0.52, expression(c), col=colc, cex=3)
+dev.off()
+
+
+pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/SimulDelta3a.pdf",
+    width = 8, height = 8)
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- range(exp(cT), exp(deltaT))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.5), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, exp(cT), col=colc, pch=16, cex=3, lwd=3)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+lines(x, exp(deltaT), col=cold, lwd=6)
+text(60, 1.6, expression(e^delta), col=cold, cex=3)
+text(-8, 1.7, expression(e^c), col=colc, cex=3)
+dev.off()
+
+
+lines(x, etaT1+cT, col=col2T, lwd=2, lty=2)
+text(20, -8.8, expression(paste(eta^2, " = ", eta^1, "+", c)), col=col2, cex=3)
+lines(x, etaT1+cT+deltaT, col=col2, lwd=4)
+text(80, 0.03, expression(paste(eta^2, " = ", eta^1, "+", c, "+", delta)), col=col2, cex=3)
+
+
+
+
+
+
+
+lines(x, etaT1, col=4, lwd=2, lty=2)
+for(i in 1:n1){
+  segments(x0=low1[i], x1=up1[i],
+           y0=lmx1g[i], y1=lmx1g[i], col=3, lwd=3)
+}
 
 
 

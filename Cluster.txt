@@ -1,0 +1,62 @@
+"x"
+"Albania" 1
+"Australia" 1
+"Austria" 2
+"Belgium" 1
+"Brazil" 1
+"Bulgaria" 1
+"Canada" 3
+"Chile" 1
+"China, Macao SAR" 3
+"Colombia" 1
+"Costa Rica" 1
+"Croatia" 2
+"Cyprus" 3
+"Czechia" 1
+"Denmark" 3
+"Ecuador" 4
+"Estonia" 1
+"Finland" 3
+"France" 2
+"French Polynesia" 1
+"Georgia" 1
+"Germany" 3
+"Greece" 1
+"Hungary" 2
+"Iceland" 3
+"Iraq" 1
+"Ireland" 2
+"Israel" 1
+"Italy" 1
+"Japan" 3
+"Kazakhstan" 1
+"Latvia" 1
+"Lithuania" 1
+"Luxembourg" 2
+"Malta" 1
+"Mauritius" 3
+"Moldova" 1
+"Montenegro" 2
+"Netherlands" 3
+"New Zealand" 3
+"Norway" 3
+"Paraguay" 1
+"Peru" 4
+"Poland" 1
+"Portugal" 3
+"Romania" 1
+"Serbia" 1
+"Seychelles" 2
+"Slovakia" 2
+"Slovenia" 2
+"South Africa" 1
+"South Korea" 1
+"Spain" 3
+"Sweden" 2
+"Switzerland" 2
+"Taiwan" 3
+"Ukraine" 1
+"United Kingdom" 1
+"Uruguay" 3
+"USA" 3
+"Zambia" 2
