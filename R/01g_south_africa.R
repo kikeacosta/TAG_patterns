@@ -1,7 +1,7 @@
 library(tidyverse)
 library(readxl)
 
-read_excel("Data/south_africa_input.xlsx") %>% 
+zaf <- read_excel("Data/south_africa_input.xlsx") %>% 
   pivot_longer(`2015_F`:`2020_M`, names_to = "ys", values_to = "Deaths") %>% 
   separate(ys, into = c("Year","Sex"),sep="_", convert = TRUE) %>% 
   mutate(Sex = tolower(Sex)) %>% 
@@ -11,5 +11,18 @@ read_excel("Data/south_africa_input.xlsx") %>%
   mutate(Country = "South Africa",
          Code = "ZAF",
          Source = "SAMRC/UCT") %>% 
-  select(Country,Code,Year,Sex,Age,Deaths,Source) %>% 
-  write_csv("Output/south_africa.csv")
+  select(Country,Code,Year,Sex,Age,Deaths,Source)
+
+zaf2 <- 
+  zaf %>% 
+  tidyr::complete(Country, Code, Year, Sex, Age, fill = list(Deaths = 0)) %>% 
+  group_by(Country, Code, Year, Sex) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Age = "TOT") %>% 
+  bind_rows(zaf %>% 
+              mutate(Age = as.character(Age))) %>% 
+  arrange(Year, Sex) %>% 
+  mutate(Source = "samrc/uct")
+
+write_csv(zaf2, "Output/south_africa.csv")

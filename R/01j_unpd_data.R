@@ -27,7 +27,7 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst],dependencie
 lapply(.packages, require, character.only=TRUE)
 
 
-## devtools::install_github("timriffe/DDSQLTools", force=TRUE)
+# devtools::install_github("timriffe/DDSQLTools", force=TRUE)
 library(DDSQLtools)
 
 options(unpd_server = "https://popdiv.dfs.un.org/DemoData/api/")
@@ -124,7 +124,7 @@ myDT <- lapply(cnty_groups, function(x) {
   tic()
   
   res <- get_recorddata(dataProcessTypeIds = c(9),    ## Register
-                        startYear = 2016,
+                        startYear = 2015,
                         endYear = 2020,
                         indicatorIds = c(194),  ## Deaths by age and sex - abridged 
                         # isComplete = 1,       ## 0=Abridged or 1=Complete
@@ -215,15 +215,17 @@ DT %>%
   dplyr::filter(AgeSpan > 0) %>% 
   mutate(Date = lubridate::dmy(Date),
          Year = lubridate::year(Date),
-         Source = "UNPD",
+         Source = "unpd",
          Sex = case_when(Sex == "Male" ~ "m",
                          Sex == "Female" ~ "f",
                          Sex == "Both sexes" ~ "t")) %>% 
-  dplyr::filter(Year == 2020) %>% 
   mutate(Code = countrycode::countrycode(LocID, "un", "iso3c")) %>% 
   select(-Date, -AgeSpan, -LocID)  %>% 
-  select(Country,Year,Sex,Age,Deaths,Code,Source)
-
+  select(Country,Year,Sex,Age,Deaths,Code,Source) %>% 
+  group_by(Country) %>% 
+  mutate(has_2020 = any(Year == 2020)) %>% 
+  dplyr::filter(has_2020) %>% 
+  select(-has_2020)
 
 
 readr::write_csv(un_data, file = "Output/unpd.csv")
