@@ -37,8 +37,10 @@ age2int2 <- function(Age){
   DemoTools::age2int(Age, OAG = TRUE, OAvalue = OAvalue)
 }
 # -------------------------------------
-# read in May 10 data
-WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_01.06.2021.xlsx")
+# read in data
+# WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_10.05.2021.xlsx")
+# WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_01.06.2021.xlsx")
+WHOin <- read_excel("Data/WHO_Allcause_Mortality_Data_Call_13.07.2021.xlsx")
 
 
 # filter down to incl age and 2020
@@ -225,7 +227,8 @@ db_who <-
                         "100+"  = 100L,
                       "85-90" = 85L,
                       "15-30" = 15L,
-                      "0-15" = 0L),
+                      "0-15" = 0L,
+                      "95-99" = 95L),
          Sex = recode(sex, "Male" = "m","Female" = "f", "Total" = "t") ) %>% 
   dplyr::select(Code = country, Year = year, Sex, Age, Deaths = deaths) %>% 
   dplyr::filter(!Code %in% c("AND")) %>% 
