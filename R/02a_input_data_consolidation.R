@@ -23,10 +23,20 @@ latam <-
             ecu) %>% 
   mutate(Source = "country_public")
 
-
+# UNPD data analysis
+# ~~~~~~~~~~~~~~~~~~
 # excluding countries with missing ages from UNPD 
-# TODO: look with Tim to these cases without deaths at age 0!!
-exc_unpd <- c("Costa Rica", "Oman", "Bermuda")
+# TODO: look with Tim to these countries without deaths at age 0!!
+exc_unpd <- 
+  unpd %>% 
+  group_by(Country, Year, Sex) %>% 
+  filter(Age == min(Age)) %>% 
+  ungroup() %>% 
+  filter(Age != 0) %>% 
+  pull(Country) %>% 
+  unique()
+
+exc_unpd
 
 unpd2 <- 
   unpd %>% 
@@ -121,52 +131,69 @@ summ2 <-
   unique()
 
 
-# selection of best source by country
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# selecting best source for each country
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # based on data previous to 2020
-# 
+# criteria:
+# 1. Guarantee continuity of the same source
+# 2. Finer age categories
+# 3. More death count registration
+# 4. Longer period of observation
 
 source_selec <- 
   db3 %>% 
   filter(Year <= 2019, Sex == "t") %>% 
   group_by(Country, Source, Year) %>% 
+  # identifying amount of age groups
   summarise(Deaths = sum(Deaths),
             age_groups = n()) %>% 
   ungroup() %>% 
   group_by(Country) %>% 
+  # evaluating how different are sources in age categories 
   mutate(prop = age_groups / max(age_groups)) %>% 
   ungroup() %>% 
+  # exclude sources in which age groups reduced more than 30% 
   filter(prop > 0.7) %>% 
   group_by(Country, Year) %>% 
+  # comparing death registration across sources
   mutate(prop_d = Deaths / max(Deaths)) %>% 
   arrange(Country, Year, -Deaths) %>% 
+  # exclude those sources with a >= 2% reduction in deaths 
   filter(prop_d > 0.98) %>% 
   ungroup() %>% 
   group_by(Country, Source) %>% 
+  # compare the period coverage across sources
   mutate(years = n()) %>% 
   ungroup() %>% 
   group_by(Country) %>% 
+  # select the sources with longest period of observations
   filter(years == max(years)) %>% 
   ungroup() %>% 
   group_by(Country, Source) %>% 
+  # identify the minimum common amount of age groups
   mutate(min_ages = min(age_groups)) %>% 
   group_by(Country) %>% 
   filter(min_ages == max(min_ages)) %>% 
   ungroup() %>% 
   group_by(Country, Source) %>% 
+  # looking at total deaths during the observed periods
   mutate(all_deaths = sum(Deaths)) %>% 
   group_by(Country) %>% 
+  # selecting the source with highest count of deaths 
   filter(all_deaths == max(all_deaths)) %>% 
   ungroup() %>% 
+  # looking at countries with more than one source
   group_by(Country, Year) %>% 
   arrange(Country, Year, Source) %>% 
   mutate(order = 1:n()) %>% 
   ungroup() %>% 
+  # selecting the first listed source
   filter(order == 1) %>% 
   ungroup() %>% 
   select(Country, Source, Year, age_groups, min_ages)
 
+# list of best source by country
 best_source_by_country <- 
   source_selec %>% 
   select(Country, Source) %>% 
@@ -184,10 +211,9 @@ db4 <-
   select(-best_source)
 
 
-
 # harmonization of ages before 2020
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# using the minimum common denominator
+# harmonizing to the minimum common amount of age intervals before 2020
 
 # selecting countries that need harmonization
 cts_to_harmonize <- 
@@ -203,6 +229,7 @@ cts_to_harmonize <-
 age_groups_period <- 
   source_selec %>% 
   filter(Country %in% cts_to_harmonize) %>% 
+  # selecting the periods with the minimum amount of age categories
   mutate(is_min_ages = ifelse(age_groups == min_ages, 1, 0)) %>% 
   filter(is_min_ages == 1) %>% 
   group_by(Country) %>% 
@@ -249,7 +276,8 @@ db2020 <- db3 %>%
 
 cts2020 <- db2020 %>% pull(Country) %>% unique() %>% sort()
 
-# adding harmonized <2019 and data in 2020
+# adding harmonized data with age groups previous to 2020 
+# and all age groups in 2020
 out <- 
   db4 %>% 
   # adding the harmonized ages
@@ -261,7 +289,7 @@ out <-
   bind_rows(db2020) %>%
   arrange(Country, Year, Sex, Age)
 
-unique(db5$Country) %>% sort()
+unique(out$Country) %>% sort()
 
 # comparing countries in original and output databases
 cts_diff <- 
@@ -272,18 +300,6 @@ cts_diff <-
                 select(Country) %>% 
                 unique() %>%
                 mutate(is_end = 1))
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# selecting best source for each country
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# criteria:
-# 1. Three sex groups
-# 2. More age groups
-# 3. More observed periods
-# 4. More deaths (only apply for Germany, so far)
-
-# only Greece has two equal best sources: stmf and eurostat, lets choose stmf :)
 
 # summary of selected sources by country 
 available <- 
