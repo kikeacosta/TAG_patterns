@@ -34,6 +34,7 @@ options(device="X11")
 ## R-studio to get the same dir as for the .R file
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(MortalitySmooth)
+library(magic)
 
 ## assuming same exposures
 ## exposures population 1
