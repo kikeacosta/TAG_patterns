@@ -7,7 +7,6 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(magic)
 library(colorspace)
 library(MortalitySmooth)
-library(colorspace)
 library(gridExtra)
 
 source("EmpiricDeriv.R")

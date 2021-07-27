@@ -12,7 +12,7 @@ countries <- read_csv("Output/summary_selected_sources_by_country.csv") %>%
 colnames(WPP_hist)
 colnames(WPPproj)
 
-YrMin <- 2016
+YrMin <- 2015
 YrMax <- 2021
 
 WPP <- bind_rows(WPP_hist,WPPproj)
@@ -46,6 +46,8 @@ denom <-offsets$Country %>% unique()
 countries$Country[!countries$Country%in% denom]
 
 write_csv(offsets, file = "Output/offsets.csv")
+
+
 # countries$Code[!countries$Code %in% offsets$Code]
 
 # library(HMDHFDplus)
@@ -55,7 +57,5 @@ write_csv(offsets, file = "Output/offsets.csv")
 #   X <- readHMDweb(get_these[i],"Population",us,pw)
 #   X$Country <-
 # }
-
-
 
 

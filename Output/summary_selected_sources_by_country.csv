@@ -1,4 +1,4 @@
-Country,Code,Source,Age_groups,Sex_groups,Period,Deaths,n_sources
+Country,Code,Source,Age_groups,Sex_groups,Period,Deaths,age_groupings
 Albania,ALB,eurs,19,3,2016-2020,229410,1
 Armenia,ARM,eurs,19,3,2016-2020,283108,1
 Australia,AUS,stmf,5,3,2015-2020,1696610,1
@@ -8,39 +8,47 @@ Brazil,BRA,country_public,101,3,2015-2020,16226440,1
 Bulgaria,BGR,stmf,19,3,2015-2020,1342112,1
 Canada,CAN,who,19,3,2016-2020,2812810,1
 Chile,CHL,country_public,101,3,2016-2020,1106714,1
+"China, Macao SAR",MAC,unpd,14,3,2016-2020,15148,1
 Colombia,COL,country_public,22,3,2015-2020,2887472,1
 Costa Rica,CRI,who,19,3,2016-2020,239420,1
 Croatia,HRV,stmf,19,3,2015-2020,643480,1
-Cyprus,CYP,eurs,19,3,2016-2020,60218,1
+Cuba,CUB,unpd,19,3,2015-2020,1197750,1
+Cyprus,CYP,eurs,19,3,2016-2020,48622,1
 Czechia,CZE,stmf,19,3,2015-2020,1375108,1
 Denmark,DNK,stmf,21,3,2015-2020,646954,1
+Dominican Republic,DOM,unpd,18,3,2015-2019,379330,2
+Dominican Republic,DOM,unpd,21,3,2020-2020,85088,2
 Ecuador,ECU,country_public,101,1,2015-2020,465776,1
 Estonia,EST,stmf,19,3,2015-2020,187012,1
 Finland,FIN,stmf,19,3,2015-2020,650022,1
-France,FRA,stmf,21,3,2015-2020,7239820,1
+France,FRA,eurs,19,3,2016-2020,6185128,1
+French Polynesia,PYF,unpd,21,3,2017-2020,12818,1
 Georgia,GEO,who,19,3,2016-2020,484626,1
 Germany,DEU,who,16,3,2016-2020,9445760,1
-Greece,GRC,stmf,19,3,2016-2020,1239282,1
-Guatemala,GTM,who,19,3,2019-2020,69030,1
+Greece,GRC,eurs,19,3,2016-2020,1239282,1
+Guatemala,GTM,unpd,19,3,2015-2020,978528,1
 Hungary,HUN,stmf,19,3,2015-2020,1589166,1
 Iceland,ISL,stmf,19,3,2015-2020,27188,1
 Iraq,IRQ,who,19,3,2018-2020,781246,1
 Ireland,IRL,who,19,3,2016-2020,295452,1
-Israel,ISR,stmf,8,3,2015-2020,545754,1
-Italy,ITA,eurs,19,3,2020-2020,1513056,2
+Israel,ISR,unpd,21,3,2015-2020,540134,1
+Italy,ITA,stmf,19,3,2020-2020,1513056,2
 Italy,ITA,stmf,22,3,2015-2019,6460946,2
 Japan,JPN,who,21,3,2016-2020,12790040,1
+Kazakhstan,KAZ,unpd,21,3,2015-2020,1628736,1
 Latvia,LVA,stmf,19,3,2015-2020,342876,1
 Liechtenstein,LIE,eurs,19,3,2016-2020,2730,1
 Lithuania,LTU,stmf,19,3,2015-2020,490678,1
 Luxembourg,LUX,stmf,19,3,2015-2020,50990,1
 Malta,MLT,eurs,19,3,2016-2020,36626,1
-Mauritius,MUS,who,19,3,2016-2020,105710,1
+Mauritius,MUS,unpd,21,3,2015-2020,125598,1
 Mexico,MEX,country_public,101,3,2016-2020,7779566,1
 Moldova,MDA,who,19,3,2016-2020,379382,1
+Mongolia,MNG,unpd,15,3,2015-2019,125198,2
+Mongolia,MNG,unpd,21,3,2020-2020,34024,2
 Montenegro,MNE,eurs,19,3,2016-2020,66690,1
 Netherlands,NLD,stmf,19,3,2015-2020,1847372,1
-New Zealand,NZL,stmf,3,3,2015-2020,394392,1
+New Zealand,NZL,unpd,21,3,2015-2020,378897,1
 Norway,NOR,stmf,21,3,2015-2020,489806,1
 Paraguay,PRY,who,19,3,2016-2020,315676,1
 Peru,PER,country_public,101,3,2017-2020,1077976,1
@@ -48,6 +56,8 @@ Poland,POL,stmf,19,3,2015-2020,4991756,1
 Portugal,PRT,stmf,19,3,2015-2020,1359712,1
 Romania,ROU,eurs,19,3,2016-2020,2682998,1
 Serbia,SRB,eurs,19,3,2016-2020,1036448,1
+Seychelles,SYC,unpd,18,3,2015-2019,6778,2
+Seychelles,SYC,unpd,21,3,2020-2020,1330,2
 Slovakia,SVK,stmf,19,3,2015-2020,656146,1
 Slovenia,SVN,stmf,19,3,2015-2020,251054,1
 South Africa,ZAF,samrc/uct,19,3,2015-2020,6492118,1
@@ -58,7 +68,7 @@ Switzerland,CHE,stmf,19,3,2015-2020,823460,1
 Taiwan,TWN,stmf,21,3,2015-2020,2062280,1
 Ukraine,UKR,who,19,3,2016-2020,5886736,1
 United Kingdom,GBR,eurs,19,3,2016-2019,4823692,2
-United Kingdom,GBR,stmf_modified,19,3,2020-2020,1393170,2
+United Kingdom,GBR,stmf_adj,19,3,2020-2020,1393170,2
 Uruguay,URY,who,19,3,2016-2020,337872,1
 USA,USA,who,19,3,2016-2020,29221688,1
 Zambia,ZMB,who,19,3,2016-2020,306426,1
