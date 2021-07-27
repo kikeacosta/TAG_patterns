@@ -1,0 +1,21 @@
+---
+title: "Methods Report on age and sex modeling of COVID-19 excess mortality"
+author: "Giancarlo Camarda, Tim Riffe, Enrique Acosta, Simona Bignami"
+date: "27 July 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+# Summary of approaches taken
+
+# Data
+
+# Methods
+
+# Results
+
