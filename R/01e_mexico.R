@@ -8,7 +8,7 @@ source(here("R", "00_functions.R"))
 #                path = "Data")
 # 
 mex_files <- unzip(here("Data", "Mexico", "mexico_deaths.zip"), list = TRUE)
-# 
+
 # # all deaths from years 2020 and 2021
 db_mx20 <- 
   read_csv(here("Data", "Mexico", "DDAAxsom2021SE14.csv"))
@@ -16,9 +16,14 @@ db_mx20 <-
 db_mx20_2 <- 
   db_mx20 %>% 
   select(Date = 5,
-         Sex = SEXO,
+         Sexo = SEXO,
          Age = EDAD) %>% 
-  mutate(Year = year(Date)) %>% 
+  mutate(Year = year(Date),
+         # provisionally exchanging variable sex as its value was originally 
+         # inverted
+         Sex = case_when(Sexo == 1 ~ 2,
+                         Sexo == 2 ~ 1,
+                         TRUE ~ 3)) %>% 
   group_by(Year, Sex, Age) %>% 
   summarise(Deaths = n()) %>% 
   ungroup() 
@@ -102,29 +107,16 @@ db_mx2 <-
   arrange(Country, Year, Sex, suppressWarnings(as.numeric(Age))) %>% 
   mutate(Code = "MEX", Source = "country_public")
 
-# saving annual deaths in Mexico and Peru
+# saving annual deaths in Mexico
 write_csv(db_mx2, "Output/mexico.csv")
 
-# db_mx_adj <- 
-#   db_mx2 %>% 
-#   group_by(Country, Sex, Year) %>% 
-#   do(rescale_age(chunk = .data)) %>% 
-#   ungroup() %>% 
-#   group_by(Country, Age, Year) %>% 
-#   do(rescale_sex(chunk = .data)) %>% 
-#   ungroup() %>% 
-#   arrange(Country, Year, Sex, suppressWarnings(as.numeric(Age)))
-# 
-# test <- 
-#   db_pe_mx_adj %>% 
-#   group_by(Country, Year) %>% 
-#   summarise(Deaths = sum(Deaths)) %>% 
-#   ungroup() %>% 
-#   left_join(db_pe_mx %>% 
-#               group_by(Country, Year) %>% 
-#               summarise(Deaths = sum(Deaths)) %>% 
-#               ungroup() %>% 
-#               rename(Deaths_org = Deaths)) 
-#   
-# write_csv(db_pe_mx_adj, "Output/pe_mx_annual_deaths.csv")
-# 
+
+
+db_mx2 %>% 
+  filter(Year == 2020,
+         Age != "TOT") %>% 
+  mutate(Age = as.integer(Age)) %>% 
+  ggplot()+
+  geom_line(aes(Age, Deaths, col = Sex, group = Sex))+
+  scale_y_log10()
+
