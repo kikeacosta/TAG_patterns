@@ -1,0 +1,613 @@
+---
+title: "Methods Report on age and sex modeling of COVID-19 excess mortality"
+author: "Giancarlo Camarda, Tim Riffe, Enrique Acosta, Simona Bignami"
+date: "27 July 2021"
+output: html_document
+header-includes:
+- \usepackage{caption}
+- \usepackage{multirow}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+# Summary of approaches taken
+
+# Data
+
+Here data sources for deaths and exposures should be presented. I only add the table (which works only in pdf) and items I presented in the talk.
+
+\begin{table}[]
+		\begin{tabular}{l|c|c|c}
+			\multicolumn{1}{c|}{}                         &                                     & \multicolumn{2}{c}{2020}                                \\
+			\multicolumn{1}{c|}{\multirow{-2}{*}{Source}} & \multirow{-2}{*}{\# of populations} & Total \# deaths             & Mean \# of age-groups      \\ \cline{3-4} 
+			WHO                     & 13                                  & 6.6 & 19                         \\
+			STMF                                          & 27                                  & 4.6                         & 18                         \\
+			Statistical bureaus                           & \;\,7 & 4.0 &78 \\
+			Eurostat                                      & \;\,9 & 1.3                         & 19                         \\
+			UN PD                        & 11                                  & 0.5 & 20 \\ \hline
+			Totals                                        & 67                                  & 6.6                         & 25                        
+		\end{tabular}
+	\end{table}
+
+
+- Criteria for selecting sources/year:
+  - 2020 must be available
+  - 2015-2019 when coming from the same source
+  - prioritize source coherence with respect to longer periods
+  - preference for more detailed age-groups
+- Sources for the exposures: UN WPP (single year of age)
+- Age-range: 0-100
+
+
+
+
+# Methods
+
+In the following, we formulate the model on a given population, both sexes combined. Sex-specific estimations will be presented in the next sub-section
+
+Whereas deaths from different sources are in general provided by age-groups, exposures population are given by single year of age. Moreover we deal with two periods: pre-pandemic years and 2020 and we denote these two periods with 1 and 2, respectively. 
+
+Let $\mathbf{d}^{1} = (d^{1}_{i})$ with $i=1,\ldots,n_{1}$ and $\mathbf{d}^{2} = (d^{2}_{i})$ with $i=1,\ldots,n_{2}$ be the observed grouped deaths in each $i$-th group 
+for the two periods. Note that grouping structure may differ in pre-pandemic years and 2020. We then denote with $\mathbf{e}^{1} = (e^{1}_{j})$ and $\mathbf{e}^{2} = (e^{2}_{j})$ with $j=1,\ldots,m=100$ the associated observed exposures by single years of age.   
+
+If we were able to observed both deaths and exposures for each single year of age, the conventional stochastic assumption is the deaths are Poisson distributed counts with expected values equal to the product of exposures and underlying force of mortality, i.e.~$\mathbf{d} \sim \mathcal{P}(\mathbf{e}\,\mathbf{\mu})$, where, in a Poisson framework, $\mathbf{e}$ is conventionally offset.  
+
+The aim of any mortality model would then be to estimate the force of mortality ($\mathrm{\mu}$). In our setting, we aim to model two populations and, for regression purposes, we combine in a column vector deaths for both period: $\mathbf{d}' = [\mathbf{d}^{1}, \mathbf{d}^{2}]'$ which has length $n_{1}+n_{2}$
+
+Moreover we deal with two latent series of force of mortality since we cannot observe its realizations (death counts) with same granularity we aim to obtain its estimation. For integrating the grouping structures, we thus assume that observed grouped deaths are realization of a Poisson distribution with a composed mean:
+$$
+\mathbf{d} \sim \mathcal{P}(\mathbf{\gamma} = \mathbf{C} \mathbf{\mu})
+$$
+where $\mathbf{C}$ is the $(n_{1}+n_{2}) \times 2m$ composition matrix that maps the observed grouped deaths $\mathbf{d}$ to the latent mortality $\mathbf{\mu} \in \mathbb{R}^{2m}$. It has the following block diagonal structure:
+$$
+\mathbf{C} = \left[\begin{array}{cc}
+\mathbf{C}^{1} & \mathbf{0}\\
+\mathbf{0} & \mathbf{C}^{2}
+\end{array}\right]
+$$
+where $\mathbf{C}^{1}$ and $\mathbf{C}^{2}$ incorporate the grouping structures for the two periods, respectively. For ease of presentation, we present the period-specific composition matrix for the pre-pandemic years and assuming the following age-groups: $[0, 1-4, 5-9, \ldots, 96-100]$. 
+Diverse grouping structure can be easily accommodated. 
+$$
+\mathbf{C}^{1} = \left[ 
+\begin{array}{ccccccccccc}
+e_{1} & 0 & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+0 & e_{2} & \ldots & e_{5} & 0     & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+0 & 0 & \ldots & 0 & e_{6} & \ldots & e_{10} & 0 & \ldots & \ldots & \ldots  \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots\\
+0 & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & 0 & e_{97} & \ldots & e_{101}
+\end{array}
+\right].
+$$
+It is important to note that via the $\mathbf{C}$ matrix we automatically includes the exposures associated to each period. In other words, by the composed mean $\mathbf{C}\mathbf{\mu}$ we ensure to account for the Poisson offset.     
+
+Since we work in a Poisson setting, we model the force of mortality via the canonical log-link and therefore we can describe all our models via the latent log-mortality. Specifically for the two periods we opted for the following model  
+$$
+\left\{ 
+\begin{array}{cl}
+\ln \mathbf{\mu}^{1} &=& \mathbf{\eta}^{1} \\
+\ln \mathbf{\mu}^{2} &=& \mathbf{\eta}^{2} \, =\,  \mathbf{\eta}^{1} + c + \mathbf{\delta}
+\end{array}
+\right.
+$$
+where $c$ is a scalar and $\mathbf{\delta} = (\delta_{j})$ is a vector over single years of age.
+
+In other words, we assume that log-mortality in 2020 is the log-mortality in pre-pandemic years, plus a scaling factor and a age-modulator. In matrix notation, for both periods simultaneously, this model can be written as a linear combination of a model matrix and associated coefficients:
+$$
+\ln(\mathbf{\mu}) = \mathbf{X} \mathbf{\beta}
+$$
+were the coefficient vector $\mathbf{\beta}$ contains the unknowns: $\mathbf{\beta}'=[\mathbf{\eta}, c, \mathbf{\delta}]'$ and consequently the model matrix is given by 
+$$
+\mathbf{X} = \left[
+\begin{array}{ccc}
+\mathbf{I}_{m} & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m}\\
+\mathbf{I}_{m} & \mathbf{1}_{m \times 1} & \mathbf{I}_{m}\\
+\end{array}
+\right]
+$$
+where $\mathbf{I}_{m}$ is an identity matrix of size $m$ and $\mathbf{0}_{m \times 1}$, $\mathbf{1}_{m \times 1}$ and $\mathbf{0}_{m \times m}$ are matrices of zeros and 1 with the displayed dimensions. 
+
+It is noteworthy that we aim to estimate both $\mathbf{\eta}^1$, $c$ and $\mathbf{\delta}$ with a total of $2m+1$ unknown parameters with $n1+n2$ observed data-points. We thus deal with an underdetermined problem and certain assumptions
+about the unknowns are needed. Instead of searching for a parametric description
+of the both $\mathbf{\eta}^1$ and $\mathbf{\delta}$, it seems natural to exploit the natural order in the solution and to assume smoothness. This is not just a computational trick: as we know little from grouped observations, it is reasonable to assume a smooth curve which, itself, has little detail. In the absence of specific reasons for irregularities in the underlying force of mortality, we cannot expect to estimate fine details from limited data: we accept smooth results and we can obtain some useful insights from data that, as collected, can not provide any response. (GC: do you like my justification?)
+
+Smoothness of $\mathbf{\eta}^1$ and $\mathbf{\delta}$ can be achieved by penalizing the associated log-likelihood function with a roughness term measured by the differences of the neighboring coefficients $\mathbf{\beta}$ (Eiler and Marx, 1996). 
+
+Finally, the model has additional identification issue since it would be impossible to disentangle the effect of $c$ and $\mathbf{\delta}$. Therefore we constrain the sum of $\mathbf{\delta}$ to be equal to 0. Consequently, the vector $\mathbf{\delta}$ measures how mortality has been modified over age between pre-pandemic years and 2020 controlling for an overall excess mortality factor ($c$). 
+
+## Estimation procedure
+
+Given that 
+
+- we express our model using a composed mean 
+- log-mortality can be written as a linear combination of matrix and coefficients
+- we assume smoothness of (part of the) coefficients
+
+we can embed our model in a Composite Link Model framework (Thompson and Baker, 1981) and estimate our unknown parameters using a modified version of the penalized iterative re-weighted least-squares algorithm (Eilers, 2007). 
+
+Moreover we have an additional constraint $\sum_{j} \delta_{j} = 0$ which could be re-written as a linear constraints for the whole vector $\mathbf{\beta}$
+$$
+\mathbf{H} \mathbf{\beta} = \kappa = 0
+$$
+where $\mathbf{H}$ is a simple row matrix $1 \times (2m+1)$ with all zeros, but in correspondence of the coefficients $\mathbf{\delta}$, i.e. $\mathbf{H}= [\mathbf{0}_{1 \times (m+1)} : \mathbf{1}_{1 \times m}]$. In this way, constraint on $\mathbf{\beta}$ could be enforced by additional Lagrangian multipliers. 
+
+Given the composite matrix $\mathbf{C}$, the design matrix $\mathbf{X}$ and the constraint matrix $\mathbf{H}$, the system of equations, in matrix notation, of the penalized composite link model becomes
+$$
+\left[
+\begin{array}{cc}
+\mathbf{\breve{X}}' \mathbf{\tilde{W}} \mathbf{\breve{X}} + \mathbf{P} & \mathbf{H}'\\
+\mathbf{H} & 0
+\end{array}
+\right]
+\, 
+\left[
+\begin{array}{c}
+\mathbf{\tilde{\beta}}\\
+\mathbf{\tilde{\omega}}
+\end{array}
+\right]
+= 
+\left[
+\begin{array}{c}
+\mathbf{\breve{X}}' \mathbf{\tilde{W}}
+\mathbf{\tilde{z}}\\
+\kappa=0
+\end{array}
+\right]
+$$
+where $\breve{\mathbf{X}}$ has elements $\breve{x}_{ik} = \sum_{j} c_{ij} x_{ik} \mu_{j}/\tilde{\gamma}_{i}$, $\mathbf{\tilde{W}} = \verb"diag"(\mathbf{\tilde{\gamma}})$ and
+$\mathbf{\tilde{z}} = \mathbf{\tilde{W}}^{-1} (\mathbf{d} - \mathbf{\tilde{\gamma}})+
+\mathbf{\breve{X}}\mathbf{\tilde{\beta}}\,$. 
+
+The penalty matrix $\mathbf{P}$ is a block diagonal matrix:  
+$$
+\mathbf{P} = \verb"diag"(\mathbf{P}^{\mathbf{\eta}^1}, 0, \mathbf{P}^{\mathbf{\delta}})
+$$
+where $\mathbf{P}^{\mathbf{\eta}^1} = \lambda^{\mathbf{\eta}^1}
+\mathbf{D}_{d}'\mathbf{D}_{d}\,$ and $\mathbf{D}_{d}$ is the matrix
+that computes $d$-th order differences for the coefficients
+$\mathbf{\eta}^{1}$. The smoothing parameter $\lambda^{\mathbf{\eta}^1}$ controls the
+roughness of the vector $\mathbf{\eta}^1$. Likewise $\mathbf{P}^{\mathbf{\delta}}$
+enforce smoothness of the vector $\mathbf{\delta}$. For the time being, we select $\lambda^{\mathbf{\eta}^1}$ and $\lambda^{\mathbf{\delta}}$ subjectively. Criteria like the Bayesian Information Criterion could be adopted for selecting our smoothing parameters. 
+
+
+Uncertainty and confidence intervals for the estimated coefficients as well as for the fitted log-mortality could be obtained as in a classic GLM framework by inverting the LHS of the system of equations to obtain the variance-covariance matrix. Square-roots of the diagonal of the variance-covariance matrix provided then all useful standard errors. 
+
+## Including sex
+
+When the variable sex is added, we deal with 4 mortality patterns
+
+- $\mathbf{\eta}^{F1}$: log-mortality for females in pre-pandemic years
+- $\mathbf{\eta}^{F2}$: log-mortality for females in 2020
+- $\mathbf{\eta}^{M1}$: log-mortality for males in pre-pandemic years
+- $\mathbf{\eta}^{M2}$: log-mortality for males in 2020
+
+Consequently different approaches could be followed for incorporating sex in the previous analysis:
+
+1) a *Stratified* approach: we double the previous analysis for each sex by treating males and females independently
+$$
+\left\{ 
+\begin{array}{cl}
+\ln \mathbf{\mu}^{F1} &=& \mathbf{\eta}^{F1} \\
+\ln \mathbf{\mu}^{F2} &=& \mathbf{\eta}^{F2} \, =\,  \mathbf{\eta}^{F1} + c^{F} + \mathbf{\delta}^{F}
+\end{array}
+\right.
+$$
+and 
+$$
+\left\{ 
+\begin{array}{cl}
+\ln \mathbf{\mu}^{M1} &=& \mathbf{\eta}^{M1} \\
+\ln \mathbf{\mu}^{M2} &=& \mathbf{\eta}^{M2} \, =\,  \mathbf{\eta}^{M1} + c^{M} + \mathbf{\delta}^{M}
+\end{array}
+\right.
+$$
+2) a *Common* approach: we assume that males log-mortality is given by females log-mortality plus a smooth age-factor ($\mathbf{s}$). Differences between pre-pandemic years and 2020 are described as above and are in common between sexes
+$$
+\left\{ 
+\begin{array}{cl}
+\ln \mathbf{\mu}^{F1} &=& \mathbf{\eta}^{F1} \\
+\ln \mathbf{\mu}^{M1} &=& \mathbf{\eta}^{M1} \, =\,  \mathbf{\eta}^{F1} + \mathbf{s}\\
+\ln \mathbf{\mu}^{F2} &=& \mathbf{\eta}^{F2} \, =\,  \mathbf{\eta}^{F1} + c + \mathbf{\delta}\\
+\ln \mathbf{\mu}^{M2} &=& \mathbf{\eta}^{M2} \, =\,  \mathbf{\eta}^{F1} + \mathbf{s} + c + \mathbf{\delta}
+\end{array}
+\right.
+$$
+
+3) a *Saturated* approach: as in 2., males log-mortality is given by females log-mortality plus a smooth age-factor, but scaling factor $c$ and age-modulator $\mathbf{\delta}$ are sex-specific
+$$
+\left\{ 
+\begin{array}{cl}
+\ln \mathbf{\mu}^{F1} &=& \mathbf{\eta}^{F1} \\
+\ln \mathbf{\mu}^{M1} &=& \mathbf{\eta}^{M1} \, =\,  \mathbf{\eta}^{F1} + \mathbf{s}\\
+\ln \mathbf{\mu}^{F2} &=& \mathbf{\eta}^{F2} \, =\,  \mathbf{\eta}^{F1} + c^{F} + \mathbf{\delta}^{F}\\
+\ln \mathbf{\mu}^{M2} &=& \mathbf{\eta}^{M2} \, =\,  \mathbf{\eta}^{F1} + \mathbf{s} + c^{M} + \mathbf{\delta}^{M}
+\end{array}
+\right.
+$$
+
+
+Whereas the  *Stratified* approach does not pose any additional issue with respect to the general approach without variable sex, the other two approaches could be estimated by the previous algorithm with small adjustments on the model matrix $\mathbf{X}$, the associated penalty term $\mathbf{P}$ and the constrain matrix $\mathbf{H}$. 
+
+For the *Common* approach, here are the elements that needs to be modified:
+$$
+\mathbf{X} = \left[
+\begin{array}{ccc}
+\mathbf{I}_{m} & \mathbf{0}_{m \times m} & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m}\\
+\mathbf{I}_{m} & \mathbf{I}_{m}  & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m}\\
+\mathbf{I}_{m} & \mathbf{0}_{m \times m} & \mathbf{1}_{m \times 1} & \mathbf{I}_{m}\\
+\mathbf{I}_{m} & \mathbf{I}_{m}  & \mathbf{1}_{m \times 1} & \mathbf{I}_{m}
+\end{array}
+\right]
+$$
+
+$$
+\mathbf{P} = \verb"diag"(\mathbf{P}^{\mathbf{\eta}^1}, \mathbf{P}^{\mathbf{s}}, 0, \mathbf{P}^{\mathbf{\delta}})
+$$
+$$
+\mathbf{H}= [\mathbf{0}_{1 \times (2m+1)} : \mathbf{1}_{1 \times m}]
+$$
+And here for the *Saturated* approach:
+$$
+\mathbf{X} = \left[
+\begin{array}{ccccc}
+\mathbf{I}_{m} & \mathbf{0}_{m \times m} & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m} & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m}\\
+\mathbf{I}_{m} & \mathbf{I}_{m}  & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m} &\mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m}\\
+\mathbf{I}_{m} & \mathbf{0}_{m \times m} & \mathbf{1}_{m \times 1} & \mathbf{I}_{m} & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m}\\
+\mathbf{I}_{m} & \mathbf{I}_{m}  & \mathbf{0}_{m \times 1} & \mathbf{0}_{m \times m} & \mathbf{1}_{m \times 1} & \mathbf{I}_{m}
+\end{array}
+\right]
+$$
+$$
+\mathbf{P} = \verb"diag"(\mathbf{P}^{\mathbf{\eta}^1}, \mathbf{P}^{\mathbf{s}}, 0, \mathbf{P}^{\mathbf{\delta}^{F}}, 0, \mathbf{P}^{\mathbf{\delta}^{M}})
+$$
+$$
+\mathbf{H}= \left[
+\begin{array}{cccc}
+\mathbf{0}_{1 \times (2m+1)} & \mathbf{1}_{1 \times m} & 0 & \mathbf{0}_{1 \times m}\\
+\mathbf{0}_{1 \times (2m+1)} & \mathbf{0}_{1 \times m} & 0 & \mathbf{1}_{1 \times m}\\
+\end{array}
+\right]
+$$
+
+# Results
+
+Here TR, I just present how you would extract (and eventually) plot outcomes from different approaches. It's your turn to create great figures...
+
+## No-sex approach
+```{r}
+load("Outputs/OutPrepandemic2020.Rdata")
+```
+
+All outcomes are save in an object called `OUT`:
+```{r}
+names(OUT)
+```
+
+Within each object in `OUT` names are more or less self-explicative. Here an example for France (the 22nd country), copied from what I prepared for the slides:
+```{r}
+j=22
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1g)
+n2 <- length(OUT.j$lmx2g)
+names(OUT.j)
+
+par(mar=c(5,5,0.5, 0.5))
+rany <- range(OUT.j$lmx1g, OUT.j$lmx2g, OUT.j$eta1.hatL, OUT.j$eta1.hatU, 
+              OUT.j$eta2.hatL, OUT.j$eta2.hatU, finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1g[i], y1=OUT.j$lmx1g[i], col=col1, lwd=2)
+}
+## 2
+for(i in 1:n1){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2g[i], y1=OUT.j$lmx2g[i], col=col2, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1.hatL, rev(OUT.j$eta1.hatU))
+polygon(xx, yy, col=col1T, border=col1T)
+lines(x, OUT.j$eta1.hat, col=col1, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2.hatL, rev(OUT.j$eta2.hatU))
+polygon(xx, yy, col=col2T, border=col2T)
+lines(x, OUT.j$eta2.hat, col=col2, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+       col=c(col1,col2), lwd=3, cex=1.8, bg="grey90")
+
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.05), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-8, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+arrows(x0=-8, x1=-8, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=colc)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+polygon(xx, yy, col=coldT, border=coldT)
+lines(x, exp(OUT.j$delta.hat), col=cold, lwd=3)
+```
+
+
+
+## Stratified approach
+
+```{r}
+load("Outputs/OutPrepandemic2020sex_StratifiedBySex.Rdata")
+```
+
+Always for France (now 21, since we lost Ecuador}
+```{r}
+j=21
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1Fg)
+n2 <- length(OUT.j$lmx2Fg)
+
+par(mfrow=c(1,2))
+par(mar=c(5,5,2, 0.5))
+rany <- range(OUT.j$lmx1Fg, OUT.j$lmx2Fg, 
+              OUT.j$eta1F.hatL, OUT.j$eta1F.hatU, 
+              OUT.j$eta2F.hatL, OUT.j$eta2F.hatU, 
+              OUT.j$lmx1Mg, OUT.j$lmx2Mg, 
+              OUT.j$eta1M.hatL, OUT.j$eta1M.hatU, 
+              OUT.j$eta2M.hatL, OUT.j$eta2M.hatU, 
+              finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+mtext(expression(paste("FEMALES")), 3, cex=1.8)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1Fg[i], y1=OUT.j$lmx1Fg[i], col=col1F, lwd=2)
+}
+for(i in 1:n2){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2Fg[i], y1=OUT.j$lmx2Fg[i], col=col2F, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1F.hatL, rev(OUT.j$eta1F.hatU))
+polygon(xx, yy, col=col1FT, border=col1FT)
+lines(x, OUT.j$eta1F.hat, col=col1F, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2F.hatL, rev(OUT.j$eta2F.hatU))
+polygon(xx, yy, col=col2FT, border=col2FT)
+lines(x, OUT.j$eta2F.hat, col=col2F, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(OUT.j$t1), max(OUT.j$t1), sep="-"), "2020"),
+       col=c(col1F,col2F), lwd=2, cex=1.8, bg="grey90")
+
+par(mar=c(5,5,2, 0.5))
+rany <- range(OUT.j$lmx1Fg, OUT.j$lmx2Fg, 
+              OUT.j$eta1F.hatL, OUT.j$eta1F.hatU, 
+              OUT.j$eta2F.hatL, OUT.j$eta2F.hatU, 
+              OUT.j$lmx1Mg, OUT.j$lmx2Mg, 
+              OUT.j$eta1M.hatL, OUT.j$eta1M.hatU, 
+              OUT.j$eta2M.hatL, OUT.j$eta2M.hatU, 
+              finite=TRUE)
+ranx <- range(x)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+     xlab="", ylab="")
+yy <- 10^seq(-7, 2)
+axis(2, at=log(yy), labels=yy, las=2, cex.lab=1.3)
+axis(1, cex.lab=1.3);box()
+abline(h=log(yy), lty=2, col="grey85")
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+mtext("age", 1, cex=1.8, line=3)
+mtext(expression(paste("log-mortality, ", eta)), 2, cex=1.8, line=3)
+mtext(expression(paste("MALES")), 3, cex=1.8)
+## 1
+for(i in 1:n1){
+  segments(x0=OUT.j$low1[i], x1=OUT.j$up1[i], 
+           y0=OUT.j$lmx1Mg[i], y1=OUT.j$lmx1Mg[i], col=col1M, lwd=2)
+}
+for(i in 1:n2){
+  segments(x0=OUT.j$low2[i], x1=OUT.j$up2[i], 
+           y0=OUT.j$lmx2Mg[i], y1=OUT.j$lmx2Mg[i], col=col2M, lwd=2)
+}
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta1M.hatL, rev(OUT.j$eta1M.hatU))
+polygon(xx, yy, col=col1MT, border=col1MT)
+lines(x, OUT.j$eta1M.hat, col=col1M, lwd=2)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$eta2M.hatL, rev(OUT.j$eta2M.hatU))
+polygon(xx, yy, col=col2MT, border=col2MT)
+lines(x, OUT.j$eta2M.hat, col=col2M, lwd=2)
+legend("topleft", inset=0.1,
+       legend=c(paste(min(OUT.j$t1), max(OUT.j$t1), sep="-"), "2020"),
+       col=c(col1M,col2M), lwd=2, cex=1.8, bg="grey90")
+```
+
+```{r}
+par(mfrow=c(1,1))
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$cF.hatL, OUT.j$cF.hatU, OUT.j$deltaF.hatL, OUT.j$deltaF.hatU,
+                  OUT.j$cM.hatL, OUT.j$cM.hatU, OUT.j$deltaM.hatL, OUT.j$deltaM.hatU,
+                  na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.05), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcFT, border = colcFT)
+points(-9, exp(OUT.j$cF.hat), col=colcF, pch=3, cex=0.8, lwd=3)
+arrows(x0=-9, x1=-9, y0=exp(OUT.j$cF.hatL), y1=exp(OUT.j$cF.hatU), col=colcF, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=1)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$deltaF.hatL), rev(exp(OUT.j$deltaF.hatU)))
+polygon(xx, yy, col=coldFT, border=coldFT)
+lines(x, exp(OUT.j$deltaF.hat), col=coldF, lwd=3)
+
+points(-7, exp(OUT.j$cM.hat), col=colcM, pch=3, cex=0.8, lwd=3)
+arrows(x0=-7, x1=-7, y0=exp(OUT.j$cM.hatL), y1=exp(OUT.j$cM.hatU), col=colcM, lwd=3, 
+       angle = 90, code=3, length=0.05)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$deltaM.hatL), rev(exp(OUT.j$deltaM.hatU)))
+polygon(xx, yy, col=coldMT, border=coldMT)
+lines(x, exp(OUT.j$deltaM.hat), col=coldM, lwd=3)
+legend("top", inset=0.1,
+       legend=c("Females", "Males"), col=c(coldF, coldM), lwd=3, cex=1.2)
+
+```
+
+## Common approach
+
+```{r}
+load("Outputs/OutPrepandemic2020sex_CommonC19factor.Rdata")
+j=21
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1Fg)
+n2 <- length(OUT.j$lmx2Fg)
+
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$c.hatL, OUT.j$c.hatU, OUT.j$delta.hatL, OUT.j$delta.hatU,
+                  na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.05), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcT, border = colcT)
+points(-9, exp(OUT.j$c.hat), col=colc, pch=3, cex=0.8, lwd=3)
+arrows(x0=-9, x1=-9, y0=exp(OUT.j$c.hatL), y1=exp(OUT.j$c.hatU), col=colc, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=1)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$delta.hatL), rev(exp(OUT.j$delta.hatU)))
+polygon(xx, yy, col=colcT, border=colcT)
+lines(x, exp(OUT.j$delta.hat), col=colc, lwd=3)
+
+```
+
+
+```{r}
+ranx <- range(x)
+rany <- range(OUT.j$s.hatL, OUT.j$s.hatU, na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(s)), 2, cex=1.8, line=3)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$s.hatL, rev(OUT.j$s.hatU))
+polygon(xx, yy, col=colcT, border=colcT)
+lines(x, OUT.j$s.hat, col=colc, lwd=3)
+```
+
+## Saturated approach
+
+```{r}
+load("Outputs/OutPrepandemic2020sex_SexSpecificC19factor.Rdata")
+
+j=21
+OUT.j <-OUT[[j]]
+n1 <- length(OUT.j$lmx1Fg)
+n2 <- length(OUT.j$lmx2Fg)
+
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(x)
+rany <- range(OUT.j$s.hatL, OUT.j$s.hatU, na.rm=TRUE)
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=0, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(s)), 2, cex=1.8, line=3)
+xx <- c(x, rev(x))
+yy <- c(OUT.j$s.hatL, rev(OUT.j$s.hatU))
+polygon(xx, yy, col=colsT, border=colsT)
+lines(x, OUT.j$s.hat, col=cols, lwd=3)
+```
+
+```{r}
+par(mar=c(5,5,0.5, 0.5))
+ranx <- range(-10, x)
+rany <- exp(range(OUT.j$cF.hatL, OUT.j$cF.hatU, OUT.j$deltaF.hatL, OUT.j$deltaF.hatU,
+                  OUT.j$cM.hatL, OUT.j$cM.hatU, OUT.j$deltaM.hatL, OUT.j$deltaM.hatU,
+                  na.rm=TRUE))
+plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+     xlab="", ylab="")
+axis(2, cex.lab=1.3, las=2)
+axis(1, cex.lab=1.3);box()
+abline(v=seq(-100, 100, 20), lty=2, col="grey85")
+abline(h=seq(-100, 100, 0.2), lty=2, col="grey85")
+abline(h=1, col="grey40", lty=3, lwd=3)
+mtext("age", 1, cex=1.8, line=3, at=50)
+mtext(expression(paste(e^c, " , ", e^delta)), 2, cex=1.8, line=3)
+abline(v=-1, col=8, lwd=4, lty=2)
+rect(xleft=-15, xright=-1, ybottom=-20, ytop=20, col=colcFT, border = colcFT)
+points(-9, exp(OUT.j$cF.hat), col=colcF, pch=3, cex=0.8, lwd=3)
+arrows(x0=-9, x1=-9, y0=exp(OUT.j$cF.hatL), y1=exp(OUT.j$cF.hatU), col=colcF, lwd=3, 
+       angle = 90, code=3, length=0.05)
+mtext(expression(e^c), 1, at=-8, cex=2, line=3, col=1)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$deltaF.hatL), rev(exp(OUT.j$deltaF.hatU)))
+polygon(xx, yy, col=coldFT, border=coldFT)
+lines(x, exp(OUT.j$deltaF.hat), col=coldF, lwd=3)
+
+points(-7, exp(OUT.j$cM.hat), col=colcM, pch=3, cex=0.8, lwd=3)
+arrows(x0=-7, x1=-7, y0=exp(OUT.j$cM.hatL), y1=exp(OUT.j$cM.hatU), col=colcM, lwd=3, 
+       angle = 90, code=3, length=0.05)
+xx <- c(x, rev(x))
+yy <- c(exp(OUT.j$deltaM.hatL), rev(exp(OUT.j$deltaM.hatU)))
+polygon(xx, yy, col=coldMT, border=coldMT)
+lines(x, exp(OUT.j$deltaM.hat), col=coldM, lwd=3)
+
+legend("bottom", inset=0.05,
+       legend=c("Females", "Males"), col=c(coldF, coldM), 
+       lwd=3, cex=1.2)
+
+```

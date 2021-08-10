@@ -11,6 +11,22 @@
 ## by C.G. Camarda 2021.06.11
 
 
+x <- 1:1000000
+y <- (1/x + 1)^x
+
+
+plot(x, y, t="p")
+
+
+x <- 1:1000000
+y <- 1/x
+plot(x,y)
+
+
+
+
+
+
 ## clearing workspace
 rm(list = ls())
 ## plotting in a difference device
