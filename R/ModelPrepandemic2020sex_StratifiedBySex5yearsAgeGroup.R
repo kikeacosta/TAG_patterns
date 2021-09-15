@@ -27,7 +27,7 @@ YY0 <- read.csv("Output/annual_deaths_countries_selected_sources.csv", header=TR
 YY1 <- subset(YY0, Sex!="t")
 
 ## loading exposures
-EE0 <- read.csv("Output/offsets_WM.csv", header=TRUE)
+EE0 <- read.csv("Output/offsets.csv", header=TRUE)
 ## remove only totals
 EE1 <- subset(EE0, Sex!="t")
 ## remove 2021
@@ -61,6 +61,10 @@ pop <- as.character(sort(unique(YY1$Country)))
 p <- length(pop)
 ##
 x <- unique(EE1$Age)
+x.low <- unique(EE1$Age)
+x.up <- c(0, unique(EE1$Age)[-c(1:2)]-1, 100)
+x.med <- (x.low+x.up)/2
+x.lab <- paste(x.low, x.up,sep="-")
 m <- length(x)
 ## colors
 col1F <- "red"
@@ -93,7 +97,7 @@ colcouT <- adjustcolor(colcou, 0.3)
 
 OUT <- list()
 PLOT <- FALSE
-j=21
+j=6
 for(j in 1:p){
   OUT.j <- list()
   ## subset for a given country
@@ -121,12 +125,11 @@ for(j in 1:p){
   up1  <- c(unique(Y1F$Age)[-1]-1, 100)
   n1 <- length(low1)
   age.gr1 <- paste(low1,up1,sep="-")
-  len1 <- up1-low1+1
   ## matrix to group exposures (for plotting purposes)
   ## and composite matrix
   G1 <- matrix(0, n1, m)
   rownames(G1) <- age.gr1
-  colnames(G1) <- x
+  colnames(G1) <- x.lab
   C1F <- C1M <- G1
   for(i in 1:n1){
     age.low.i <- low1[i]
@@ -140,7 +143,7 @@ for(j in 1:p){
   lmx1Fg <- log(y1F/e1Fg)
   e1Mg <- G1%*%e1M
   lmx1Mg <- log(y1M/e1Mg)
-  
+  len1 <- rowSums(G1)#up1-low1+1
   ## 2020
   ## deaths
   Y2F <- subset(YYF.i, Year==2020)
@@ -155,12 +158,11 @@ for(j in 1:p){
   up2  <- c(unique(Y2F$Age)[-1]-1, 100)
   n2 <- length(low2)
   age.gr2 <- paste(low2,up2,sep="-")
-  len2 <- up2-low2+1
   ## matrix to group exposures (for plotting purposes)
   ## and composite matrix
   G2 <- matrix(0, n2, m)
   rownames(G2) <- age.gr2
-  colnames(G2) <- x
+  colnames(G2) <- x.lab
   C2F <- C2M <- G2
   for(i in 1:n2){
     age.low.i <- low2[i]
@@ -174,7 +176,7 @@ for(j in 1:p){
   lmx2Fg <- log(y2F/e2Fg)
   e2Mg <- G2%*%e2M
   lmx2Mg <- log(y2M/e2Mg)
-  
+  len2 <- rowSums(G2)#up2-low2+1
   
   OUT.j$t1 <- t1
   OUT.j$low1 <- low1
@@ -186,26 +188,44 @@ for(j in 1:p){
   OUT.j$lmx2Fg <- lmx2Fg
   OUT.j$lmx2Mg <- lmx2Mg
   
-  # ## plotting
-  # if(PLOT){
-  #   rany <- range(lmx1g, lmx2g, finite=TRUE)
-  #   ranx <- range(x)
-  #   plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
-  #        xlab="age", ylab="mortality, log-scale",
-  #        main="mortality age-pattern")
-  #   yy <- 10^seq(-7, 2)
-  #   axis(2, at=log(yy), labels=yy)
-  #   axis(1);box()
-  #   for(i in 1:n1){
-  #     segments(x0=low1[i], x1=up1[i], y0=lmx1g[i], y1=lmx1g[i], col=col1, lwd=3)
-  #   }
-  #   for(i in 1:n2){
-  #     segments(x0=low2[i], x1=up2[i], y0=lmx2g[i], y1=lmx2g[i], col=col2, lwd=3)
-  #   }
-  #   legend("topleft", inset=0.1,
-  #          legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
-  #          col=c(col1,col2), lwd=3)
-  # }
+  ## plotting
+  if(PLOT){
+    par(mfrow=c(1,2))
+    rany <- range(lmx1Fg, lmx2Fg, finite=TRUE)
+    ranx <- range(x.low, x.up)
+    plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+         xlab="age", ylab="mortality, log-scale",
+         main="mortality age-pattern, females")
+    yy <- 10^seq(-7, 2)
+    axis(2, at=log(yy), labels=yy)
+    axis(1);box()
+    for(i in 1:n1){
+      segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Fg[i], y1=lmx1Fg[i], col=col1F, lwd=3)
+    }
+    for(i in 1:n2){
+      segments(x0=low2[i], x1=up2[i]+1, y0=lmx2Fg[i], y1=lmx2Fg[i], col=col2F, lwd=3)
+    }
+    legend("topleft", inset=0.1,
+           legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+           col=c(col1F,col2F), lwd=3)
+    rany <- range(lmx1Mg, lmx2Mg, finite=TRUE)
+    ranx <- range(x.low, x.up)
+    plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+         xlab="age", ylab="mortality, log-scale",
+         main="mortality age-pattern, males")
+    yy <- 10^seq(-7, 2)
+    axis(2, at=log(yy), labels=yy)
+    axis(1);box()
+    for(i in 1:n1){
+      segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Mg[i], y1=lmx1Mg[i], col=col1M, lwd=3)
+    }
+    for(i in 1:n2){
+      segments(x0=low2[i], x1=up2[i]+1, y0=lmx2Mg[i], y1=lmx2Mg[i], col=col2M, lwd=3)
+    }
+    legend("topleft", inset=0.1,
+           legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
+           col=c(col1M,col2M), lwd=3)
+  }
   
   ## FEMALES
   ## estimation
@@ -234,14 +254,18 @@ for(j in 1:p){
   eta.st <- c(fit1F.0$logmortality, 
               fit2F.0$logmortality)
   
+  ## B-splines
+  B <- MortSmooth_bbase(x=x, xl=min(x), xr=max(x), ndx=15, deg=3)
+  nb <- ncol(B)
+  
   ## penalty stuff
-  Deta1 <- diff(diag(m), diff=2)
+  Deta1 <- diff(diag(nb), diff=2)
   tDDeta1 <- t(Deta1)%*%Deta1
-  Ddelta <- diff(diag(m), diff=2)
+  Ddelta <- diff(diag(nb), diff=2)
   tDDdelta <- t(Ddelta)%*%Ddelta
   
-  lambda.eta1 <- 10^3
-  lambda.delta <- 10^5
+  lambda.eta1 <- 10^1
+  lambda.delta <- 10^3
   
   P <- adiag(lambda.eta1*tDDeta1,
              0,
@@ -249,13 +273,14 @@ for(j in 1:p){
   ## ridge penalty
   Pr <- 1e-4*diag(ncol(P))
 
+  
   ## model matrix
-  U0 <- rbind(diag(m), diag(m))
+  U0 <- rbind(B, B)
   U1 <- matrix(c(rep(0,m), rep(1,m)), 2*m)
-  U2 <- rbind(0*diag(m), diag(m))
+  U2 <- rbind(0*B, B)
   U <- cbind(U0,U1,U2)
   ## constraining delta to sum up to 0
-  H <- matrix(c(rep(0,m+1), rep(1,m)), nrow=1)
+  H <- matrix(c(rep(0,nb+1), rep(1,nb)), nrow=1)
   kappa <- 0
   
   eta <- eta.st
@@ -274,7 +299,7 @@ for(j in 1:p){
                  cbind(H, 0))
     RHS <- matrix(c(tXr, kappa), ncol=1)
     coeff   <- solve(LHS, RHS)
-    betas   <- coeff[1:(m*2+1)]
+    betas   <- coeff[1:(nb*2+1)]
     #betas   <- solve(GpP, tXr)
     eta.old <- eta
     eta     <- U%*%betas
@@ -282,21 +307,83 @@ for(j in 1:p){
     if(dif.eta < 1e-04 & it > 4) break
     #cat(it, dif.eta, "\n")
   }
-  eta1F.hat <- betas[1:m]
-  cF.hat <- betas[m+1]
-  deltaF.hat <- betas[1:m+1+m]
+  betasF.hat <- betas
+  eta1F.hat <- B%*%betas[1:nb]
+  cF.hat <- betas[nb+1]
+  deltaF.hat <- B%*%betas[1:nb+1+nb]
   eta2F.hat <- eta1F.hat + cF.hat + deltaF.hat
+  
+  # sum(deltaF.hat)
+  # 
+  # 
+  # par(mfrow=c(1,2))
+  # rany <- range(lmx1Fg, lmx2Fg, eta1F.hat, finite=TRUE)
+  # ranx <- range(x.low, x.up)
+  # plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+  #      xlab="age", ylab="mortality, log-scale",
+  #      main="mortality age-pattern, females")
+  # yy <- 10^seq(-7, 2)
+  # axis(2, at=log(yy), labels=yy)
+  # axis(1);box()
+  # for(i in 1:n1){
+  #   segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Fg[i], y1=lmx1Fg[i], col=col1F, lwd=3)
+  # }
+  # for(i in 1:m){
+  #   segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1F.hat[i], y1=eta1F.hat[i], col=col2F, lwd=3)
+  # }
+  # 
+  # rany <- range(lmx1Fg, lmx2Fg, eta1F.hat, finite=TRUE)
+  # ranx <- range(x.low, x.up)
+  # plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+  #      xlab="age", ylab="mortality, log-scale",
+  #      main="mortality age-pattern, females")
+  # yy <- 10^seq(-7, 2)
+  # axis(2, at=log(yy), labels=yy)
+  # axis(1);box()
+  # for(i in 1:n2){
+  #   segments(x0=low2[i], x1=up2[i]+1, y0=lmx2Fg[i], y1=lmx2Fg[i], col=col1F, lwd=3)
+  # }
+  # for(i in 1:m){
+  #   segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2F.hat[i], y1=eta2F.hat[i], col=col2F, lwd=3)
+  # }
+  # 
+  # plot(x, deltaF.hat, t="l", col=coldF, lwd=3)
+  # 
+  # xs <- c(0.5, 2, seq(7.5, 102.5, 5))
+  # Bs <- MortSmooth_bbase(x=xs, xl=min(x), xr=max(x), ndx=15, deg=3)
+  # bla1 <- Bs%*%betas[1:nb]
+  # rany <- range(lmx1Fg, lmx2Fg, eta1F.hat, finite=TRUE)
+  # ranx <- range(x.low, x.up)
+  # plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+  #      xlab="age", ylab="mortality, log-scale",
+  #      main="mortality age-pattern, females")
+  # yy <- 10^seq(-7, 2)
+  # axis(2, at=log(yy), labels=yy)
+  # axis(1);box()
+  # for(i in 1:n1){
+  #   segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Fg[i], y1=lmx1Fg[i], col=col1F, lwd=3)
+  # }
+  # for(i in 1:m){
+  #   segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1F.hat[i], y1=eta1F.hat[i], col=col2F, lwd=3)
+  # }
+  # points(xs, bla1, col=2, pch=16, cex=1.5)
+  # 
+  # delta.bla <- Bs%*%betas[1:nb+1+nb]
+  # plot(x, deltaF.hat, t="l", col=coldF, lwd=3)
+  # points(xs, delta.bla)
+  # 
   ## standard errors
   H0 <- solve(GpP)
   Vbetas <- H0 %*% G %*% H0
   diagVbetas <- diag(Vbetas)
   se.betas <- sqrt(diagVbetas)
-  se.eta1 <- se.betas[1:m]
-  se.c <- se.betas[m+1]
-  se.delta <- se.betas[1:m+1+m]
-  se.delta[is.na(se.delta)] <- mean(se.delta[!is.na(se.delta)])
+  se.c <- se.betas[nb+1]
   V.eta12 <- U %*% Vbetas %*% t(U)
+  se.eta1 <- sqrt(diag(V.eta12))[1:m]
   se.eta2 <- sqrt(diag(V.eta12))[1:m+m]
+  V.delta <- B %*% Vbetas[1:nb+nb+1, 1:nb+nb+1] %*% t(B)
+  se.delta <- sqrt(diag(V.delta))
+  
   ## confidence intervals
   eta1F.hatL <- eta1F.hat - 2*se.eta1
   eta1F.hatU <- eta1F.hat + 2*se.eta1
@@ -335,30 +422,6 @@ for(j in 1:p){
   eta.st <- c(fit1M.0$logmortality, 
               fit2M.0$logmortality)
   
-  ## penalty stuff
-  Deta1 <- diff(diag(m), diff=2)
-  tDDeta1 <- t(Deta1)%*%Deta1
-  Ddelta <- diff(diag(m), diff=2)
-  tDDdelta <- t(Ddelta)%*%Ddelta
-  
-  lambda.eta1 <- 10^3
-  lambda.delta <- 10^5
-  
-  P <- adiag(lambda.eta1*tDDeta1,
-             0,
-             lambda.delta*tDDdelta)
-  ## ridge penalty
-  Pr <- 1e-4*diag(ncol(P))
-  
-  ## model matrix
-  U0 <- rbind(diag(m), diag(m))
-  U1 <- matrix(c(rep(0,m), rep(1,m)), 2*m)
-  U2 <- rbind(0*diag(m), diag(m))
-  U <- cbind(U0,U1,U2)
-  ## constraining delta to sum up to 0
-  H <- matrix(c(rep(0,m+1), rep(1,m)), nrow=1)
-  kappa <- 0
-  
   eta <- eta.st
   max.it <- 100
   for(it in 1:max.it){
@@ -375,7 +438,7 @@ for(j in 1:p){
                  cbind(H, 0))
     RHS <- matrix(c(tXr, kappa), ncol=1)
     coeff   <- solve(LHS, RHS)
-    betas   <- coeff[1:(m*2+1)]
+    betas   <- coeff[1:(nb*2+1)]
     #betas   <- solve(GpP, tXr)
     eta.old <- eta
     eta     <- U%*%betas
@@ -383,21 +446,56 @@ for(j in 1:p){
     if(dif.eta < 1e-04 & it > 4) break
     #cat(it, dif.eta, "\n")
   }
-  eta1M.hat <- betas[1:m]
-  cM.hat <- betas[m+1]
-  deltaM.hat <- betas[1:m+1+m]
+  betasM.hat <- betas
+  eta1M.hat <- B%*%betas[1:nb]
+  cM.hat <- betas[nb+1]
+  deltaM.hat <- B%*%betas[1:nb+1+nb]
   eta2M.hat <- eta1M.hat + cM.hat + deltaM.hat
+  
+  
+  # par(mfrow=c(1,2))
+  # rany <- range(lmx1Mg, lmx2Mg, eta1M.hat, finite=TRUE)
+  # ranx <- range(x.low, x.up)
+  # plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+  #      xlab="age", ylab="mortality, log-scale",
+  #      main="mortality age-pattern, males")
+  # yy <- 10^seq(-7, 2)
+  # axis(2, at=log(yy), labels=yy)
+  # axis(1);box()
+  # for(i in 1:n1){
+  #   segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Mg[i], y1=lmx1Mg[i], col=col1M, lwd=3)
+  # }
+  # for(i in 1:m){
+  #   segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1M.hat[i], y1=eta1M.hat[i], col=col2M, lwd=3)
+  # }
+  # rany <- range(lmx1Mg, lmx2Mg, eta1M.hat, finite=TRUE)
+  # ranx <- range(x.low, x.up)
+  # plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE,
+  #      xlab="age", ylab="mortality, log-scale",
+  #      main="mortality age-pattern, males")
+  # yy <- 10^seq(-7, 2)
+  # axis(2, at=log(yy), labels=yy)
+  # axis(1);box()
+  # for(i in 1:n2){
+  #   segments(x0=low2[i], x1=up2[i]+1, y0=lmx2Mg[i], y1=lmx2Mg[i], col=col1M, lwd=3)
+  # }
+  # for(i in 1:m){
+  #   segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2M.hat[i], y1=eta2M.hat[i], col=col2M, lwd=3)
+  # }
+  # 
+  
   ## standard errors
   H0 <- solve(GpP)
   Vbetas <- H0 %*% G %*% H0
   diagVbetas <- diag(Vbetas)
   se.betas <- sqrt(diagVbetas)
-  se.eta1 <- se.betas[1:m]
-  se.c <- se.betas[m+1]
-  se.delta <- se.betas[1:m+1+m]
-  se.delta[is.na(se.delta)] <- mean(se.delta[!is.na(se.delta)])
+  se.c <- se.betas[nb+1]
   V.eta12 <- U %*% Vbetas %*% t(U)
+  se.eta1 <- sqrt(diag(V.eta12))[1:m]
   se.eta2 <- sqrt(diag(V.eta12))[1:m+m]
+  V.delta <- B %*% Vbetas[1:nb+nb+1, 1:nb+nb+1] %*% t(B)
+  se.delta <- sqrt(diag(V.delta))
+  
   ## confidence intervals
   eta1M.hatL <- eta1M.hat - 2*se.eta1
   eta1M.hatU <- eta1M.hat + 2*se.eta1
@@ -408,6 +506,9 @@ for(j in 1:p){
   deltaM.hatL <- deltaM.hat - 2*se.delta
   deltaM.hatU <- deltaM.hat + 2*se.delta
   
+  
+  OUT.j$betasF.hat <- betasF.hat
+  OUT.j$betasM.hat <- betasM.hat
   
   OUT.j$eta1F.hat <- eta1F.hat
   OUT.j$eta1F.hatL <- eta1F.hatL
@@ -441,63 +542,89 @@ for(j in 1:p){
   OUT[[j]] <- OUT.j
   
   if(PLOT){
-    par(mfrow=c(1,3))
-    ## eta1 + eta2
+    par(mfrow=c(3,2))
+    ## eta1F
     rany <- range(lmx1Fg, lmx2Fg, lmx1Mg, lmx2Mg,
                   eta1F.hatL, eta1F.hatU, eta2F.hatL, eta2F.hatU, 
                   eta1M.hatL, eta1M.hatU, eta2M.hatL, eta2M.hatU, 
                   finite=TRUE)
-    ranx <- range(x)
+    ranx <- range(x.up, x.low)
     plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
          xlab="age", ylab="mortality, log-scale",
-         main="mortality age-pattern, females")
+         main=paste("mortality age-pattern, females,", min(t1), "-", max(t1)))
     yy <- 10^seq(-7, 2)
     axis(2, at=log(yy), labels=yy)
     axis(1);box()
-    ## Females
     for(i in 1:n1){
-      segments(x0=low1[i], x1=up1[i], y0=lmx1Fg[i], y1=lmx1Fg[i], col=col1F, lwd=1)
+      segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Fg[i], y1=lmx1Fg[i], col=col1F, lwd=1)
     }
-    for(i in 1:n2){
-      segments(x0=low1[i], x1=up1[i], y0=lmx2Fg[i], y1=lmx2Fg[i], col=col2F, lwd=1)
+    for(i in 1:m){
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1F.hat[i], y1=eta1F.hat[i], col=col2F, lwd=1)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1F.hatL[i], y1=eta1F.hatL[i], col=col2F, lwd=1, lty=2)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1F.hatU[i], y1=eta1F.hatU[i], col=col2F, lwd=1, lty=2)
     }
-    xx <- c(x, rev(x))
-    yy <- c(eta1F.hatL, rev(eta1F.hatU))
-    polygon(xx, yy, col=col1FT, border=col1FT)
-    lines(x, eta1F.hat, col=col1F, lwd=2)
-    yy <- c(eta2F.hatL, rev(eta2F.hatU))
-    polygon(xx, yy, col=col2FT, border=col2FT)
-    lines(x, eta2F.hat, col=col2F, lwd=2)
-    legend("topleft", inset=0.1,
-           legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
-           col=c(col1F,col2F), lwd=3)
-    
+    ## eta2F
+    rany <- range(lmx1Fg, lmx2Fg, lmx1Mg, lmx2Mg,
+                  eta1F.hatL, eta1F.hatU, eta2F.hatL, eta2F.hatU, 
+                  eta1M.hatL, eta1M.hatU, eta2M.hatL, eta2M.hatU, 
+                  finite=TRUE)
+    ranx <- range(x.up, x.low)
     plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
          xlab="age", ylab="mortality, log-scale",
-         main="mortality age-pattern, males")
+         main=paste("mortality age-pattern, females, 2020"))
     yy <- 10^seq(-7, 2)
     axis(2, at=log(yy), labels=yy)
     axis(1);box()
-    ## Males
-    for(i in 1:n1){
-      segments(x0=low1[i], x1=up1[i], y0=lmx1Mg[i], y1=lmx1Mg[i], col=col1M, lwd=1)
-    }
     for(i in 1:n2){
-      segments(x0=low1[i], x1=up1[i], y0=lmx2Mg[i], y1=lmx2Mg[i], col=col2M, lwd=1)
+      segments(x0=low2[i], x1=up2[i]+1, y0=lmx2Fg[i], y1=lmx2Fg[i], col=col1F, lwd=1)
     }
-    xx <- c(x, rev(x))
-    yy <- c(eta1M.hatL, rev(eta1M.hatU))
-    polygon(xx, yy, col=col1MT, border=col1MT)
-    lines(x, eta1M.hat, col=col1M, lwd=2)
-    yy <- c(eta2M.hatL, rev(eta2M.hatU))
-    polygon(xx, yy, col=col2MT, border=col2MT)
-    lines(x, eta2M.hat, col=col2M, lwd=2)
-    legend("topleft", inset=0.1,
-           legend=c(paste(min(t1), max(t1), sep="-"), "2020"),
-           col=c(col1M,col2M), lwd=3)
-
-    ## deltas
-    ranx <- range(-10, x)
+    for(i in 1:m){
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2F.hat[i], y1=eta2F.hat[i], col=col2F, lwd=1)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2F.hatL[i], y1=eta2F.hatL[i], col=col2F, lwd=1, lty=2)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2F.hatU[i], y1=eta2F.hatU[i], col=col2F, lwd=1, lty=2)
+    }
+    ## eta1M
+    rany <- range(lmx1Fg, lmx2Fg, lmx1Mg, lmx2Mg,
+                  eta1F.hatL, eta1F.hatU, eta2F.hatL, eta2F.hatU, 
+                  eta1M.hatL, eta1M.hatU, eta2M.hatL, eta2M.hatU, 
+                  finite=TRUE)
+    ranx <- range(x.up, x.low)
+    plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+         xlab="age", ylab="mortality, log-scale",
+         main=paste("mortality age-pattern, males,", min(t1), "-", max(t1)))
+    yy <- 10^seq(-7, 2)
+    axis(2, at=log(yy), labels=yy)
+    axis(1);box()
+    for(i in 1:n1){
+      segments(x0=low1[i], x1=up1[i]+1, y0=lmx1Mg[i], y1=lmx1Mg[i], col=col1M, lwd=1)
+    }
+    for(i in 1:m){
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1M.hat[i], y1=eta1M.hat[i], col=col2M, lwd=1)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1M.hatL[i], y1=eta1M.hatL[i], col=col2M, lwd=1, lty=2)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta1M.hatU[i], y1=eta1M.hatU[i], col=col2M, lwd=1, lty=2)
+    }
+    ## eta2M
+    rany <- range(lmx1Fg, lmx2Fg, lmx1Mg, lmx2Mg,
+                  eta1F.hatL, eta1F.hatU, eta2F.hatL, eta2F.hatU, 
+                  eta1M.hatL, eta1M.hatU, eta2M.hatL, eta2M.hatU, 
+                  finite=TRUE)
+    ranx <- range(x.up, x.low)
+    plot(1, 1, t="n", xlim=ranx, ylim=rany, axes=FALSE, 
+         xlab="age", ylab="mortality, log-scale",
+         main=paste("mortality age-pattern, males, 2020"))
+    yy <- 10^seq(-7, 2)
+    axis(2, at=log(yy), labels=yy)
+    axis(1);box()
+    for(i in 1:n2){
+      segments(x0=low2[i], x1=up2[i]+1, y0=lmx2Mg[i], y1=lmx2Mg[i], col=col1M, lwd=1)
+    }
+    for(i in 1:m){
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2M.hat[i], y1=eta2M.hat[i], col=col2M, lwd=1)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2M.hatL[i], y1=eta2M.hatL[i], col=col2M, lwd=1, lty=2)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=eta2M.hatU[i], y1=eta2M.hatU[i], col=col2M, lwd=1, lty=2)
+    }
+    ## deltas and c, both males and females
+    ranx <- range(-10, x.low, x.up)
     rany <- range(deltaF.hatL,deltaF.hatU, cF.hatU, cF.hatL, 
                   deltaM.hatL,deltaM.hatU, cM.hatU, cM.hatL,
                   na.rm = TRUE)
@@ -507,14 +634,16 @@ for(j in 1:p){
     axis(2)
     axis(1);box()
     abline(h=0, col=8, lty=3, lwd=2)
-    xx <- c(x, rev(x))
-    yy <- c(deltaF.hatL, rev(deltaF.hatU))
-    polygon(xx, yy, col=coldFT, border=coldFT)
-    lines(x, deltaF.hat, col=coldF, lwd=4)
-    yy <- c(deltaM.hatL, rev(deltaM.hatU))
-    polygon(xx, yy, col=coldMT, border=coldMT)
-    lines(x, deltaM.hat, col=coldM, lwd=4)
-    
+    for(i in 1:m){
+      ## females
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=deltaF.hat[i], y1=deltaF.hat[i], col=coldF, lwd=3)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=deltaF.hatL[i], y1=deltaF.hatL[i], col=coldF, lwd=1, lty=2)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=deltaF.hatU[i], y1=deltaF.hatU[i], col=coldF, lwd=1, lty=2)
+      ## males
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=deltaM.hat[i], y1=deltaM.hat[i], col=coldM, lwd=3)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=deltaM.hatL[i], y1=deltaM.hatL[i], col=coldM, lwd=1, lty=2)
+      segments(x0=x.low[i], x1=x.up[i]+1, y0=deltaM.hatU[i], y1=deltaM.hatU[i], col=coldM, lwd=1, lty=2)
+    }
     abline(v=-1, col=8, lwd=4, lty=2)
     points(-8, cF.hat, col=colcF, pch=3, lwd=3)
     arrows(x0=-8, x1=-8, y0=cF.hatL, y1=cF.hatU, col=colcF, lwd=3, 
@@ -531,4 +660,4 @@ for(j in 1:p){
 }
 names(OUT) <- pop
 
-save.image("Output/OutPrepandemic2020sex_StratifiedBySex.Rdata")
+# save.image("Output/OutPrepandemic2020sex_StratifiedBySexAgeGroup.Rdata")
