@@ -21,6 +21,81 @@ library(MortalitySmooth)
 library(magic)
 library(colorspace)
 
+load("Output/OutPrepandemic2020sex_StratifiedBySexAgeGroup.Rdata")
+
+
+WMout <- read.csv("Output/WM_constraints_and_clusters.csv", header=TRUE)
+
+
+nc <- length(table(WMout$Cluster))
+
+
+cbind(names(OUT), 
+      sort(WMout$iso3[WMout$iso3%in%names(OUT)]))
+
+## appearing in OUT, not in WMout, at least with the same name
+## "MAC"
+## "PYF"
+## "TWN"
+OUT <- OUT[-c(40,54,61)]
+
+cbind(sort(names(OUT)), 
+      sort(WMout$iso3[WMout$iso3%in%names(OUT)]))
+
+## take for each cluster, population in which we have data
+## and average the coefficients betas associated to deltas
+betas.delta.cluF <- betas.delta.cluM <- matrix(NA, nb, nc)
+
+i=1
+for(i in 1:nc){
+  ## pop in a given cluster
+  cou.i <- WMout$iso3[WMout$Cluster==i]
+  ## take those with data
+  cou.data.i <- names(OUT)[names(OUT)%in%cou.i]
+  cat(i, cou.data.i, "\n")
+  ## take the betas associated to deltas from cou.data.i
+  out.i <- OUT[cou.data.i]
+  betasF.i <- betasM.i <- matrix(NA, nb, length(out.i))
+  for(j in 1:length(out.i)){
+    betasF.i[,j] <- out.i[[j]]$betasF.hat[1:nb+nb+1]
+    betasM.i[,j] <- out.i[[j]]$betasM.hat[1:nb+nb+1]
+  }
+  betas.delta.cluF[,i] <- rowMeans(betasF.i)
+  betas.delta.cluM[,i] <- rowMeans(betasM.i)
+}
+
+## ages at which we wanna evaluate outcomes
+xs <- c(0, 2, seq(7.5,97.5,5))
+ms <- length(xs)
+Bs <- MortSmooth_bbase(x=xs, xl=min(x), xr=max(x), ndx=15, deg=3)
+deltasF.clu <- matrix(NA, ms, nc)
+rownames(deltasF.clu) <- c(0,1,seq(5,95,5))
+colnames(deltasF.clu) <- 1:8
+deltasM.clu <- deltasF.clu
+for(i in 1:nc){
+  deltasF.clu[,i] <- Bs%*%betas.delta.cluF[,i]
+  deltasM.clu[,i] <- Bs%*%betas.delta.cluM[,i]
+}
+
+par(mfrow=c(1,2))
+matplot(xs, deltasF.clu)
+matplot(xs, deltasM.clu)
+
+
+write.table(deltasF.clu, "deltasF.txt")
+write.table(deltasM.clu, "deltasM.txt")
+
+
+## clearing workspace
+rm(list = ls())
+## plotting in a difference device
+options(device="X11")
+## !!!! to be changed
+setwd("~/WORK/TAG_patterns/")
+library(MortalitySmooth)
+library(magic)
+library(colorspace)
+
 ## loading deaths
 YY0 <- read.csv("Output/annual_deaths_countries_selected_sources.csv", header=TRUE)
 ## remove totals
@@ -57,7 +132,7 @@ EEM <- subset(EE, Sex=="m")
 
 
 ## populations
-pop <- as.character(sort(unique(YY1$Code)))
+pop <- as.character(sort(unique(YY1$Country)))
 p <- length(pop)
 ##
 x <- unique(EE1$Age)
@@ -101,10 +176,10 @@ j=6
 for(j in 1:p){
   OUT.j <- list()
   ## subset for a given country
-  YYF.i <- subset(YYF, Code==pop[j])
-  EEF.i <- subset(EEF, Code==pop[j])
-  YYM.i <- subset(YYM, Code==pop[j])
-  EEM.i <- subset(EEM, Code==pop[j])
+  YYF.i <- subset(YYF, Country==pop[j])
+  EEF.i <- subset(EEF, Country==pop[j])
+  YYM.i <- subset(YYM, Country==pop[j])
+  EEM.i <- subset(EEM, Country==pop[j])
   
   ## pre-pandemic years
   ## deaths
@@ -660,4 +735,4 @@ for(j in 1:p){
 }
 names(OUT) <- pop
 
-save.image("Output/OutPrepandemic2020sex_StratifiedBySexAgeGroup.Rdata")
+# save.image("Output/OutPrepandemic2020sex_StratifiedBySexAgeGroup.Rdata")
