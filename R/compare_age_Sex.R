@@ -2,7 +2,7 @@
 library(tidyverse)
 library(readr)
 library(countrycode)
-
+library(readxl)
 
 WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
 
@@ -18,7 +18,7 @@ WPPout %>%
   write_csv("Output/WPP2019_baseline.csv")
 
 
-library(readxl)
+
 WM_estimates<- read_excel("Data/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
 clusters <- read_csv("Data/iso.clusters.csv")
 
@@ -77,11 +77,18 @@ WPPprime <-
          mx_prime = exp(mx_prime)) %>% 
   select(-WHO_region, -LocID, -Country)
 
+# for sex-specific constraints
+# WPPprimeprime <-
+#   WMout %>% 
+#   select(-Yhat, -Cluster) %>% 
+#   pivot_longer(Female:Male, names_to = "sex", values_to = "TOT") %>% 
+#   right_join(WPPprime, by = c("iso3","sex"))
+
+# for overall constraint
 WPPprimeprime <-
   WMout %>% 
-  select(-Yhat, -Cluster) %>% 
-  pivot_longer(Female:Male, names_to = "sex", values_to = "TOT") %>% 
-  right_join(WPPprime, by = c("iso3","sex"))
+  select(iso3, TOT = Yhat) %>% 
+  right_join(WPPprime, by = c("iso3"))
 
 WPPpop <- read_csv("Data/WPP2019_PopulationBySingleAgeSex_1950-2019.csv")
 
@@ -103,14 +110,15 @@ WPP_pop_prep <-
 # our "final" estimate
 Dxhat <-
   WPPprimeprime %>% 
-  left_join(WPP_pop_prep, by = c("iso3", "sex","Age"))%>% 
-  filter(!is.na(Country)) %>% 
+  left_join(WPP_pop_prep, by = c("iso3", "sex","Age")) %>% 
   mutate(Dxhat = mx_prime * Population) %>% 
-  group_by(iso3, sex) %>% 
+  group_by(iso3) %>% 
   mutate(Dxhat = Dxhat / sum(Dxhat) * TOT) %>% 
   ungroup() %>% 
   select(-TOT, -Time, -MidPeriod) %>% 
-  mutate(age = ifelse(Age == 1, 0, Age)) %>% 
+  mutate(age = ifelse(Age == 1, 0, Age),
+         age = ifelse(age > 85, 85, age)) %>% 
+  filter(!is.na(Dxhat)) %>% 
   group_by(iso3, sex, age) %>% 
   summarize(Dxhat_spinoff = sum(Dxhat), .groups = "drop")
 
@@ -152,5 +160,17 @@ for (i in unique(mx_plot$Country)){
   print(p)
 }
 dev.off()
-
-
+pdf("Figures/sr_compare.pdf")
+for (i in unique(mx_plot$Country)){
+p <- 
+  mx_plot %>% 
+  filter(Country == i) %>% 
+  pivot_wider(names_from = sex, values_from = mx) %>% 
+  mutate(sr = Male / Female) %>% 
+  ggplot(aes(x = age, y = sr, color = variant, linetype = variant)) +
+  geom_line() +
+  scale_y_log10() +
+  labs(title = i)
+print(p)
+}
+dev.off()
