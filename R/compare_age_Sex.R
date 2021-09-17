@@ -131,11 +131,13 @@ obs <-
 
 Dx_hat_out <-
   WM_estimates %>% 
-  filter(measure == "deaths",
-         `source year` == "Predicted 2020") %>% 
-  select(Country, iso3, sex, age, Nx, Dxhat_WM = mean) %>% 
+  filter(measure == "deaths") %>% 
+  select(-lwr, -uppr) %>% 
+  pivot_wider(names_from = `source year`, values_from = `mean`) %>% 
+  select(Country, iso3, sex, age, Nx, Dxhat_WM = `Predicted 2020`, 
+         Dx_expected = `Expected 2020`,  Dx_observed = `Observed 2020`,
+         GHE_2019 = `GHE 2019`) %>% 
   left_join(Dxhat, by = c("iso3","sex","age")) %>% 
-  left_join(obs) %>% 
   filter(!is.na(Dxhat_WM) & !is.na(Dxhat_spinoff))
 
 write_csv(Dx_hat_out, file = "Output/age_sex_compare.csv")
@@ -174,3 +176,132 @@ p <-
 print(p)
 }
 dev.off()
+
+cljoin <- 
+clusters %>% 
+  select(iso3, Cluster)
+Dx_hat_out <- 
+  Dx_hat_out %>% 
+  left_join(cljoin, by = "iso3")
+
+
+Dx_hat_out <- 
+  Dx_hat_out %>% 
+  arrange(Cluster, Country, age)
+
+pdf("Figures/observed_vs_expected_compare.pdf")
+for (ctry in unique(Dx_hat_out$Country)){
+  chu <-
+    Dx_hat_out %>% 
+    dplyr::filter(Country == ctry)%>% 
+    mutate(oe_wm = Dxhat_WM / Dx_expected,
+           oe_spinoff = Dxhat_spinoff / Dx_expected,
+           oe_obs = Dx_observed / Dx_expected) %>% 
+    pivot_longer(oe_wm:oe_obs, names_to = "variant", values_to = "OE") 
+  cl <- chu$Cluster[1]
+  p <- 
+    chu %>% 
+    ggplot(aes(x = age, y = OE, color = variant, linetype = sex)) +
+    geom_line() +
+    scale_y_log10() +
+    labs(title = paste(ctry, ", Cluster", cl))
+ print(p)
+}
+dev.off()
+
+# obs_clusters <- 
+# mx_plot %>% 
+#   filter(variant == "mx_observed",
+#          !is.na(mx)) %>% 
+#   select(Country) %>% 
+#   distinct() %>% 
+#   mutate(obs = TRUE) %>% 
+#   right_join(clusters, by = "Country") %>% 
+#   filter(obs) %>% 
+#   group_by(Cluster) %>% 
+#   tally() %>% 
+#   rename("obs" = "n")
+# 
+# clusters %>% 
+#   group_by(Cluster) %>% 
+#   tally() %>% 
+#   rename( "total" = "n") %>% 
+#   left_join(obs_clusters) %>% 
+#   mutate(prop = obs/ total)
+# 
+# 
+# has_data <- 
+# mx_plot %>% 
+#   filter(variant == "mx_observed",
+#          !is.na(mx)) %>% 
+#   select(Country) %>% 
+#   distinct() %>% 
+#   mutate(obs = TRUE) %>% 
+#   right_join(clusters, by = "Country") %>% 
+#   filter(obs) %>% 
+#   select(iso_a3 = iso3, obs)
+# 
+# dput(has_data)
+
+deltasM <- read.table("Data/deltasMobs.txt", header =TRUE)%>% 
+  pivot_longer(-1, names_to = "iso3", values_to = "delta") %>% 
+  mutate(sex = "m")
+deltasf <- read.table("Data/deltasFobs.txt", header =TRUE) %>% 
+  pivot_longer(-1, names_to = "iso3", values_to = "delta")%>% 
+  mutate(sex = "f")
+
+deltas <-
+  bind_rows(deltasM, deltasf) %>% 
+  rename("age" = "Age")
+
+deltas
+WPP_pop_prep  %>% 
+  left_join(deltas, by = c("iso3", "sex", "age")) %>% 
+  filter(iso3 == "USA")
+deltas %>% 
+  filter(iso3 == "USA")
+
+
+Dx_hat_out %>% 
+  filter(!is.na(Dx_observed)) %>% 
+  mutate(mx_obs = Dx_observed / Nx) %>% 
+  filter(mx_obs == min(mx_obs))
+  
+  
+  
+  ggplot(aes(x = age, y = mx_obs, color = sex, group = interaction(Country, sex))) + 
+  geom_line(alpha = .3) + 
+  scale_y_log10()
+
+  
+  WPP2019 <- read_csv("Output/WPP2019_baseline.csv")
+  WPP2019 %>% 
+    ggplot(aes(x = Age, y = mx, color = Sex, group = interaction(iso3, Sex))) +
+    geom_line(alpha = .3) + 
+    scale_y_log10()
+  
+  
+  Dx_hat_out %>% 
+    mutate(mx_expected = GHE_2019 / Nx) %>% 
+    ggplot(aes(x = age, y = mx_expected, color = sex, group = interaction(iso3, sex)))+
+    geom_line(alpha = .3) + 
+    scale_y_log10()
+
+  
+  pdf("Figures/spinoff_vs_wm.pdf")
+  for (ctry in unique(Dx_hat_out$Country)){
+    chu  <-
+      Dx_hat_out %>% 
+      dplyr::filter(Country == ctry)
+    cl <- chu$Cluster[1]
+    p <- 
+      chu %>% 
+      mutate(spinoff_vs_wm = Dxhat_spinoff / Dxhat_WM) %>% 
+      ggplot(aes(x = age, y = spinoff_vs_wm, color = sex)) +
+      geom_line() +
+      scale_y_log10() +
+      labs(title = paste(ctry, "Cluster =",cl))
+    print(p)
+  }
+  dev.off()
+  
