@@ -80,8 +80,8 @@ for(i in 1:nc){
 }
 
 par(mfrow=c(1,2))
-matplot(xs, deltasF.clu)
-matplot(xs, deltasM.clu)
+matplot(xs, deltasF.clu, t="l")
+matplot(xs, deltasM.clu, t="l")
 
 write.table(deltasF.clu, "deltasF.txt")
 write.table(deltasM.clu, "deltasM.txt")
