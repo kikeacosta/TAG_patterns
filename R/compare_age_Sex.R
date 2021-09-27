@@ -267,8 +267,6 @@ Dx_hat_out %>%
   mutate(mx_obs = Dx_observed / Nx) %>% 
   filter(mx_obs == min(mx_obs))
   
-  
-  
   ggplot(aes(x = age, y = mx_obs, color = sex, group = interaction(Country, sex))) + 
   geom_line(alpha = .3) + 
   scale_y_log10()
@@ -305,3 +303,66 @@ Dx_hat_out %>%
   }
   dev.off()
   
+
+# recalculate everything using GHE baseline.
+  
+# 1) plot baseline, spinoff, william separately by sex. 2-panel.
+# 2) plot deltas by cluster
+# 3) plot observed / expected by cluster
+  
+GHE2019_baseline <-
+  WM_estimates %>% 
+    filter(`source year` == "GHE 2019",
+           measure == "deaths") %>% 
+    arrange(iso3, sex, age) %>% 
+  select(Country, iso3, sex, age, Nx, deaths = `mean`)
+  
+write_csv(GHE2019_baseline, file = "Output/GHE2019_baseline.csv")
+WM2020_observed <-
+  WM_estimates %>% 
+    filter(`source year` == "Observed 2020",
+           measure == "deaths") %>% 
+    arrange(iso3, sex, age) %>% 
+  select(Country, iso3, sex, age, Nx, deaths = `mean`)
+write_csv(WM2020_observed, file = "Output/WM2020_observed.csv")
+  
+  out_iso3 <- deltasM$iso3 %>% unique()
+  
+  out_iso3[!out_iso3 %in% wm_iso3]
+  wm_iso3[!wm_iso3 %in% out_iso3]
+
+  
+dat <- read_csv("Output/annual_deaths_countries_selected_sources.csv")  
+allctry <- dat %>% pull(Country) %>% unique()
+
+COL <-
+dat %>% 
+  filter(Country == "Colombia",
+         Year == 2020) %>% 
+  mutate(Sex = case_when(Sex == "f" ~ "Female",
+                         Sex == "m" ~ "Male",
+                         Sex == "t" ~ "Total")) %>% 
+  rename("iso3" = "Code", "sex" = "Sex", "age" = "Age" ,"deaths" = "Deaths") %>% 
+  select(Country, iso3, sex, age, deaths) %>% 
+  mutate(age = ifelse(age >85,85,age)) %>% 
+  group_by(Country, iso3, sex, age) %>% 
+  summarize(deaths = sum(deaths), .groups = "drop") 
+
+COL <- 
+WM_estimates %>% 
+  filter(`source year` == "Expected 2020",
+         Country == "Colombia") %>% 
+  select(Country, iso3, sex, age, Nx) %>% 
+  left_join(COL) 
+
+GHE2019_baseline %>% 
+  select(Country, iso3, sex, age, Nx, deaths = `mean`)
+WM2020_observed %>% 
+  bind_rows(COL) %>% 
+  write_csv("Output/WM2020_observed.csv")
+
+
+
+
+DAT <- read_csv("Output/age_sex_compare.csv")
+DAT$Country %>% unique()
