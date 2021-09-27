@@ -436,7 +436,7 @@ for(j in 1:p){
            angle = 90, code=3, length=0.15)
     locator(1)
   }
-}
+} 
 names(OUT) <- pop
 
 save.image("Output/OutPrepandemic2020sex_StratifiedBySex_WMdata.Rdata")
@@ -452,4 +452,7 @@ for(j in 1:p){
   DELTAS_WM$deltas[wr] <- deltas
 }
 write.table(DELTAS_WM, "DELTAS_WM.txt")
+
+
+
 
