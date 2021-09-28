@@ -389,7 +389,7 @@ baseline %>%
   left_join(clusters,by = "iso3")
 
 # visualize deltas by cluster and sex
-
+p <-
 inputs %>% 
   filter(!is.na(deltas)) %>% 
   ggplot(aes(x = age, y = deltas, color = as.factor(Cluster), group = iso3)) +
@@ -397,6 +397,9 @@ inputs %>%
   facet_wrap(~Cluster + sex) +
   theme(legend.position = "none")
 
+pdf("Figures/deltas_clusters.pdf")
+print(p)
+dev.off()
 inputs %>% 
   filter(!is.na(deltas),
         Cluster == 2,
