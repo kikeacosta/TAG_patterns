@@ -34,7 +34,7 @@ BR2020 <-
   mutate(Country = "Brazil",
          Code = "BRA",
          Year = 2020,
-         Source = "opendatasus.saude.gov.br") %>% 
+         Source = "country_public") %>% 
   select(Country, Code, Year, Sex, Age, Deaths, Source)
 
 # now do other years one at a time, then rbind and save.
@@ -90,7 +90,7 @@ db_bra <-
   out %>% 
   bind_rows() %>% 
   bind_rows(BR2020) %>% 
-  arrange(Year, Sex, as.integer(Age)) 
+  arrange(Year, Sex, suppressWarnings(as.integer(Age)))
   
 write_csv(db_bra, "Output/brazil.csv")
 
