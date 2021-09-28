@@ -527,6 +527,7 @@ inputs %>%
 clusters <-
   clusters %>% 
   select(-WHO_region)
+Joined <- 
 WM_estimates %>% 
   filter(`source year` == "Predicted 2020",
          measure == "deaths") %>% 
@@ -557,7 +558,7 @@ for (i in iso3){
 }
 dev.off()
 
-
+write_csv(Joined, file = "Output/age_sex_compare2.csv")
   
 
 
