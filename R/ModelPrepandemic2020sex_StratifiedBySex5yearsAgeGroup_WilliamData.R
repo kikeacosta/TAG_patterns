@@ -29,6 +29,14 @@ data2 <- read.csv("Output/WM2020_observed.csv", header=TRUE)
 ## removed doubles Colombia in data2
 data2 <- data2[-c(2161:2268), ]
 
+
+data2$lmx <- log(data2$deaths/data2$Nx)
+
+aa <- ggplot(data=data2, aes(x=age, y=lmx, col=iso3))+
+  geom_line()+labs(x = "age", y = "", title = "log-mortality")
+ggplotly(aa)
+plot(aa)
+
 ## select pop which are in both datasets
 ## populations
 pop <- as.character(sort(unique(data2$iso3)))
@@ -452,6 +460,24 @@ for(j in 1:p){
   DELTAS_WM$deltas[wr] <- deltas
 }
 write.table(DELTAS_WM, "DELTAS_WM.txt")
+
+## clearing workspace
+rm(list = ls())
+## plotting in a difference device
+options(device="X11")
+## !!!! to be changed
+setwd("~/WORK/TAG_patterns/")
+library(MortalitySmooth)
+library(magic)
+library(colorspace)
+
+## loading outcomes from model
+load("Output/OutPrepandemic2020sex_StratifiedBySex_WMdata.Rdata")
+
+## loading baseline
+compare <- read.csv("Output/age_sex_compare.csv", header=TRUE)
+
+
 
 
 
