@@ -391,12 +391,11 @@ baseline %>%
 # visualize deltas by cluster and sex
 
 inputs %>% 
-  filter(!is.na(deltas),
-         iso3 != "ARM") %>% 
-  ggplot(aes(x = age, y = deltas)) +
-  geom_line(aes(group = iso3)) +
-  facet_grid(Cluster ~ sex) +
-  geom_smooth()
+  filter(!is.na(deltas)) %>% 
+  ggplot(aes(x = age, y = deltas, color = as.factor(Cluster), group = iso3)) +
+  geom_line() +
+  facet_wrap(~Cluster + sex) +
+  theme(legend.position = "none")
 
 inputs %>% 
   filter(!is.na(deltas),
@@ -421,7 +420,7 @@ inputs %>%
   ggplot(aes(x = age, y= delta, group = Cluster))+
   geom_line() +
   facet_wrap(~sex)
-install.packages("quantreg")
+# install.packages("quantreg")
 library(quantreg)
 library(splines)
 dat <- 
@@ -560,5 +559,65 @@ dev.off()
 
 write_csv(Joined, file = "Output/age_sex_compare2.csv")
   
+# 1) create SR plots 
+sr_data <- 
+Joined %>% 
+  filter(variant %in% c("mx_pred_qm","mx_WM","observed")) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = "sex", values_from = "mx") %>% 
+  mutate(sr = Male / Female)
 
 
+pdf("Figures/sr_compare_2.pdf")
+for (i in iso3){
+  chunk <- 
+    sr_data %>% 
+    filter(iso3 == i)
+  ctry <- chunk$Country %>% na.omit() %>% '['(1)
+  cl  <-  chunk$Cluster[1]
+  p <-
+    chunk %>% 
+    ggplot(aes(x = age, y = sr, color = variant, linetype = variant))+
+    geom_line() +
+    scale_y_log10(limits = c(.1,10)) +
+    labs(title = paste("Cluster",cl,ctry))
+  print(p)
+}
+dev.off()
+
+# 2) log(predicted / observed ) for us and william (in sample)
+
+in_sample_data <- 
+  Joined %>% 
+  filter(variant %in% c("mx_pred_qm","mx_WM","observed")) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = "variant", values_from = "mx") %>% 
+  mutate(spinoff = mx_pred_qm / observed,
+         wm = mx_WM / observed) %>% 
+  filter(!is.na(observed)) %>% 
+  pivot_longer(spinoff:wm, names_to = "variant", values_to = "ratio") %>% 
+  arrange(Cluster, iso3, sex, variant,age)
+
+iso3_2 <- in_sample_data %>% pull(iso3) %>% unique()
+pdf("Figures/in_sample_compare.pdf")
+for (i in iso3_2){
+  chunk <- 
+    in_sample_data %>% 
+    filter(iso3 == i)
+  ctry <- chunk$Country %>% na.omit() %>% '['(1)
+  cl  <-  chunk$Cluster[1]
+  p <-
+    chunk %>% 
+    ggplot(aes(x = age, y = ratio, color = variant, linetype = variant))+
+    geom_line() +
+    scale_y_log10(limits = c(.25,4)) +
+    facet_grid(~sex) +
+    labs(title = paste("Cluster",cl,ctry)) +
+    geom_hline(yintercept=1,color = "red")
+  print(p)
+}
+dev.off()
+
+# 3) log(us / william)  (everything)
+
+# map
