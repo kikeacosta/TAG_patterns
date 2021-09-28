@@ -10,8 +10,7 @@ library(tidyverse)
 
 # load data
 db_pe <- 
-  read_xlsx(unzip(here("Data", "Peru", "peru_deaths.zip"),
-                  "SINADEF_DATOS_ABIERTOS_19032021.xlsx"), skip = 2)
+  read_delim(here("Data", "Peru", "fallecidos_sinadef.csv"), delim = "|")
 
 # data wrangling
 db_pe2 <- db_pe %>% 

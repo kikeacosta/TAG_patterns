@@ -58,6 +58,14 @@ db <-
             col,
             chl)
 
+unique(db$Sex)
+unique(db$Age)
+
+db_tots <- 
+  db %>% 
+  filter(Age == "TOT",
+         Sex == "t")
+
 # imputing unknown ages and sexes
 db2 <- 
   db %>% 

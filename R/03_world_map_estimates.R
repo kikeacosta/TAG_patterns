@@ -133,14 +133,14 @@ map_joined %>%
         # legend.spacing = unit(c(0,0,0,0),"cm"),
         legend.margin = margin(0, 0, 0, 0),
         legend.key.size = unit(0.5, "cm"),
-        axis.line=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks=element_blank(),
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        panel.background=element_blank()
-        # plot.background=element_blank()
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_blank()
+        # plot.background = element_blank()
   )
 
 ggsave("Figures/cluster_map.png", dpi = 700, width = 6, height = 3)
