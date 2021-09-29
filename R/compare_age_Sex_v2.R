@@ -4,19 +4,20 @@ library(readr)
 library(countrycode)
 library(readxl)
 
-# WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
-# 
-# WPP
-# WPPout <- 
-#   WPP %>% 
-#   dplyr::filter(Sex != "Total",
-#                 MidPeriod == 2018) %>% 
-#   select(LocID, Time, MidPeriod, Sex, Age = AgeGrpStart, mx) %>% 
-#   mutate(iso3 = countrycode::countrycode(LocID, "un", "iso3c")) %>% 
-#   dplyr::filter(!is.na(iso3)) 
-# WPPout %>% 
-#   write_csv("Output/WPP2019_baseline.csv")
+WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
 
+WPP
+WPPout <-
+  WPP %>%
+  dplyr::filter(Sex != "Total",
+                MidPeriod == 2018) %>%
+  select(LocID, Time, MidPeriod, Sex, Age = AgeGrpStart, mx) %>%
+  mutate(iso3 = countrycode::countrycode(LocID, "un", "iso3c")) %>%
+  dplyr::filter(!is.na(iso3))
+WPPout %>%
+  write_csv("Output/WPP2019_baseline.csv")
+
+WPPout <- read_csv("Output/WPP2019_baseline.csv")
 
 
 WM_estimates<- read_excel("Data/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
@@ -52,12 +53,14 @@ read_csv("Output/offsets.csv")  %>%
 
 
 # ------------------------------------ #
-d <- read_delim("Output/Deltas_GC.txt", delim = " ", col_names = TRUE)
+Deltas1 <- read_delim("Output/Deltas_GC.txt", delim = " ", col_names = c("id", "age","sex","cluster","delta.hat","delta.hatU", "delta.hatL"),
+                skip = 1)
+
 
 Deltas <- 
-  dM %>% 
-  bind_rows(dF)
-Deltas
+  Deltas1 %>% 
+  rename(Age = age, Cluster = cluster) %>% 
+  mutate(Cluster = as.character(Cluster))
 
 WMout
 
@@ -68,7 +71,7 @@ WPPprime <-
   left_join(clusters, by = "iso3") %>% 
   mutate(Cluster = as.character(Cluster)) %>% 
   left_join(Deltas, by = c("Cluster", "sex","Age")) %>% 
-  mutate(mx_prime = log(mx) + delta,
+  mutate(mx_prime = log(mx) + delta.hat,
          mx_prime = exp(mx_prime)) %>% 
   select(-WHO_region, -LocID, -Country)
 
@@ -310,21 +313,24 @@ GHE2019_baseline <-
     filter(`source year` == "GHE 2019",
            measure == "deaths") %>% 
     arrange(iso3, sex, age) %>% 
-  select(Country, iso3, sex, age, Nx, deaths = `mean`)
+  select(Country, iso3, sex, age, Nx, deaths = `mean`) %>% 
+  left_join(clusters)
   
 write_csv(GHE2019_baseline, file = "Output/GHE2019_baseline.csv")
+
 WM2020_observed <-
   WM_estimates %>% 
     filter(`source year` == "Observed 2020",
            measure == "deaths") %>% 
     arrange(iso3, sex, age) %>% 
-  select(Country, iso3, sex, age, Nx, deaths = `mean`)
+  select(Country, iso3, sex, age, Nx, deaths = `mean`) %>% 
+  left_join(clusters)
 write_csv(WM2020_observed, file = "Output/WM2020_observed.csv")
   
-  out_iso3 <- deltasM$iso3 %>% unique()
+  out_clus <- Deltas$Cluster %>% unique()
   
-  out_iso3[!out_iso3 %in% wm_iso3]
-  wm_iso3[!wm_iso3 %in% out_iso3]
+  # out_clus[!out_clus %in% wm_iso3]
+  # wm_iso3[!wm_iso3 %in% out_iso3]
 
   
 dat <- read_csv("Output/annual_deaths_countries_selected_sources.csv")  
@@ -351,7 +357,7 @@ WM_estimates %>%
   left_join(COL) 
 
 GHE2019_baseline %>% 
-  select(Country, iso3, sex, age, Nx, deaths = `mean`)
+  select(Country, iso3, sex, age, Nx, deaths)
 WM2020_observed %>% 
   bind_rows(COL) %>% 
   write_csv("Output/WM2020_observed.csv")

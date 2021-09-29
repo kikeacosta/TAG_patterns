@@ -76,7 +76,8 @@ db2 <-
   do(rescale_sex(chunk = .data)) %>% 
   ungroup() %>% 
   mutate(Age = as.double(Age)) %>% 
-  arrange(Source, Country, Year, Sex, Age)
+  arrange(Source, Country, Year, Sex, Age) %>% 
+  replace_na(list(Deaths = 0))
 
 # Adding data in 2020 for the UK
 # grouping deaths for the UK in 2020 from the STMF
