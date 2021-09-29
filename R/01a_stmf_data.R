@@ -74,6 +74,7 @@ db_d2 <-
   select(-Access, -Type, -AgeInterval, -Area) %>% 
   mutate(PopCode = ifelse(PopCode == "a", "NOR", PopCode)) %>% 
   bind_rows(rus)
+
 unique(db_d2$PopCode)
 
 db_stmf <- 
