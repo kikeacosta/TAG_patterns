@@ -22,9 +22,62 @@ for(i in 1:length(zipdf$Name)){
     bind_rows(temp)
 }
 
-db_stmf <- 
+unique(db_d$PopCode)
+# a PopCode "a"
+test <- 
+  db_d %>% 
+  mutate(id = 1:n())
+
+# it is Norway in week 18, age 90, sex "b"
+
+# temporal fix: Russia has no total sex for 2019 and 2020, 
+# and ages 0-1 only since 2019
+test_rus <- 
+  db_d %>% 
+  filter(PopCode == "RUS",
+         Sex == "b",
+         Age == "TOT",
+         Year >= 2015)
+
+rus_19_20 <- 
+  db_d %>% 
+  filter(PopCode == "RUS",
+         Sex != "b",
+         Year >= 2019) %>% 
+  mutate(Age = case_when(Age == "1" ~ "0", 
+                         Age == "95" ~ "90",
+                         TRUE ~ Age)) %>% 
+  select(-Access, -Type, -AgeInterval, -Area) %>% 
+  group_by(PopCode, Year, Week, Sex, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() 
+
+rus_19_20_2 <- 
+  rus_19_20 %>% 
+  group_by(PopCode, Year, Week, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Sex = "b") %>% 
+  bind_rows(rus_19_20) 
+
+rus <- 
   db_d %>% 
   select(-Access, -Type, -AgeInterval, -Area) %>% 
+  filter(PopCode == "RUS",
+         Year >= 2015 & Year <= 2018) %>% 
+  bind_rows(rus_19_20_2) %>% 
+  arrange(Year, Week, Sex, suppressWarnings(as.integer(Age)))
+  
+db_d2 <- 
+  db_d %>% 
+  filter(PopCode != "RUS") %>% 
+  select(-Access, -Type, -AgeInterval, -Area) %>% 
+  mutate(PopCode = ifelse(PopCode == "a", "NOR", PopCode)) %>% 
+  bind_rows(rus)
+unique(db_d2$PopCode)
+
+db_stmf <- 
+  db_d2 %>% 
   mutate(PopCode = recode(PopCode,
                           "AUS2" = "AUS",
                           "DEUTNP" = "DEU",
@@ -51,5 +104,6 @@ db_stmf <-
                              Code == "USA" ~ "USA", 
                              TRUE ~ Country)) %>% 
   select(Country, Code, Year, Sex, Age, Deaths, Source)
+
 
 write_csv(db_stmf, "Output/stmf.csv")
