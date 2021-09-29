@@ -1,0 +1,195 @@
+Country,iso3,WHO_region,Cluster
+Afghanistan,AFG,EMRO,3
+Albania,ALB,EURO,2
+Algeria,DZA,AFRO,6
+Andorra,AND,EURO,2
+Angola,AGO,AFRO,3
+Antigua and Barbuda,ATG,AMRO,6
+Argentina,ARG,AMRO,3
+Armenia,ARM,EURO,8
+Australia,AUS,WPRO,7
+Austria,AUT,EURO,4
+Azerbaijan,AZE,EURO,8
+Bahamas,BHS,AMRO,6
+Bahrain,BHR,EMRO,6
+Bangladesh,BGD,SEARO,6
+Barbados,BRB,AMRO,7
+Belarus,BLR,EURO,2
+Belgium,BEL,EURO,2
+Belize,BLZ,AMRO,3
+Benin,BEN,AFRO,3
+Bhutan,BTN,SEARO,6
+Bolivia (Plurinational State of),BOL,AMRO,8
+Bosnia and Herzegovina,BIH,EURO,2
+Botswana,BWA,AFRO,6
+Brazil,BRA,AMRO,3
+Brunei Darussalam,BRN,WPRO,7
+Bulgaria,BGR,EURO,2
+Burkina Faso,BFA,AFRO,3
+Burundi,BDI,AFRO,3
+Côte d’Ivoire,CIV,AFRO,3
+Cabo Verde,CPV,AFRO,3
+Cambodia,KHM,WPRO,6
+Cameroon,CMR,AFRO,3
+Canada,CAN,AMRO,5
+Central African Republic,CAF,AFRO,3
+Chad,TCD,AFRO,3
+Chile,CHL,AMRO,4
+China,CHN,WPRO,1
+Colombia,COL,AMRO,3
+Comoros,COM,AFRO,3
+Congo,COG,AFRO,3
+Cook Islands,COK,WPRO,6
+Costa Rica,CRI,AMRO,6
+Croatia,HRV,EURO,4
+Cuba,CUB,AMRO,1
+Cyprus,CYP,EURO,1
+Czechia,CZE,EURO,2
+Democratic People's Republic of Korea,PRK,SEARO,6
+Democratic Republic of the Congo,COD,AFRO,3
+Denmark,DNK,EURO,1
+Djibouti,DJI,EMRO,3
+Dominica,DMA,AMRO,6
+Dominican Republic,DOM,AMRO,3
+Ecuador,ECU,AMRO,8
+Egypt,EGY,EMRO,3
+El Salvador,SLV,AMRO,3
+Equatorial Guinea,GNQ,AFRO,3
+Eritrea,ERI,AFRO,6
+Estonia,EST,EURO,1
+Eswatini,SWZ,AFRO,3
+Ethiopia,ETH,AFRO,3
+Fiji,FJI,WPRO,6
+Finland,FIN,EURO,1
+France,FRA,EURO,4
+Gabon,GAB,AFRO,3
+Gambia,GMB,AFRO,3
+Georgia,GEO,EURO,4
+Germany,DEU,EURO,5
+Ghana,GHA,AFRO,3
+Greece,GRC,EURO,5
+Grenada,GRD,AMRO,6
+Guatemala,GTM,AMRO,7
+Guinea,GIN,AFRO,3
+Guinea-Bissau,GNB,AFRO,3
+Guyana,GUY,AMRO,3
+Haiti,HTI,AMRO,3
+Honduras,HND,AMRO,3
+Hungary,HUN,EURO,4
+Iceland,ISL,EURO,1
+India,IND,SEARO,6
+Indonesia,IDN,SEARO,3
+Iran (Islamic Republic of),IRN,EMRO,3
+Iraq,IRQ,EMRO,3
+Ireland,IRL,EURO,7
+Israel,ISR,EURO,6
+Italy,ITA,EURO,2
+Jamaica,JAM,AMRO,6
+Japan,JPN,WPRO,1
+Jordan,JOR,EMRO,6
+Kazakhstan,KAZ,EURO,3
+Kenya,KEN,AFRO,3
+Kiribati,KIR,WPRO,6
+Kuwait,KWT,EMRO,6
+Kyrgyzstan,KGZ,EURO,3
+Lao People's Democratic Republic,LAO,WPRO,6
+Latvia,LVA,EURO,5
+Lebanon,LBN,EMRO,6
+Lesotho,LSO,AFRO,3
+Liberia,LBR,AFRO,3
+Libya,LBY,EMRO,3
+Lithuania,LTU,EURO,2
+Luxembourg,LUX,EURO,1
+Madagascar,MDG,AFRO,3
+Malawi,MWI,AFRO,3
+Malaysia,MYS,WPRO,7
+Maldives,MDV,SEARO,6
+Mali,MLI,AFRO,3
+Malta,MLT,EURO,5
+Marshall Islands,MHL,WPRO,6
+Mauritania,MRT,AFRO,3
+Mauritius,MUS,AFRO,7
+Mexico,MEX,AMRO,8
+Micronesia (Federated States of),FSM,WPRO,6
+Monaco,MCO,EURO,5
+Mongolia,MNG,WPRO,6
+Montenegro,MNE,EURO,4
+Morocco,MAR,EMRO,3
+Mozambique,MOZ,AFRO,3
+Myanmar,MMR,SEARO,6
+Namibia,"NAM",AFRO,3
+Nauru,NRU,WPRO,6
+Nepal,NPL,SEARO,3
+Netherlands,NLD,EURO,4
+New Zealand,NZL,WPRO,7
+Nicaragua,NIC,AMRO,3
+Niger,NER,AFRO,3
+Nigeria,NGA,AFRO,3
+Niue,NIU,WPRO,6
+North Macedonia,MKD,EURO,2
+Norway,NOR,EURO,1
+Oman,OMN,EMRO,6
+Pakistan,PAK,EMRO,3
+Palau,PLW,WPRO,7
+Panama,PAN,AMRO,3
+Papua New Guinea,PNG,WPRO,6
+Paraguay,PRY,AMRO,6
+Peru,PER,AMRO,8
+Philippines,PHL,WPRO,6
+Poland,POL,EURO,2
+Portugal,PRT,EURO,4
+Qatar,QAT,EMRO,6
+Republic of Korea,KOR,WPRO,1
+Republic of Moldova,MDA,EURO,2
+Romania,ROU,EURO,2
+Russian Federation,RUS,EURO,2
+Rwanda,RWA,AFRO,6
+Saint Kitts and Nevis,KNA,AMRO,7
+Saint Lucia,LCA,AMRO,6
+Saint Vincent and the Grenadines,VCT,AMRO,6
+Samoa,WSM,WPRO,6
+San Marino,SMR,EURO,2
+Sao Tome and Principe,STP,AFRO,3
+Saudi Arabia,SAU,EMRO,6
+Senegal,SEN,AFRO,3
+Serbia,SRB,EURO,2
+Seychelles,SYC,AFRO,7
+Sierra Leone,SLE,AFRO,3
+Singapore,SGP,WPRO,1
+Slovakia,SVK,EURO,4
+Slovenia,SVN,EURO,2
+Solomon Islands,SLB,WPRO,6
+Somalia,SOM,EMRO,3
+South Africa,ZAF,AFRO,3
+South Sudan,SSD,AFRO,3
+Spain,ESP,EURO,2
+Sri Lanka,LKA,SEARO,6
+Sudan,SDN,EMRO,3
+Suriname,SUR,AMRO,3
+Sweden,SWE,EURO,4
+Switzerland,CHE,EURO,4
+Syrian Arab Republic,SYR,EMRO,6
+Tajikistan,TJK,EURO,6
+Thailand,THA,SEARO,1
+The United Kingdom,GBR,EURO,4
+Timor-Leste,TLS,SEARO,6
+Togo,TGO,AFRO,3
+Tonga,TON,WPRO,6
+Trinidad and Tobago,TTO,AMRO,6
+Tunisia,TUN,EMRO,6
+Turkey,TUR,EURO,6
+Turkmenistan,TKM,EURO,6
+Tuvalu,TUV,WPRO,6
+Uganda,UGA,AFRO,3
+Ukraine,UKR,EURO,4
+United Arab Emirates,ARE,EMRO,6
+United Republic of Tanzania,TZA,AFRO,3
+United States of America,USA,AMRO,2
+Uruguay,URY,AMRO,7
+Uzbekistan,UZB,EURO,3
+Vanuatu,VUT,WPRO,6
+Venezuela (Bolivarian Republic of),VEN,AMRO,6
+Viet Nam,VNM,WPRO,6
+Yemen,YEM,EMRO,3
+Zambia,ZMB,AFRO,3
+Zimbabwe,ZWE,AFRO,3
