@@ -5,17 +5,16 @@ library(janitor)
 
 # doing this in one pass means that the input microdata doesn't eat up memory
 # the only thing that gets saves is the tiny resulting table
+
 BR2020 <-
-  read_delim("https://opendatasus.saude.gov.br/dataset/57c4b23e-6ffa-43ef-a1e7-23103f73f376/resource/da17c5f6-aa89-4e7d-b7e2-ec4b77a5dc31/download/dobrano_.csv", delim = ";") %>% 
+  read_delim("https://opendatasus.saude.gov.br/dataset/57c4b23e-6ffa-43ef-a1e7-23103f73f376/resource/8d947ac1-addb-49f2-85ab-824a7408a432/download/dobrano_.csv", delim = ";") %>% 
+  filter(TIPOBITO == 2) %>% 
   group_by(IDADE, SEXO) %>% 
   summarize(Deaths = n(), .groups = "drop") %>% 
-  mutate(age_type = substr(IDADE, 1,1),
-         Age = substr(IDADE, 2,3),
-         Age = case_when(age_type %in% c("0","9")~"UNK",
-                         is.na(age_type)~"UNK",
-                         age_type %in% c("1","2","3")~"00",
-                         age_type == "5" ~ "100",
-                         TRUE ~ Age),
+  mutate(Age = case_when(IDADE < 400 ~ "0",
+                         IDADE > 400 & IDADE < 500 ~ str_sub(IDADE, 2, 3),
+                         IDADE >= 500 & IDADE <= 600 ~ "100",
+                         TRUE ~ "UNK"),
          Sex = recode(SEXO,
                       "0" = "UNK",
                       "1" = "m",
@@ -41,7 +40,6 @@ BR2020 <-
 # will need to do manual, though, since code might have inconsistencies?
 # especially IDADE might be coded differently.
 
-
 link2019 <- "https://s3-sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/Mortalidade_Geral_2019.csv"
 link2018 <- "https://s3-sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/Mortalidade_Geral_2018.csv"
 link2017 <- "https://s3-sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/Mortalidade_Geral_2017.csv"
@@ -56,13 +54,10 @@ for (i in 1:length(years)){
   out[[i]] <- read_delim(link, delim = ";") %>% 
     group_by(IDADE, SEXO) %>% 
     summarize(Deaths = n(), .groups = "drop") %>% 
-    mutate(age_type = substr(IDADE, 1,1),
-           Age = substr(IDADE, 2,3),
-           Age = case_when(age_type %in% c("0","9")~"UNK",
-                           is.na(age_type)~"UNK",
-                           age_type %in% c("1","2","3")~"00",
-                           age_type == "5" ~ "100",
-                           TRUE ~ Age),
+    mutate(Age = case_when(IDADE < 400 ~ "0",
+                           IDADE > 400 & IDADE < 500 ~ str_sub(IDADE, 2, 3),
+                           IDADE >= 500 & IDADE <= 600 ~ "100",
+                           TRUE ~ "UNK"),
            Sex = recode(SEXO,
                         "0" = "UNK",
                         "1" = "m",
