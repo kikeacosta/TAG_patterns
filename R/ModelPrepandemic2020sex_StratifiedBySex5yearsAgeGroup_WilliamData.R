@@ -29,13 +29,28 @@ data2 <- read.csv("Output/WM2020_observed.csv", header=TRUE)
 ## removed doubles Colombia in data2
 data2 <- data2[-c(2161:2268), ]
 
-
+data1$lmx <- log(data1$deaths/data1$Nx)
 data2$lmx <- log(data2$deaths/data2$Nx)
 
+# whi.data1 <- which(data1$lmx==data2$lmx[37])
+# whi.data2 <- which(data2$lmx==data2$lmx[37])
+# 
+# data1$deaths[whi.data1] <- 0
+# data2$deaths[whi.data2] <- 0
+
+data1$lmx <- log(data1$deaths/data1$Nx)
+data2$lmx <- log(data2$deaths/data2$Nx)
+
+
+library(ggplot2)
+library(plotly)
 aa <- ggplot(data=data2, aes(x=age, y=lmx, col=iso3))+
   geom_line()+labs(x = "age", y = "", title = "log-mortality")
 ggplotly(aa)
 plot(aa)
+
+library(lattice)
+xyplot(lmx~age|iso3, group=sex, data=data1, type="l")
 
 ## select pop which are in both datasets
 ## populations
@@ -79,8 +94,8 @@ colpopT <- adjustcolor(colpop, 0.3)
 
 
 OUT <- list()
-PLOT <- FALSE
-j=59
+PLOT <- TRUE
+j=2
 for(j in 1:p){
   OUT.j <- list()
   
