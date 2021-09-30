@@ -279,7 +279,9 @@ for(c in 1:8){
 
 save.image("Output/OutPrepandemic2020sex_StratifiedBySex_WMdata.Rdata")
 
-
+write.table(data1, "data2019_GC.txt")
+write.table(data2, "data2020_GC.txt")
+write.table(DELTAs, "Deltas_GC.txt")
 
 ## 2019
 pdf("ActualFittedLogMortalityClusterDelta.pdf", width = 12, height = 10)
