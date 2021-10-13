@@ -14,6 +14,7 @@ col <- read_csv("Output/colombia.csv")
 chl <- read_csv("Output/chile.csv")
 ecu <- read_csv("Output/ecuador.csv",
                  col_types = "ccdccdc")
+irn <- read_csv("Output/iran.csv")
 
 # adjusting sources for "country_public" data
 latam <- 
@@ -56,7 +57,8 @@ db <-
             latam,
             zaf,
             col,
-            chl)
+            chl,
+            irn)
 
 unique(db$Sex)
 unique(db$Age)
@@ -329,7 +331,6 @@ available <-
   mutate(age_groupings = n()) %>% 
   ungroup() 
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # saving 3 output data objects
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -343,3 +344,4 @@ write_csv(available, "Output/summary_selected_sources_by_country.csv")
 # 3) output mortality data based on selected sources
 write_csv(out, "Output/annual_deaths_countries_selected_sources.csv")
 
+unique(summ1$Country)
