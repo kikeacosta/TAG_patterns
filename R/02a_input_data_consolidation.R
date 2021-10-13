@@ -15,6 +15,7 @@ chl <- read_csv("Output/chile.csv")
 ecu <- read_csv("Output/ecuador.csv",
                  col_types = "ccdccdc")
 irn <- read_csv("Output/iran.csv")
+hmd <- read_csv("Output/hmd_2020.csv")
 
 # adjusting sources for "country_public" data
 latam <- 
@@ -43,6 +44,17 @@ unpd2 <-
   unpd %>% 
   filter(!Country %in% exc_unpd)
 
+# excluding HMD countries from stmf and eurs
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+hmd_cts <- unique(hmd$Country)
+
+stmf2 <- 
+  stmf %>% 
+  filter(!Country %in% hmd_cts)
+
+eurs2 <- 
+  eurs %>% 
+  filter(!Country %in% hmd_cts)
 
 # Adjust for unknown ages and sex
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,8 +64,9 @@ unpd2 <-
 # solving for stmf, eurostat, and brazil
 
 db <- 
-  bind_rows(stmf,
-            eurs,
+  bind_rows(stmf2,
+            eurs2,
+            hmd,
             latam,
             zaf,
             col,
@@ -89,8 +102,7 @@ uk2020 <-
   db2 %>% 
   filter(Code %in% c("GBR_SCO", "GBR_NIR", "GBRTENW"),
          Year == 2020) %>% 
-  mutate(Age = case_when(Age > 90 ~ 90, 
-                         Age < 5 ~ 0,
+  mutate(Age = case_when(Age > 90 ~ 90,
                          TRUE ~ Age)) %>% 
   group_by(Year, Sex, Age) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
@@ -107,7 +119,6 @@ db3 <-
             uk2020) %>% 
   mutate(Deaths = ifelse(is.na(Deaths), 0, Deaths)) %>% 
   filter(!Code %in% c("GBR_SCO", "GBR_NIR", "GBRTENW"))
-
 
 # create a table with data availability by population, including age groups and years
 
