@@ -1,3 +1,6 @@
+library(readr)
+library(tidyverse)
+library(readxl)
 
 
 Deltas1 <- 
@@ -41,24 +44,23 @@ Data_2019_2 <-
   ungroup() %>% 
   left_join(WMout2) %>% 
   mutate(dx = px * d_tot,
-         lmx_scaled = log(dx/Nx))
+         lmx_spinoff = log(dx/Nx))
 
-library(readxl)
-WM_estimates<- read_excel("Data/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
+WM_estimates<- read_excel("Output/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
 
 WM_pred <- 
   WM_estimates %>% 
   dplyr::filter(measure == "mx",
                 `source year` == "Predicted 2020") %>% 
-  mutate(lmx_pred_w = log(mean)) %>% 
-  select(iso3, sex, age, lmx_pred_w)
+  mutate(lmx_WM = log(mean)) %>% 
+  select(iso3, sex, age, lmx_WM)
 
 Data_2019_3 <- 
   Data_2019_2 %>% 
   left_join(WM_pred) %>% 
-  select(Country, iso3, cluster, sex, age, lmx_scaled, lmx_pred_w) %>% 
+  select(Country, iso3, cluster, sex, age, lmx_spinoff, lmx_WM) %>% 
   drop_na() %>% 
-  gather(lmx_scaled, lmx_pred_w, key = source, value = lmx)
+  gather(lmx_spinoff, lmx_WM, key = source, value = lmx)
 
 pdf("Figures/in_sample_compare2.pdf")
 
@@ -74,9 +76,10 @@ for(is in isos){
   p <- 
     chunk %>% 
     ggplot()+
-    geom_line(aes(age, lmx, col = source, linetype = sex))+
+    geom_line(aes(age, lmx, col = source, linetype = sex), size=1)+
     labs(title = paste("Cluster",cl,ctry)) +
-    theme_bw()
+    theme_bw()+
+    labs(x = "age", y = "log-mortality")
     
     print(p)
 }
@@ -113,9 +116,9 @@ deaths <-
 diffs <- 
   Data_2019_2 %>% 
   left_join(WM_pred) %>% 
-  select(Country, iso3, cluster, sex, age, lmx_scaled, lmx_pred_w) %>% 
+  select(Country, iso3, cluster, sex, age, lmx_spinoff, lmx_WM) %>% 
   drop_na() %>% 
-  mutate(diff_lx = exp(lmx_scaled - lmx_pred_w))
+  mutate(diff_lx = exp(lmx_spinoff - lmx_WM))
 
 pdf("Figures/all_diffs.pdf")
 
@@ -131,11 +134,12 @@ for(is in isos){
   p <- 
     chunk %>% 
     ggplot()+
-    geom_line(aes(age, diff_lx, linetype = sex))+
+    geom_line(aes(age, diff_lx, linetype = sex),size=1)+
     geom_hline(yintercept = 1, linetype = "dashed")+
     scale_y_log10()+
     labs(title = paste("Cluster",cl,ctry)) +
-    theme_bw()
+    theme_bw()+
+    labs(x = "age", y = "Incidence rate ratio")
   
   print(p)
 }
@@ -144,9 +148,9 @@ dev.off()
 sex_ratio <- 
   Data_2019_2 %>% 
   left_join(WM_pred) %>% 
-  select(Country, iso3, cluster, sex, age, lmx_scaled, lmx_pred_w) %>% 
+  select(Country, iso3, cluster, sex, age, lmx_spinoff, lmx_WM) %>% 
   drop_na() %>% 
-  gather(lmx_scaled, lmx_pred_w, key = source, value = lmx) %>% 
+  gather(lmx_spinoff, lmx_WM, key = source, value = lmx) %>% 
   spread(sex, lmx) %>% 
   mutate(sex_ratio = exp(Male - Female))
 
@@ -164,11 +168,12 @@ for(is in isos){
   p <- 
     chunk %>% 
     ggplot()+
-    geom_line(aes(age, sex_ratio, linetype = source))+
+    geom_line(aes(age, sex_ratio, col = source), size=1)+
     geom_hline(yintercept = 1, linetype = "dashed")+
     scale_y_log10()+
     labs(title = paste("Cluster",cl,ctry)) +
-    theme_bw()
+    theme_bw()+
+    labs(x = "age", y = "Sex ratio")
   
   print(p)
 }

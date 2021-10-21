@@ -75,6 +75,7 @@
 \author[Camarda et al.$\qquad\quad\qquad\quad\qquad\quad\qquad\quad\qquad\quad$October 2021]
 {\large{\sl{Carlo Giovanni Camarda}}\\
 \large{\sl{Tim Riffe}}\\
+\large{\sl{Simona Bignani}}\\
 \large{\sl{Enrique Acosta}}
 }
 
@@ -125,30 +126,32 @@ $\,$\\
 \begin{frame}[fragile]\frametitle{Data and aim}
 	\vspace{-0.2cm}
 \begin{itemize}
-	\item Death and exposures by 
+	\item<1-> Death and exposures by 
 	\begin{itemize}
 		\item five years age-group: 0-4, 5-9, $\ldots$, 85+
 		\item females and males separately 
 	\end{itemize}	
-	\item 2019 data source (baseline):
+	\item<2->  2019 (baseline):
 	\begin{itemize}
-		\item Mortality and Global Health Estimates (GHE)
-		\item Data available for all 194 populations
+		\item \textbf{Source:} Global Health Estimates (GHE)
+		\item \textbf{Availability:} all 194 populations
 	\end{itemize}
-	\item 2020 data sources:
+	\item<3->  2020:
 	\begin{itemize}
-		\item ???
-		\item Data available for only 60 populations
+		\item \textbf{Source:} Various
+		\item \textbf{Availability:} only 60 populations
 	\end{itemize}
-	\item Information provided by William et al.
+	\item<4->  Information provided by William et al.
 	\begin{itemize}
 		\item Overall excess deaths in 2020 for all populations 
 		\item 8 clusters for all populations, based on external information
 	\end{itemize}
 \end{itemize}
+\onslide<5>{
 \begin{alertblock}{\centering \textbf{AIM}}
 Estimate 2020 mortality by age and sex for pop.~with no data
 \end{alertblock}	
+}
 \end{frame}
 
 
@@ -156,14 +159,14 @@ Estimate 2020 mortality by age and sex for pop.~with no data
 	\vspace{-0.2cm}
 	
 	\begin{itemize}
-		\item William's approach:
+		\item<1-> William's approach:
 		\begin{enumerate}
 			\item empirical ratio between mortality in 2019 and 2020 for population with both information
 			\item group of these ratios based on mentioned clusters
 			\item creation of a smooth cluster-specific distribution of ratios
 			\item extract random ratio and apply it to 2019 mortality for population with no information in 2020
 		\end{enumerate}
-	\item Spin-off (our) approach:
+	\item<2-> Spin-off (our) approach:
 		\begin{enumerate}
 		\item for a given population with both information within a cluster $k$:
 	$$
@@ -173,7 +176,7 @@ Estimate 2020 mortality by age and sex for pop.~with no data
 		\item apply cluster-specific age-factor $\delta^{k}(x)$ to population with no information in 2020
 		\item (uncertainty still to be included)
 	\end{enumerate}
-\item Final common step: redistribution of estimated 2020 deaths to match ``known'' overall excess mortality deaths
+\item<3-> Final common step: redistribution of estimated 2020 deaths to match ``known'' overall excess mortality deaths
 	 \end{itemize}	
  
 
@@ -190,21 +193,21 @@ Estimate 2020 mortality by age and sex for pop.~with no data
 		\begin{scriptsize}
 			\begin{table}[]
 				\begin{tabular}{clrrr}
-					Cluster                                            & \multicolumn{1}{c}{pop w/ data}                                                                           & \multicolumn{1}{l}{\begin{tabular}[c]{@{}l@{}}\# pop \\ w/ data\end{tabular}} & \multicolumn{1}{c}{\begin{tabular}[c]{@{}c@{}}\# pop \\ w/o data\end{tabular}} & \multicolumn{1}{l}{$\frac{\mbox{\# w/o data}}{\mbox{\# w/data}}$} \\ \hline
+					Cluster                                            & \multicolumn{1}{c}{pop w/ data}                                                                           & \multicolumn{1}{l}{\begin{tabular}[c]{@{}l@{}}\# pop \\ w/ data\end{tabular}} & \multicolumn{1}{c}{\begin{tabular}[c]{@{}c@{}}\# pop \\ w/o data\end{tabular}} & \multicolumn{1}{l}{\begin{tabular}[c]{@{}c@{}}\% of pop. \\ w/ data\end{tabular}} \\ \hline
 					\rowcolor[HTML]{C0C0C0} 
-					1                                                  & \begin{tabular}[c]{@{}l@{}}CYP,DNK,EST,FIN,ISL,\\ JPN,KOR,LUX,NOR\end{tabular}                            & 9                                                                             & 4                                                                              & 0.44                                                              \\
-					2                                                  & \begin{tabular}[c]{@{}l@{}}ALB,AND,BEL,BGR,CZE,\\ ESP,ITA,LTU,MDA,POL,ROU,\\ RUS,SRB,SVN,USA\end{tabular} & 15                                                                            & 4                                                                              & 0.27                                                              \\
+					1                                                  & \begin{tabular}[c]{@{}l@{}}CYP,DNK,EST,FIN,ISL,\\ JPN,KOR,LUX,NOR\end{tabular}                            & 9                                                                             & 4                                                                              & 69\%                                                              \\
+					2                                                  & \begin{tabular}[c]{@{}l@{}}ALB,AND,BEL,BGR,CZE,\\ ESP,ITA,LTU,MDA,POL,ROU,\\ RUS,SRB,SVN,USA\end{tabular} & 15                                                                            & 4                                                                              & 79\%                                                              \\
 					\rowcolor[HTML]{C0C0C0} 
-					3                                                  & BRA,IRQ,ZAF,COL                                                                                           & 4                                                                             & 65                                                                             & 16.25                                                             \\
-					4                                                  & \begin{tabular}[c]{@{}l@{}}AUT,CHE,CHL,FRA,GBR,\\ GEO,HRV,HUN,MNE,NLD,\\ PRT,SVK,SWE,UKR\end{tabular}     & 14                                                                            & 0                                                                              & 0.00                                                              \\
+					3                                                  & BRA,IRQ,ZAF,COL                                                                                           & 4                                                                             & 65                                                                             & $\,$6\%                                                             \\
+					4                                                  & \begin{tabular}[c]{@{}l@{}}AUT,CHE,CHL,FRA,GBR,\\ GEO,HRV,HUN,MNE,NLD,\\ PRT,SVK,SWE,UKR\end{tabular}     & 14                                                                            & 0                                                                              & 100\%                                                              \\
 					\rowcolor[HTML]{C0C0C0} 
-					5                                                  & CAN,DEU,GRC,LVA,MLT                                                                                       & 5                                                                             & 1                                                                              & 0.20                                                              \\
-					6                                                  & CRI,ISR,PRY,TUN                                                                                           & 4                                                                             & 51                                                                             & 12.75                                                             \\
+					5                                                  & CAN,DEU,GRC,LVA,MLT                                                                                       & 5                                                                             & 1                                                                              & 83\%                                                              \\
+					6                                                  & CRI,ISR,PRY,TUN                                                                                           & 4                                                                             & 51                                                                             & 7\%                                                             \\
 					\rowcolor[HTML]{C0C0C0} 
-					7                                                  & AUS,IRL,MUS,NZL,URY                                                                                       & 5                                                                             & 7                                                                              & 1.40                                                              \\
-					8                                                  & ARM,ECU,MEX,PER                                                                                           & 4                                                                             & 2                                                                              & 0.50                                                              \\ \hline
+					7                                                  & AUS,IRL,MUS,NZL,URY                                                                                       & 5                                                                             & 7                                                                              & 42\%                                                              \\
+					8                                                  & ARM,ECU,MEX,PER                                                                                           & 4                                                                             & 2                                                                              & 67\%                                                              \\ \hline
 					\rowcolor[HTML]{C0C0C0} 
-					\multicolumn{1}{l}{\cellcolor[HTML]{C0C0C0}\textbf{Totals}} &                                                                                                           & 60                                                                            & 134                                                                            & 2.23                                                             
+					\multicolumn{1}{l}{\cellcolor[HTML]{C0C0C0}\textbf{Totals}} &                                                                                                           & 60                                                                            & 134                                                                            & 31\%                                                             
 				\end{tabular}
 			\end{table}
 \end{scriptsize}
@@ -223,299 +226,465 @@ Estimate 2020 mortality by age and sex for pop.~with no data
 \end{frame}
 
 
+\begin{frame}[fragile]\frametitle{Log-mortality in 2019: in-sample fit}
+	\vspace*{-0.2cm}
+	\begin{center}
+		%\hspace*{-2cm}
+		\includegraphics[scale=.3]{Figures/ActualFittedLogMortality2019.pdf}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Log-mortality in 2020: in-sample fit}
+	\vspace*{-0.2cm}
+	\begin{center}
+		%\hspace*{-2cm}
+		\includegraphics[scale=.3]{Figures/ActualFittedLogMortality2020.pdf}
+	\end{center}
+\end{frame}
 
 
-\begin{frame}[fragile]\frametitle{A schematic illustration: model \emph{Common}}
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 1 (69\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+		%		\includegraphics[scale=.3, page=44]{Figures/in_sample_compare2.pdf}
+		%		\includegraphics[scale=.3, page=33]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=44]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=44]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=44]{Figures/all_sex_ratios.pdf}
+
+		
+		\includegraphics[scale=.18, page=33]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=33]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=33]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 2 (79\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=55]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.3, page=21]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=55]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=55]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=55]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.18, page=21]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=21]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=21]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 3 (6\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=24]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.3, page=53]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=24]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=24]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=24]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.18, page=53]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=53]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=53]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 4 (100\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=60]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.2]{Figures/Empty.pdf}
+		\includegraphics[scale=.18, page=60]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=60]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=60]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.1]{Figures/Empty.pdf}
+		\includegraphics[scale=.1]{Figures/Empty.pdf}
+		\includegraphics[scale=.1]{Figures/Empty.pdf}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 5 (83\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=30]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.3, page=108]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=30]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=30]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=30]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.18, page=108]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=108]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=108]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 6 (7\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=84]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.3, page=79]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=84]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=84]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=84]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.18, page=79]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=79]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=79]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 7 (42\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=80]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.3, page=140]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=80]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=80]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=80]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.18, page=140]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=140]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=140]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]\frametitle{Out-of-sample comparison, Cluster 8 (67\%)}
+	\vspace*{-0.2cm}
+	\begin{center}
+%		\includegraphics[scale=.3, page=112]{Figures/in_sample_compare2.pdf}
+%		\includegraphics[scale=.3, page=23]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=112]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=112]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=112]{Figures/all_sex_ratios.pdf}
+		
+		
+		\includegraphics[scale=.18, page=23]{Figures/in_sample_compare2.pdf}
+		\includegraphics[scale=.18, page=23]{Figures/all_diffs.pdf}
+		\includegraphics[scale=.18, page=23]{Figures/all_sex_ratios.pdf}
+	\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]\frametitle{Concluding remarks}
 	\vspace{-0.2cm}
-	\only<1>{
-		\begin{center}
-			\includegraphics[scale=.18]{Figures/SimulEta0FSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulEta0MSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulDelta0Sex.pdf}
-			\includegraphics[scale=.18]{Figures/Simuls0Sex.pdf}
-		\end{center}
-	}
-	\only<2>{
-		\begin{center}
-			\includegraphics[scale=.18]{Figures/SimulEta1FSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulEta1MSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulDelta1Sex.pdf}
-			\includegraphics[scale=.18]{Figures/Simuls1Sex.pdf}
-		\end{center}
-	}
-	\only<3>{
-		\begin{center}
-			\includegraphics[scale=.18]{Figures/SimulEta2FSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulEta2MSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulDelta2Sex.pdf}
-			\includegraphics[scale=.18]{Figures/Simuls2Sex.pdf}
-		\end{center}
-	}
-	\only<4>{
-		\begin{center}
-			\includegraphics[scale=.18]{Figures/SimulEta3FSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulEta3MSex.pdf}
-			\includegraphics[scale=.18]{Figures/SimulDelta3Sex.pdf}
-			\includegraphics[scale=.18]{Figures/Simuls3Sex.pdf}
-		\end{center}
-	}
-\end{frame}
-
-
-\begin{frame}[fragile]\frametitle{A schematic illustration: model \emph{Saturated}}
-	\vspace{-0.2cm}
-\only<1>{
-	\begin{center}
-		\includegraphics[scale=.18]{Figures/SimulEta3FSexSat.pdf}
-		\includegraphics[scale=.18]{Figures/SimulEta3MSexSat.pdf}
-		\includegraphics[scale=.18]{Figures/SimulDelta3SexSat.pdf}
-		\includegraphics[scale=.18]{Figures/Simuls3SexSat.pdf}
-	\end{center}
-}
-\end{frame}
-
-
-\begin{frame}[fragile]\frametitle{Actual data illustration 1: France (different scaling factor)}
-	\vspace{-0.2cm}
-	\only<1>{
-		\begin{center}
-			\includegraphics[scale=.26]{Figures/FranceEtaFSexStra.pdf}
-			\includegraphics[scale=.26]{Figures/FranceEtaMSexStra.pdf}
-			
-			\begin{footnotesize}
-				Fitted log-mortality from \emph{Stratified} model
-			\end{footnotesize}
-			
-		\end{center}
-	}
-	\only<2>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/FranceDeltaSexStra.pdf}
-		
-		\begin{footnotesize}
-			Parameters from \emph{Stratified} model
-		\end{footnotesize}
-		
-	\end{center}
-	}
-	\only<3>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/FrancesSexCom.pdf}
-		\includegraphics[scale=.26]{Figures/FranceDeltaSexCom.pdf}
-		
-		\begin{footnotesize}
-			Parameters from \emph{Common} model
-		\end{footnotesize}
-		
-	\end{center}
-}
-	\only<4>{
-	\begin{center}
-		\includegraphics[scale=.26]{Figures/FrancesSexComSat.pdf}
-		\includegraphics[scale=.26]{Figures/FranceDeltaSexComSat.pdf}
-		
-		\begin{footnotesize}
-			Parameters from \emph{Common} and \emph{Saturated} model
-		\end{footnotesize}
-		
-	\end{center}
-}
-\end{frame}
-
-
-
-
-\begin{frame}[fragile]\frametitle{Actual data illustration 2: Peru (middle-age hump)}
-	\vspace{-0.2cm}
-\only<1>{
-	\begin{center}
-		\includegraphics[scale=.17]{Figures/PeruEtaFSexSat.pdf}
-		\includegraphics[scale=.17]{Figures/PeruEtaMSexSat.pdf}
-		
-		\includegraphics[scale=.17]{Figures/PerusSexSat.pdf}
-	\includegraphics[scale=.17]{Figures/PeruDeltaSexSat.pdf}
-		
-		\begin{footnotesize}
-			Fitted log-mortality and parameters from \emph{Saturated} model
-		\end{footnotesize}
-		
-	\end{center}
-}
-\only<2>{
-	\begin{center}
-		\includegraphics[scale=.17]{Figures/PeruEtaFSexSat.pdf}
-		\includegraphics[scale=.17]{Figures/PeruEtaMSexSat.pdf}
-		
-		\includegraphics[scale=.17]{Figures/PerusSexSat.pdf}
-		\includegraphics[scale=.17]{Figures/PeruDeltaSexSatCom.pdf}
-		
-		\begin{footnotesize}
-			Fitted log-mortality and parameters from \emph{Saturated} model. $\delta(x)$ and $c$ parameters from the \emph{Common} are plotted along\\
-		\end{footnotesize}
-		
-	\end{center}
-}
-
+	\begin{itemize}
+		\item<1-> \textbf{Adequate coherence between WM and spin-off group outcomes}
+		\bigskip
+		\item<2-> More data are now available in 2020 (model can be easily accommodated)
+		\item<3-> Diverse data sources contains diverse age-grouping structure
+		\item<4-> Include uncertainty measures, coming from $\delta^{k}(x)$ \& $\eta(x)$
+		\item<5-> Should we aim outcomes by single year of age?
+		\item<6-> How sensible the model is with respect to the clusters and/or overall excess deaths?
+		\medskip
+		\item<7-> \emph{Something else from your side?}
+	\end{itemize}
 \end{frame}
 
 
 
 
 
-\begin{frame}[fragile]\frametitle{Actual data illustration 2: Peru (middle-age hump)}
-	\vspace{-0.2cm}
-	\only<1>{
-		\begin{center}
-			\includegraphics[scale=.26]{Figures/DeltaFAll.pdf}
-			\includegraphics[scale=.26]{Figures/DeltaMAll.pdf}
-			
-			\begin{footnotesize}
-				$\delta(x)$ from \emph{Saturated} model by sex
-			\end{footnotesize}
-			
-		\end{center}
-	}
-	
-\end{frame}
-
-
-
-
-\begin{frame}[fragile]\frametitle{Sex-specific age-dependent component $e^{\delta(x)}$}
-	\only<1>{
-		\vspace{-0.7cm}
-		\begin{center}
-			\includegraphics[scale=.38]{Figures/ExpDeltaGoodPop.pdf}		
-		\end{center}
-	}
-\end{frame}
-
-
-
-\begin{frame}[fragile]\frametitle{Sex age-factor $s(x)$}
-	\only<1>{
-		\vspace{-0.7cm}
-		\begin{center}
-			\includegraphics[scale=.38]{Figures/sGoodPop.pdf}		
-		\end{center}
-	}
-\end{frame}
-
-%
-%
-%\begin{frame}[fragile]\frametitle{Actual data illustration 3: Mongolia (clear data issues)}
+%\begin{frame}[fragile]\frametitle{A schematic illustration: model \emph{Common}}
+%	\vspace{-0.2cm}
 %	\only<1>{
 %		\begin{center}
-%			\includegraphics[scale=.26]{Figures/MongoliaEta.pdf}
-%			\includegraphics[scale=.26]{Figures/MongoliaDelta.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulEta0FSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulEta0MSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulDelta0Sex.pdf}
+%			\includegraphics[scale=.18]{Figures/Simuls0Sex.pdf}
 %		\end{center}
 %	}
-%\end{frame}
-%
-%\begin{frame}[fragile]\frametitle{Actual data illustration 4: Ireland (a good 2020?)}
-%	\only<1>{
-%		\begin{center}
-%			\includegraphics[scale=.26]{Figures/IrelandEta.pdf}
-%			\includegraphics[scale=.26]{Figures/IrelandDelta.pdf}
-%		\end{center}
-%	}
-%\end{frame}
-%
-%\begin{frame}[fragile]\frametitle{World Map with $e^c$ (relative risk scaling factor)}
-%	\hspace{-2cm}
-%			\includegraphics[scale=0.8]{Figures/scale_factor_map}
-%\end{frame}
-%
-%
-%\begin{frame}[fragile]\frametitle{Age-dependent component $\delta(x)$}
-%	\only<1>{
-%		\begin{center}
-%			\includegraphics[scale=.3]{Figures/DeltaAll.pdf}
-%			
-%			\begin{scriptsize}
-%				Parameter $\delta$ for all available data
-%			\end{scriptsize}
-%			
-%		\end{center}
-%	}
-%
 %	\only<2>{
+%		\begin{center}
+%			\includegraphics[scale=.18]{Figures/SimulEta1FSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulEta1MSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulDelta1Sex.pdf}
+%			\includegraphics[scale=.18]{Figures/Simuls1Sex.pdf}
+%		\end{center}
+%	}
+%	\only<3>{
+%		\begin{center}
+%			\includegraphics[scale=.18]{Figures/SimulEta2FSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulEta2MSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulDelta2Sex.pdf}
+%			\includegraphics[scale=.18]{Figures/Simuls2Sex.pdf}
+%		\end{center}
+%	}
+%	\only<4>{
+%		\begin{center}
+%			\includegraphics[scale=.18]{Figures/SimulEta3FSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulEta3MSex.pdf}
+%			\includegraphics[scale=.18]{Figures/SimulDelta3Sex.pdf}
+%			\includegraphics[scale=.18]{Figures/Simuls3Sex.pdf}
+%		\end{center}
+%	}
+%\end{frame}
+%
+%
+%\begin{frame}[fragile]\frametitle{A schematic illustration: model \emph{Saturated}}
+%	\vspace{-0.2cm}
+%\only<1>{
 %	\begin{center}
-%		\includegraphics[scale=.3]{Figures/DeltaDataIssue.pdf}
-%		
-%		\begin{scriptsize}
-%			Parameter $\delta$ for populations with clear data issue or peculiar patterns
-%		\end{scriptsize}
-%		
+%		\includegraphics[scale=.18]{Figures/SimulEta3FSexSat.pdf}
+%		\includegraphics[scale=.18]{Figures/SimulEta3MSexSat.pdf}
+%		\includegraphics[scale=.18]{Figures/SimulDelta3SexSat.pdf}
+%		\includegraphics[scale=.18]{Figures/Simuls3SexSat.pdf}
 %	\end{center}
 %}
+%\end{frame}
+%
+%
+%\begin{frame}[fragile]\frametitle{Actual data illustration 1: France (different scaling factor)}
+%	\vspace{-0.2cm}
+%	\only<1>{
+%		\begin{center}
+%			\includegraphics[scale=.26]{Figures/FranceEtaFSexStra.pdf}
+%			\includegraphics[scale=.26]{Figures/FranceEtaMSexStra.pdf}
+%			
+%			\begin{footnotesize}
+%				Fitted log-mortality from \emph{Stratified} model
+%			\end{footnotesize}
+%			
+%		\end{center}
+%	}
+%	\only<2>{
+%	\begin{center}
+%		\includegraphics[scale=.26]{Figures/FranceDeltaSexStra.pdf}
+%		
+%		\begin{footnotesize}
+%			Parameters from \emph{Stratified} model
+%		\end{footnotesize}
+%		
+%	\end{center}
+%	}
 %	\only<3>{
 %	\begin{center}
-%		\includegraphics[scale=.3]{Figures/DeltaOther.pdf}
+%		\includegraphics[scale=.26]{Figures/FrancesSexCom.pdf}
+%		\includegraphics[scale=.26]{Figures/FranceDeltaSexCom.pdf}
 %		
-%		\begin{scriptsize}
-%			Parameter $\delta$ for populations without clear data issue or peculiar patterns
-%		\end{scriptsize}
+%		\begin{footnotesize}
+%			Parameters from \emph{Common} model
+%		\end{footnotesize}
 %		
 %	\end{center}
 %}
 %	\only<4>{
 %	\begin{center}
-%		\includegraphics[scale=.3]{Figures/DeltaOtherNames.pdf}
+%		\includegraphics[scale=.26]{Figures/FrancesSexComSat.pdf}
+%		\includegraphics[scale=.26]{Figures/FranceDeltaSexComSat.pdf}
 %		
-%		\begin{scriptsize}
-%			Parameter $\delta$ for populations without clear data issue or peculiar patterns
-%		\end{scriptsize}
+%		\begin{footnotesize}
+%			Parameters from \emph{Common} and \emph{Saturated} model
+%		\end{footnotesize}
 %		
 %	\end{center}
-%
 %}
 %\end{frame}
-%\begin{frame}[fragile]\frametitle{Age-dependent component $e^{\delta(x)}$}
-%	\only<1>{
-%		\begin{center}
-%			\includegraphics[scale=.3]{Figures/ExpDeltaOtherNames.pdf}
-%			
-%			\begin{scriptsize}
-%				Parameter $e^\delta$ for populations without clear data issue or peculiar patterns
-%			\end{scriptsize}
-%			
-%		\end{center}
-%	}
-%	\only<2>{
-%		\vspace{-1cm}
-%		\begin{center}
-%			\includegraphics[scale=.38]{Figures/ExpDeltaOtherNamesAll.pdf}		
-%		\end{center}
-%	}
-%\end{frame}
 %
 %
 %
-%\begin{frame}[fragile]\frametitle{An attempt to cluster $\delta(x)$}
-%	\only<1>{
-%		\vspace{-0.9cm}
-%		\begin{center}
-%			\includegraphics[scale=.33]{Figures/ClusterDeltaDendo.pdf}		
-%		\end{center}
-%	}
+%
+%\begin{frame}[fragile]\frametitle{Actual data illustration 2: Peru (middle-age hump)}
+%	\vspace{-0.2cm}
+%\only<1>{
+%	\begin{center}
+%		\includegraphics[scale=.17]{Figures/PeruEtaFSexSat.pdf}
+%		\includegraphics[scale=.17]{Figures/PeruEtaMSexSat.pdf}
+%		
+%		\includegraphics[scale=.17]{Figures/PerusSexSat.pdf}
+%	\includegraphics[scale=.17]{Figures/PeruDeltaSexSat.pdf}
+%		
+%		\begin{footnotesize}
+%			Fitted log-mortality and parameters from \emph{Saturated} model
+%		\end{footnotesize}
+%		
+%	\end{center}
+%}
 %\only<2>{
-%	\hspace{-2cm}
-%	\includegraphics[scale=0.8]{Figures/cluster_map}
-%}
-%\only<3>{
-%	\vspace{-0.1cm}
 %	\begin{center}
-%		\includegraphics[scale=.33]{Figures/ClusterDelta.pdf}		
+%		\includegraphics[scale=.17]{Figures/PeruEtaFSexSat.pdf}
+%		\includegraphics[scale=.17]{Figures/PeruEtaMSexSat.pdf}
+%		
+%		\includegraphics[scale=.17]{Figures/PerusSexSat.pdf}
+%		\includegraphics[scale=.17]{Figures/PeruDeltaSexSatCom.pdf}
+%		
+%		\begin{footnotesize}
+%			Fitted log-mortality and parameters from \emph{Saturated} model. $\delta(x)$ and $c$ parameters from the \emph{Common} are plotted along\\
+%		\end{footnotesize}
+%		
 %	\end{center}
 %}
-%\only<4>{
-%	\vspace{-0.1cm}
-%	\begin{center}
-%		\includegraphics[scale=.33]{Figures/ClusterDeltaCenter.pdf}		
-%	\end{center}
-%}
+%
 %\end{frame}
+%
+%
+%
+%
+%
+%\begin{frame}[fragile]\frametitle{Actual data illustration 2: Peru (middle-age hump)}
+%	\vspace{-0.2cm}
+%	\only<1>{
+%		\begin{center}
+%			\includegraphics[scale=.26]{Figures/DeltaFAll.pdf}
+%			\includegraphics[scale=.26]{Figures/DeltaMAll.pdf}
+%			
+%			\begin{footnotesize}
+%				$\delta(x)$ from \emph{Saturated} model by sex
+%			\end{footnotesize}
+%			
+%		\end{center}
+%	}
+%	
+%\end{frame}
+%
+%
+%
+%
+%\begin{frame}[fragile]\frametitle{Sex-specific age-dependent component $e^{\delta(x)}$}
+%	\only<1>{
+%		\vspace{-0.7cm}
+%		\begin{center}
+%			\includegraphics[scale=.38]{Figures/ExpDeltaGoodPop.pdf}		
+%		\end{center}
+%	}
+%\end{frame}
+%
+%
+%
+%\begin{frame}[fragile]\frametitle{Sex age-factor $s(x)$}
+%	\only<1>{
+%		\vspace{-0.7cm}
+%		\begin{center}
+%			\includegraphics[scale=.38]{Figures/sGoodPop.pdf}		
+%		\end{center}
+%	}
+%\end{frame}
+%
+%%
+%%
+%%\begin{frame}[fragile]\frametitle{Actual data illustration 3: Mongolia (clear data issues)}
+%%	\only<1>{
+%%		\begin{center}
+%%			\includegraphics[scale=.26]{Figures/MongoliaEta.pdf}
+%%			\includegraphics[scale=.26]{Figures/MongoliaDelta.pdf}
+%%		\end{center}
+%%	}
+%%\end{frame}
+%%
+%%\begin{frame}[fragile]\frametitle{Actual data illustration 4: Ireland (a good 2020?)}
+%%	\only<1>{
+%%		\begin{center}
+%%			\includegraphics[scale=.26]{Figures/IrelandEta.pdf}
+%%			\includegraphics[scale=.26]{Figures/IrelandDelta.pdf}
+%%		\end{center}
+%%	}
+%%\end{frame}
+%%
+%%\begin{frame}[fragile]\frametitle{World Map with $e^c$ (relative risk scaling factor)}
+%%	\hspace{-2cm}
+%%			\includegraphics[scale=0.8]{Figures/scale_factor_map}
+%%\end{frame}
+%%
+%%
+%%\begin{frame}[fragile]\frametitle{Age-dependent component $\delta(x)$}
+%%	\only<1>{
+%%		\begin{center}
+%%			\includegraphics[scale=.3]{Figures/DeltaAll.pdf}
+%%			
+%%			\begin{scriptsize}
+%%				Parameter $\delta$ for all available data
+%%			\end{scriptsize}
+%%			
+%%		\end{center}
+%%	}
+%%
+%%	\only<2>{
+%%	\begin{center}
+%%		\includegraphics[scale=.3]{Figures/DeltaDataIssue.pdf}
+%%		
+%%		\begin{scriptsize}
+%%			Parameter $\delta$ for populations with clear data issue or peculiar patterns
+%%		\end{scriptsize}
+%%		
+%%	\end{center}
+%%}
+%%	\only<3>{
+%%	\begin{center}
+%%		\includegraphics[scale=.3]{Figures/DeltaOther.pdf}
+%%		
+%%		\begin{scriptsize}
+%%			Parameter $\delta$ for populations without clear data issue or peculiar patterns
+%%		\end{scriptsize}
+%%		
+%%	\end{center}
+%%}
+%%	\only<4>{
+%%	\begin{center}
+%%		\includegraphics[scale=.3]{Figures/DeltaOtherNames.pdf}
+%%		
+%%		\begin{scriptsize}
+%%			Parameter $\delta$ for populations without clear data issue or peculiar patterns
+%%		\end{scriptsize}
+%%		
+%%	\end{center}
+%%
+%%}
+%%\end{frame}
+%%\begin{frame}[fragile]\frametitle{Age-dependent component $e^{\delta(x)}$}
+%%	\only<1>{
+%%		\begin{center}
+%%			\includegraphics[scale=.3]{Figures/ExpDeltaOtherNames.pdf}
+%%			
+%%			\begin{scriptsize}
+%%				Parameter $e^\delta$ for populations without clear data issue or peculiar patterns
+%%			\end{scriptsize}
+%%			
+%%		\end{center}
+%%	}
+%%	\only<2>{
+%%		\vspace{-1cm}
+%%		\begin{center}
+%%			\includegraphics[scale=.38]{Figures/ExpDeltaOtherNamesAll.pdf}		
+%%		\end{center}
+%%	}
+%%\end{frame}
+%%
+%%
+%%
+%%\begin{frame}[fragile]\frametitle{An attempt to cluster $\delta(x)$}
+%%	\only<1>{
+%%		\vspace{-0.9cm}
+%%		\begin{center}
+%%			\includegraphics[scale=.33]{Figures/ClusterDeltaDendo.pdf}		
+%%		\end{center}
+%%	}
+%%\only<2>{
+%%	\hspace{-2cm}
+%%	\includegraphics[scale=0.8]{Figures/cluster_map}
+%%}
+%%\only<3>{
+%%	\vspace{-0.1cm}
+%%	\begin{center}
+%%		\includegraphics[scale=.33]{Figures/ClusterDelta.pdf}		
+%%	\end{center}
+%%}
+%%\only<4>{
+%%	\vspace{-0.1cm}
+%%	\begin{center}
+%%		\includegraphics[scale=.33]{Figures/ClusterDeltaCenter.pdf}		
+%%	\end{center}
+%%}
+%%\end{frame}
 
 
 \end{document}
