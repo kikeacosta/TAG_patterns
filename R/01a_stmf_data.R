@@ -7,7 +7,7 @@ library(countrycode)
 
 # downloading the last version of STMF Mortality input data zip 
 # this version as of 25 May 2021
-# download.file("https://www.mortality.org/Public/STMF/Inputs/STMFinput.zip", here("Data/STMFinput.zip"))
+download.file("https://www.mortality.org/Public/STMF/Inputs/STMFinput.zip", here("Data/STMFinput.zip"))
 
 # list of country codes in STMF
 zipdf <- unzip(here("Data", "STMFinput.zip"), list = TRUE)

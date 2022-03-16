@@ -64,5 +64,5 @@ hmd_out <-
 
 write_csv(hmd_out, "Output/hmd_2020.csv")
 
-
+unique(hmd_out$Country)
 
