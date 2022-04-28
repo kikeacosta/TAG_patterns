@@ -19,10 +19,30 @@ WPPout %>%
   write_csv("Output/WPP2019_baseline.csv")
 
 
+# WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
+# 
+# WPP
+# WPPout <- 
+#   WPP %>% 
+#   dplyr::filter(Sex != "Total",
+#                 MidPeriod == 2018) %>% 
+#   select(LocID, Time, MidPeriod, Sex, Age = AgeGrpStart, mx) %>% 
+#   mutate(iso3 = countrycode::countrycode(LocID, "un", "iso3c")) %>% 
+#   dplyr::filter(!is.na(iso3)) 
+# WPPout %>% 
+#   write_csv("Output/WPP2019_baseline.csv")
+
+
+
 
 WM_estimates<- read_excel("Data/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
-clusters <- read_csv("Data/iso.clusters.csv")
-write_csv(clusters, file = "Output/iso.clusters.csv")
+
+# clusters <- read_csv("Data/iso.clusters.csv")
+# write_csv(clusters, file = "Output/iso.clusters.csv")
+
+clusters <- read_csv("Output/iso.clusters.csv")
+
+
 WMout <- 
   WM_estimates %>% 
   dplyr::filter(measure == "deaths",
@@ -53,12 +73,7 @@ read_csv("Output/offsets.csv")  %>%
 
 
 # ------------------------------------ #
-dM <- read_delim("Data/deltasM.txt",delim = " ", col_names = c("Age",seq(1,8)), skip = 1) %>% 
-  pivot_longer(-1, names_to = "Cluster", values_to = "delta") %>% 
-  mutate(sex = "Male")
-dF <- read_delim("Data/deltasF.txt",delim = " ", col_names = c("Age",seq(1,8)), skip = 1) %>% 
-  pivot_longer(-1, names_to = "Cluster", values_to = "delta") %>% 
-  mutate(sex = "Female")
+d <- read_delim("Output/Deltas_GC.txt", delim = " ", col_names = TRUE)
 
 Deltas <- 
   dM %>% 
