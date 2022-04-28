@@ -3,7 +3,8 @@ library(tidyverse)
 library(readr)
 library(countrycode)
 library(readxl)
-
+library(quantreg)
+library(splines)
 WPP <- read_csv("Data/WPP2019_Life_Table_Medium.csv")
 
 WPP
@@ -21,7 +22,7 @@ WPPout %>%
 
 WM_estimates<- read_excel("Data/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
 clusters <- read_csv("Data/iso.clusters.csv")
-
+write_csv(clusters, file = "Output/iso.clusters.csv")
 WMout <- 
   WM_estimates %>% 
   dplyr::filter(measure == "deaths",
@@ -426,13 +427,6 @@ inputs %>%
 # install.packages("quantreg")
 library(quantreg)
 library(splines)
-dat <- 
-inputs %>% 
-  filter(Cluster == 1, sex == "Female") 
-  rqfit <- rq(deltas ~ bs(age), data = dat,tau = .5)
-  
-predict(rqfit, newdata = data.frame(age = seq(0,85,by=5))) %>% 
-  plot()
 
 my_smooth_median <- function(chunk){
   newdata <- data.frame(age = seq(0,85,by=5))
@@ -443,19 +437,18 @@ my_smooth_median <- function(chunk){
 }
 qm_deltas <-
 inputs %>% 
-  dplyr::filter(!is.na(deltas),
-                ! (iso3 == "ARM" & sex == "Male"),
-                ! (iso3 == "USA" & sex == "Female")) %>% 
+  dplyr::filter(!is.na(deltas)) %>% 
   group_by(Cluster, sex) %>% 
   do(my_smooth_median(chunk = .data)) %>% 
   ungroup()
+
 qm_deltas %>% 
   ggplot(aes(x = age, y = delta_qm, color = sex)) +
   geom_line() +
   facet_wrap(~Cluster)
 
-inputs %>% 
-  filter(sex == "Female", Country == "Albania")
+# inputs %>% 
+#   filter(sex == "Female", Country == "Albania")
 
 # constraints:
 library(readxl)
@@ -478,18 +471,21 @@ WMout <-
 
 
 # constrained predictions:
-mx_prime <-
+deltas_all <-
 inputs %>% 
   left_join(qm_deltas, by = c("Cluster","sex","age")) %>% 
-  group_by(Cluster, sex) %>% 
+  group_by(Cluster, sex, age) %>% 
   mutate(delta_mean = mean(deltas, na.rm = TRUE),
          delta_median = median(deltas, na.rm = TRUE)) %>% 
-  ungroup() %>% 
+  ungroup() 
+
+mx_prime <-
+  deltas_all %>% 
   mutate(mx = deaths / Nx,
          mx_pred_qm = (log(mx) + delta_qm) %>% exp(),
          mx_pred_mean = (log(mx) + delta_mean) %>% exp(),
          mx_pred_median = (log(mx) + delta_median) %>% exp()) %>% 
-  select(Cluster, Country, iso3, sex, age, Nx,mx:mx_pred_median) %>% 
+  select(Cluster, Country, iso3, sex, age, deltas, Nx,mx:mx_pred_median) %>% 
   left_join(WMout, by = c("Cluster","iso3")) %>% 
   mutate(Dx_pred_qm = mx_pred_qm * Nx,
          Dx_pred_mean = mx_pred_mean * Nx,
@@ -501,7 +497,7 @@ inputs %>%
          mx_pred_qm = Dx_pred_qm / Nx,
          mx_pred_mean = Dx_pred_mean / Nx,
          mx_pred_median = Dx_pred_median / Nx) %>% 
-  select(Cluster, iso3, sex, age, mx_pred_qm, mx_pred_mean, mx_pred_median) %>% 
+  select(Cluster, iso3, sex, age, deltas, mx_pred_qm, mx_pred_mean, mx_pred_median) %>% 
   pivot_longer(mx_pred_qm:mx_pred_median, values_to = "mx", names_to = "variant")
 
 Observed <- read_csv("Output/WM2020_observed.csv")
@@ -510,7 +506,7 @@ Joined <-
 Observed %>% 
   mutate(variant = "observed",
          mx = deaths / Nx) %>% 
-  select(-Nx, - deaths) %>% 
+  select(-deaths) %>% 
   filter(nchar(iso3) == 3) %>% 
   left_join(clusters, by = "iso3") %>% 
   select(-WHO_region) %>% 
@@ -534,11 +530,12 @@ WM_estimates %>%
   filter(`source year` == "Predicted 2020",
          measure == "deaths") %>% 
   mutate(mx = `mean` / Nx) %>% 
-  select(Country, iso3, sex, age, mx) %>% 
+  select(Country, iso3, sex, age, mx, Nx) %>% 
   inner_join(clusters, by = c("iso3")) %>% 
   mutate(variant = "mx_WM") %>% 
   bind_rows(Joined) %>% 
-  arrange(Cluster, iso3, sex, variant, age)
+  arrange(Cluster, iso3, sex, variant, age) %>% 
+  distinct()
 
 iso3 <- Joined %>% pull(iso3) %>% unique()
 
@@ -621,6 +618,30 @@ for (i in iso3_2){
 }
 dev.off()
 
-# 3) log(us / william)  (everything)
+deltas_dat <- 
+deltas_all %>% 
+  filter(!is.na(deltas)) %>% 
+  pivot_longer(contains("delta"), names_to = "variant",values_to = "delta") %>% 
+  arrange(Cluster, iso3, sex, variant, age) 
+deltas_dat %>% 
+  filter(variant == "deltas") %>% 
+  ggplot(aes(x = age, y = delta, group = interaction(iso3,variant))) + 
+  geom_line(alpha= .5) +
+  facet_wrap(~Cluster+sex) +
+  theme(legend.position = "none") +
+  geom_line(data = deltas_dat %>% filter(variant!="deltas"),
+            mapping = aes(x = age, y = delta, color = variant, linetype = variant))
 
-# map
+
+IN <-read_csv("Output/age_sex_compare2.csv")
+WM_estimates<- read_excel("Data/EstimatesBySexAge.xlsx", sheet = 2, skip = 5)
+OUT2 <-
+WM_estimates %>% 
+  filter(`source year` == "Expected 2020",
+         measure == "deaths") %>% 
+  select(iso3,sex,age,Nx) %>% 
+  right_join(IN, by = c("iso3","sex","age")) %>% 
+  distinct() %>% 
+  arrange(iso3, variant, sex, age)
+write_csv(OUT2, file = "Output/age_sex_compare2.csv")
+
