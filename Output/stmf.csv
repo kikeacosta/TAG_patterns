@@ -89,24 +89,24 @@ Australia,AUS,2019,t,65,22939,stmf
 Australia,AUS,2019,t,75,39122,stmf
 Australia,AUS,2019,t,85,63620,stmf
 Australia,AUS,2019,t,TOT,143808,stmf
-Australia,AUS,2020,f,0,1311,stmf
-Australia,AUS,2020,f,45,6491,stmf
-Australia,AUS,2020,f,65,9391,stmf
-Australia,AUS,2020,f,75,17534,stmf
+Australia,AUS,2020,f,0,1312,stmf
+Australia,AUS,2020,f,45,6492,stmf
+Australia,AUS,2020,f,65,9392,stmf
+Australia,AUS,2020,f,75,17537,stmf
 Australia,AUS,2020,f,85,36635,stmf
-Australia,AUS,2020,f,TOT,71363,stmf
-Australia,AUS,2020,m,0,1494,stmf
-Australia,AUS,2020,m,45,8754,stmf
-Australia,AUS,2020,m,65,13979,stmf
-Australia,AUS,2020,m,75,22154,stmf
-Australia,AUS,2020,m,85,26214,stmf
-Australia,AUS,2020,m,TOT,72597,stmf
-Australia,AUS,2020,t,0,2805,stmf
-Australia,AUS,2020,t,45,15245,stmf
-Australia,AUS,2020,t,65,23370,stmf
-Australia,AUS,2020,t,75,39688,stmf
-Australia,AUS,2020,t,85,62849,stmf
-Australia,AUS,2020,t,TOT,143960,stmf
+Australia,AUS,2020,f,TOT,71369,stmf
+Australia,AUS,2020,m,0,1495,stmf
+Australia,AUS,2020,m,45,8758,stmf
+Australia,AUS,2020,m,65,13981,stmf
+Australia,AUS,2020,m,75,22155,stmf
+Australia,AUS,2020,m,85,26215,stmf
+Australia,AUS,2020,m,TOT,72606,stmf
+Australia,AUS,2020,t,0,2807,stmf
+Australia,AUS,2020,t,45,15250,stmf
+Australia,AUS,2020,t,65,23373,stmf
+Australia,AUS,2020,t,75,39692,stmf
+Australia,AUS,2020,t,85,62850,stmf
+Australia,AUS,2020,t,TOT,143975,stmf
 Austria,AUT,2015,f,0,133,stmf
 Austria,AUT,2015,f,10,17,stmf
 Austria,AUT,2015,f,15,33,stmf
@@ -1262,21 +1262,21 @@ Canada,CAN,2019,t,45,41035,stmf
 Canada,CAN,2019,t,65,122610,stmf
 Canada,CAN,2019,t,85,106110,stmf
 Canada,CAN,2019,t,TOT,283105,stmf
-Canada,CAN,2020,f,0,5605,stmf
-Canada,CAN,2020,f,45,17305,stmf
-Canada,CAN,2020,f,65,57405,stmf
-Canada,CAN,2020,f,85,68245,stmf
-Canada,CAN,2020,f,TOT,148485,stmf
-Canada,CAN,2020,m,0,11105,stmf
-Canada,CAN,2020,m,45,27895,stmf
-Canada,CAN,2020,m,65,74840,stmf
-Canada,CAN,2020,m,85,46330,stmf
-Canada,CAN,2020,m,TOT,160120,stmf
-Canada,CAN,2020,t,0,16725,stmf
-Canada,CAN,2020,t,45,45180,stmf
-Canada,CAN,2020,t,65,132205,stmf
-Canada,CAN,2020,t,85,114575,stmf
-Canada,CAN,2020,t,TOT,308615,stmf
+Canada,CAN,2020,f,0,5535,stmf
+Canada,CAN,2020,f,45,17485,stmf
+Canada,CAN,2020,f,65,58330,stmf
+Canada,CAN,2020,f,85,69415,stmf
+Canada,CAN,2020,f,TOT,150810,stmf
+Canada,CAN,2020,m,0,10830,stmf
+Canada,CAN,2020,m,45,27985,stmf
+Canada,CAN,2020,m,65,76010,stmf
+Canada,CAN,2020,m,85,47080,stmf
+Canada,CAN,2020,m,TOT,162005,stmf
+Canada,CAN,2020,t,0,16400,stmf
+Canada,CAN,2020,t,45,45455,stmf
+Canada,CAN,2020,t,65,134390,stmf
+Canada,CAN,2020,t,85,116530,stmf
+Canada,CAN,2020,t,TOT,312845,stmf
 Switzerland,CHE,2015,f,0,162,stmf
 Switzerland,CHE,2015,f,10,18,stmf
 Switzerland,CHE,2015,f,15,30,stmf
@@ -1895,18 +1895,18 @@ Chile,CHL,2020,f,15,161,stmf
 Chile,CHL,2020,f,20,238,stmf
 Chile,CHL,2020,f,25,294,stmf
 Chile,CHL,2020,f,30,393,stmf
-Chile,CHL,2020,f,35,486,stmf
-Chile,CHL,2020,f,40,746,stmf
+Chile,CHL,2020,f,35,487,stmf
+Chile,CHL,2020,f,40,745,stmf
 Chile,CHL,2020,f,45,1110,stmf
 Chile,CHL,2020,f,5,51,stmf
 Chile,CHL,2020,f,50,1652,stmf
 Chile,CHL,2020,f,55,2602,stmf
 Chile,CHL,2020,f,60,3618,stmf
-Chile,CHL,2020,f,65,4516,stmf
-Chile,CHL,2020,f,70,5702,stmf
+Chile,CHL,2020,f,65,4514,stmf
+Chile,CHL,2020,f,70,5704,stmf
 Chile,CHL,2020,f,75,7078,stmf
-Chile,CHL,2020,f,80,8462,stmf
-Chile,CHL,2020,f,85,9316,stmf
+Chile,CHL,2020,f,80,8460,stmf
+Chile,CHL,2020,f,85,9318,stmf
 Chile,CHL,2020,f,90,7810,stmf
 Chile,CHL,2020,f,95,4273,stmf
 Chile,CHL,2020,f,TOT,59138,stmf
@@ -1922,8 +1922,8 @@ Chile,CHL,2020,m,45,2084,stmf
 Chile,CHL,2020,m,5,82,stmf
 Chile,CHL,2020,m,50,3091,stmf
 Chile,CHL,2020,m,55,4477,stmf
-Chile,CHL,2020,m,60,5943,stmf
-Chile,CHL,2020,m,65,7022,stmf
+Chile,CHL,2020,m,60,5942,stmf
+Chile,CHL,2020,m,65,7023,stmf
 Chile,CHL,2020,m,70,8223,stmf
 Chile,CHL,2020,m,75,9000,stmf
 Chile,CHL,2020,m,80,8674,stmf
@@ -1937,18 +1937,18 @@ Chile,CHL,2020,t,15,498,stmf
 Chile,CHL,2020,t,20,915,stmf
 Chile,CHL,2020,t,25,1176,stmf
 Chile,CHL,2020,t,30,1423,stmf
-Chile,CHL,2020,t,35,1652,stmf
-Chile,CHL,2020,t,40,2139,stmf
+Chile,CHL,2020,t,35,1653,stmf
+Chile,CHL,2020,t,40,2138,stmf
 Chile,CHL,2020,t,45,3194,stmf
 Chile,CHL,2020,t,5,133,stmf
 Chile,CHL,2020,t,50,4743,stmf
 Chile,CHL,2020,t,55,7079,stmf
-Chile,CHL,2020,t,60,9561,stmf
-Chile,CHL,2020,t,65,11538,stmf
-Chile,CHL,2020,t,70,13925,stmf
+Chile,CHL,2020,t,60,9560,stmf
+Chile,CHL,2020,t,65,11537,stmf
+Chile,CHL,2020,t,70,13927,stmf
 Chile,CHL,2020,t,75,16078,stmf
-Chile,CHL,2020,t,80,17136,stmf
-Chile,CHL,2020,t,85,16675,stmf
+Chile,CHL,2020,t,80,17134,stmf
+Chile,CHL,2020,t,85,16677,stmf
 Chile,CHL,2020,t,90,12280,stmf
 Chile,CHL,2020,t,95,5840,stmf
 Chile,CHL,2020,t,TOT,127455,stmf
@@ -2260,7 +2260,7 @@ Czechia,CZE,2020,f,25,88,stmf
 Czechia,CZE,2020,f,30,144,stmf
 Czechia,CZE,2020,f,35,237,stmf
 Czechia,CZE,2020,f,40,422,stmf
-Czechia,CZE,2020,f,45,662,stmf
+Czechia,CZE,2020,f,45,663,stmf
 Czechia,CZE,2020,f,5,16,stmf
 Czechia,CZE,2020,f,50,904,stmf
 Czechia,CZE,2020,f,55,1431,stmf
@@ -2271,19 +2271,19 @@ Czechia,CZE,2020,f,75,8823,stmf
 Czechia,CZE,2020,f,80,10621,stmf
 Czechia,CZE,2020,f,85,13075,stmf
 Czechia,CZE,2020,f,90,13548,stmf
-Czechia,CZE,2020,f,TOT,63723,stmf
+Czechia,CZE,2020,f,TOT,63724,stmf
 Czechia,CZE,2020,m,0,191,stmf
 Czechia,CZE,2020,m,10,25,stmf
 Czechia,CZE,2020,m,15,85,stmf
 Czechia,CZE,2020,m,20,157,stmf
 Czechia,CZE,2020,m,25,235,stmf
-Czechia,CZE,2020,m,30,349,stmf
+Czechia,CZE,2020,m,30,350,stmf
 Czechia,CZE,2020,m,35,500,stmf
 Czechia,CZE,2020,m,40,920,stmf
 Czechia,CZE,2020,m,45,1359,stmf
 Czechia,CZE,2020,m,5,24,stmf
 Czechia,CZE,2020,m,50,1966,stmf
-Czechia,CZE,2020,m,55,3051,stmf
+Czechia,CZE,2020,m,55,3050,stmf
 Czechia,CZE,2020,m,60,5068,stmf
 Czechia,CZE,2020,m,65,8175,stmf
 Czechia,CZE,2020,m,70,11149,stmf
@@ -2297,13 +2297,13 @@ Czechia,CZE,2020,t,10,48,stmf
 Czechia,CZE,2020,t,15,120,stmf
 Czechia,CZE,2020,t,20,205,stmf
 Czechia,CZE,2020,t,25,323,stmf
-Czechia,CZE,2020,t,30,493,stmf
+Czechia,CZE,2020,t,30,494,stmf
 Czechia,CZE,2020,t,35,737,stmf
 Czechia,CZE,2020,t,40,1342,stmf
-Czechia,CZE,2020,t,45,2021,stmf
+Czechia,CZE,2020,t,45,2022,stmf
 Czechia,CZE,2020,t,5,40,stmf
 Czechia,CZE,2020,t,50,2870,stmf
-Czechia,CZE,2020,t,55,4482,stmf
+Czechia,CZE,2020,t,55,4481,stmf
 Czechia,CZE,2020,t,60,7421,stmf
 Czechia,CZE,2020,t,65,12390,stmf
 Czechia,CZE,2020,t,70,18102,stmf
@@ -2311,7 +2311,7 @@ Czechia,CZE,2020,t,75,19888,stmf
 Czechia,CZE,2020,t,80,20192,stmf
 Czechia,CZE,2020,t,85,21551,stmf
 Czechia,CZE,2020,t,90,18975,stmf
-Czechia,CZE,2020,t,TOT,131516,stmf
+Czechia,CZE,2020,t,TOT,131517,stmf
 Germany,DEU,2015,f,0,2999,stmf
 Germany,DEU,2015,f,30,913,stmf
 Germany,DEU,2015,f,35,1231,stmf
@@ -6923,7 +6923,7 @@ Israel,ISR,2020,f,60,2330,stmf
 Israel,ISR,2020,f,70,4271,stmf
 Israel,ISR,2020,f,80,15534,stmf
 Israel,ISR,2020,f,TOT,24227,stmf
-Israel,ISR,2020,m,0,463,stmf
+Israel,ISR,2020,m,0,465,stmf
 Israel,ISR,2020,m,20,322,stmf
 Israel,ISR,2020,m,30,428,stmf
 Israel,ISR,2020,m,40,773,stmf
@@ -6931,8 +6931,8 @@ Israel,ISR,2020,m,50,1729,stmf
 Israel,ISR,2020,m,60,3901,stmf
 Israel,ISR,2020,m,70,6061,stmf
 Israel,ISR,2020,m,80,11622,stmf
-Israel,ISR,2020,m,TOT,25299,stmf
-Israel,ISR,2020,t,0,794,stmf
+Israel,ISR,2020,m,TOT,25301,stmf
+Israel,ISR,2020,t,0,796,stmf
 Israel,ISR,2020,t,20,437,stmf
 Israel,ISR,2020,t,30,631,stmf
 Israel,ISR,2020,t,40,1244,stmf
@@ -6940,7 +6940,7 @@ Israel,ISR,2020,t,50,2701,stmf
 Israel,ISR,2020,t,60,6231,stmf
 Israel,ISR,2020,t,70,10332,stmf
 Israel,ISR,2020,t,80,27156,stmf
-Israel,ISR,2020,t,TOT,49526,stmf
+Israel,ISR,2020,t,TOT,49528,stmf
 Italy,ITA,2015,f,0,686,stmf
 Italy,ITA,2015,f,1,139,stmf
 Italy,ITA,2015,f,10,86,stmf
@@ -7305,10 +7305,10 @@ Italy,ITA,2020,f,65,13758,stmf
 Italy,ITA,2020,f,70,23632,stmf
 Italy,ITA,2020,f,75,34860,stmf
 Italy,ITA,2020,f,80,63034,stmf
-Italy,ITA,2020,f,85,89586,stmf
+Italy,ITA,2020,f,85,89589,stmf
 Italy,ITA,2020,f,90,87070,stmf
 Italy,ITA,2020,f,95,41658,stmf
-Italy,ITA,2020,f,TOT,388271,stmf
+Italy,ITA,2020,f,TOT,388274,stmf
 Italy,ITA,2020,m,0,604,stmf
 Italy,ITA,2020,m,1,106,stmf
 Italy,ITA,2020,m,10,134,stmf
@@ -7316,22 +7316,22 @@ Italy,ITA,2020,m,100,1399,stmf
 Italy,ITA,2020,m,15,334,stmf
 Italy,ITA,2020,m,20,561,stmf
 Italy,ITA,2020,m,25,682,stmf
-Italy,ITA,2020,m,30,842,stmf
+Italy,ITA,2020,m,30,843,stmf
 Italy,ITA,2020,m,35,1313,stmf
 Italy,ITA,2020,m,40,2375,stmf
 Italy,ITA,2020,m,45,4416,stmf
 Italy,ITA,2020,m,5,79,stmf
 Italy,ITA,2020,m,50,7719,stmf
 Italy,ITA,2020,m,55,11961,stmf
-Italy,ITA,2020,m,60,17338,stmf
+Italy,ITA,2020,m,60,17340,stmf
 Italy,ITA,2020,m,65,24904,stmf
-Italy,ITA,2020,m,70,39896,stmf
+Italy,ITA,2020,m,70,39898,stmf
 Italy,ITA,2020,m,75,50250,stmf
 Italy,ITA,2020,m,80,71219,stmf
-Italy,ITA,2020,m,85,72189,stmf
-Italy,ITA,2020,m,90,46205,stmf
+Italy,ITA,2020,m,85,72192,stmf
+Italy,ITA,2020,m,90,46206,stmf
 Italy,ITA,2020,m,95,13929,stmf
-Italy,ITA,2020,m,TOT,368455,stmf
+Italy,ITA,2020,m,TOT,368464,stmf
 Italy,ITA,2020,t,0,1103,stmf
 Italy,ITA,2020,t,1,185,stmf
 Italy,ITA,2020,t,10,222,stmf
@@ -7339,22 +7339,22 @@ Italy,ITA,2020,t,100,8296,stmf
 Italy,ITA,2020,t,15,504,stmf
 Italy,ITA,2020,t,20,756,stmf
 Italy,ITA,2020,t,25,935,stmf
-Italy,ITA,2020,t,30,1259,stmf
+Italy,ITA,2020,t,30,1260,stmf
 Italy,ITA,2020,t,35,2009,stmf
 Italy,ITA,2020,t,40,3737,stmf
 Italy,ITA,2020,t,45,7161,stmf
 Italy,ITA,2020,t,5,149,stmf
 Italy,ITA,2020,t,50,12365,stmf
 Italy,ITA,2020,t,55,18823,stmf
-Italy,ITA,2020,t,60,27032,stmf
+Italy,ITA,2020,t,60,27034,stmf
 Italy,ITA,2020,t,65,38662,stmf
-Italy,ITA,2020,t,70,63528,stmf
+Italy,ITA,2020,t,70,63530,stmf
 Italy,ITA,2020,t,75,85110,stmf
 Italy,ITA,2020,t,80,134253,stmf
-Italy,ITA,2020,t,85,161775,stmf
-Italy,ITA,2020,t,90,133275,stmf
+Italy,ITA,2020,t,85,161781,stmf
+Italy,ITA,2020,t,90,133276,stmf
 Italy,ITA,2020,t,95,55587,stmf
-Italy,ITA,2020,t,TOT,756726,stmf
+Italy,ITA,2020,t,TOT,756738,stmf
 South Korea,KOR,2015,f,0,835,stmf
 South Korea,KOR,2015,f,15,19600,stmf
 South Korea,KOR,2015,f,65,16829,stmf
@@ -7446,22 +7446,22 @@ South Korea,KOR,2019,t,75,94969,stmf
 South Korea,KOR,2019,t,85,85172,stmf
 South Korea,KOR,2019,t,TOT,294080,stmf
 South Korea,KOR,2020,f,0,518,stmf
-South Korea,KOR,2020,f,15,19739,stmf
-South Korea,KOR,2020,f,65,14513,stmf
+South Korea,KOR,2020,f,15,19736,stmf
+South Korea,KOR,2020,f,65,14514,stmf
 South Korea,KOR,2020,f,75,43740,stmf
-South Korea,KOR,2020,f,85,63383,stmf
+South Korea,KOR,2020,f,85,63368,stmf
 South Korea,KOR,2020,f,TOT,141894,stmf
 South Korea,KOR,2020,m,0,704,stmf
-South Korea,KOR,2020,m,15,47095,stmf
-South Korea,KOR,2020,m,65,33861,stmf
-South Korea,KOR,2020,m,75,54807,stmf
-South Korea,KOR,2020,m,85,31162,stmf
+South Korea,KOR,2020,m,15,47092,stmf
+South Korea,KOR,2020,m,65,33860,stmf
+South Korea,KOR,2020,m,75,54803,stmf
+South Korea,KOR,2020,m,85,31161,stmf
 South Korea,KOR,2020,m,TOT,167629,stmf
 South Korea,KOR,2020,t,0,1222,stmf
-South Korea,KOR,2020,t,15,66834,stmf
+South Korea,KOR,2020,t,15,66828,stmf
 South Korea,KOR,2020,t,65,48374,stmf
-South Korea,KOR,2020,t,75,98547,stmf
-South Korea,KOR,2020,t,85,94545,stmf
+South Korea,KOR,2020,t,75,98543,stmf
+South Korea,KOR,2020,t,85,94529,stmf
 South Korea,KOR,2020,t,TOT,309523,stmf
 Lithuania,LTU,2015,f,0,77,stmf
 Lithuania,LTU,2015,f,10,13,stmf
@@ -9250,11 +9250,11 @@ Norway,NOR,2020,f,60,709,stmf
 Norway,NOR,2020,f,65,1063,stmf
 Norway,NOR,2020,f,70,1851,stmf
 Norway,NOR,2020,f,75,2178,stmf
-Norway,NOR,2020,f,80,2955,stmf
+Norway,NOR,2020,f,80,2956,stmf
 Norway,NOR,2020,f,85,3889,stmf
 Norway,NOR,2020,f,90,4095,stmf
 Norway,NOR,2020,f,95,2261,stmf
-Norway,NOR,2020,f,TOT,20851,stmf
+Norway,NOR,2020,f,TOT,20852,stmf
 Norway,NOR,2020,m,0,68,stmf
 Norway,NOR,2020,m,10,12,stmf
 Norway,NOR,2020,m,100,89,stmf
@@ -9262,21 +9262,21 @@ Norway,NOR,2020,m,15,69,stmf
 Norway,NOR,2020,m,20,84,stmf
 Norway,NOR,2020,m,25,123,stmf
 Norway,NOR,2020,m,30,123,stmf
-Norway,NOR,2020,m,35,147,stmf
+Norway,NOR,2020,m,35,148,stmf
 Norway,NOR,2020,m,40,206,stmf
 Norway,NOR,2020,m,45,314,stmf
 Norway,NOR,2020,m,5,7,stmf
 Norway,NOR,2020,m,50,458,stmf
-Norway,NOR,2020,m,55,732,stmf
+Norway,NOR,2020,m,55,733,stmf
 Norway,NOR,2020,m,60,1074,stmf
-Norway,NOR,2020,m,65,1649,stmf
-Norway,NOR,2020,m,70,2520,stmf
-Norway,NOR,2020,m,75,2868,stmf
+Norway,NOR,2020,m,65,1650,stmf
+Norway,NOR,2020,m,70,2521,stmf
+Norway,NOR,2020,m,75,2869,stmf
 Norway,NOR,2020,m,80,3166,stmf
 Norway,NOR,2020,m,85,3364,stmf
 Norway,NOR,2020,m,90,2395,stmf
 Norway,NOR,2020,m,95,849,stmf
-Norway,NOR,2020,m,TOT,20317,stmf
+Norway,NOR,2020,m,TOT,20322,stmf
 Norway,NOR,2020,t,0,112,stmf
 Norway,NOR,2020,t,10,33,stmf
 Norway,NOR,2020,t,100,542,stmf
@@ -9284,21 +9284,21 @@ Norway,NOR,2020,t,15,95,stmf
 Norway,NOR,2020,t,20,114,stmf
 Norway,NOR,2020,t,25,172,stmf
 Norway,NOR,2020,t,30,178,stmf
-Norway,NOR,2020,t,35,228,stmf
+Norway,NOR,2020,t,35,229,stmf
 Norway,NOR,2020,t,40,315,stmf
 Norway,NOR,2020,t,45,527,stmf
 Norway,NOR,2020,t,5,16,stmf
 Norway,NOR,2020,t,50,781,stmf
-Norway,NOR,2020,t,55,1169,stmf
+Norway,NOR,2020,t,55,1170,stmf
 Norway,NOR,2020,t,60,1783,stmf
-Norway,NOR,2020,t,65,2712,stmf
-Norway,NOR,2020,t,70,4371,stmf
-Norway,NOR,2020,t,75,5046,stmf
-Norway,NOR,2020,t,80,6121,stmf
+Norway,NOR,2020,t,65,2713,stmf
+Norway,NOR,2020,t,70,4372,stmf
+Norway,NOR,2020,t,75,5047,stmf
+Norway,NOR,2020,t,80,6122,stmf
 Norway,NOR,2020,t,85,7253,stmf
 Norway,NOR,2020,t,90,6490,stmf
 Norway,NOR,2020,t,95,3110,stmf
-Norway,NOR,2020,t,TOT,41168,stmf
+Norway,NOR,2020,t,TOT,41174,stmf
 New Zealand,NZL,2015,f,0,2582,stmf
 New Zealand,NZL,2015,f,65,4014,stmf
 New Zealand,NZL,2015,f,80,9508,stmf
@@ -9360,17 +9360,17 @@ New Zealand,NZL,2019,t,65,9940,stmf
 New Zealand,NZL,2019,t,80,17433,stmf
 New Zealand,NZL,2019,t,TOT,34088,stmf
 New Zealand,NZL,2020,f,0,2633,stmf
-New Zealand,NZL,2020,f,65,4147,stmf
+New Zealand,NZL,2020,f,65,4149,stmf
 New Zealand,NZL,2020,f,80,9216,stmf
-New Zealand,NZL,2020,f,TOT,15996,stmf
+New Zealand,NZL,2020,f,TOT,15998,stmf
 New Zealand,NZL,2020,m,0,3863,stmf
 New Zealand,NZL,2020,m,65,5716,stmf
 New Zealand,NZL,2020,m,80,7611,stmf
 New Zealand,NZL,2020,m,TOT,17190,stmf
 New Zealand,NZL,2020,t,0,6496,stmf
-New Zealand,NZL,2020,t,65,9863,stmf
+New Zealand,NZL,2020,t,65,9865,stmf
 New Zealand,NZL,2020,t,80,16827,stmf
-New Zealand,NZL,2020,t,TOT,33186,stmf
+New Zealand,NZL,2020,t,TOT,33188,stmf
 Poland,POL,2015,f,0,773,stmf
 Poland,POL,2015,f,10,96,stmf
 Poland,POL,2015,f,15,210,stmf
@@ -11962,39 +11962,39 @@ USA,USA,2019,t,65,555350,stmf
 USA,USA,2019,t,75,686918,stmf
 USA,USA,2019,t,85,871596,stmf
 USA,USA,2019,t,TOT,2852462,stmf
-USA,USA,2020,f,0,8889,stmf
-USA,USA,2020,f,1,1535,stmf
-USA,USA,2020,f,15,9481,stmf
-USA,USA,2020,f,25,22075,stmf
-USA,USA,2020,f,35,36620,stmf
-USA,USA,2020,f,45,72500,stmf
-USA,USA,2020,f,5,2307,stmf
-USA,USA,2020,f,55,172272,stmf
-USA,USA,2020,f,65,287096,stmf
-USA,USA,2020,f,75,399436,stmf
-USA,USA,2020,f,85,627388,stmf
-USA,USA,2020,f,TOT,1639599,stmf
-USA,USA,2020,m,0,11052,stmf
-USA,USA,2020,m,1,2061,stmf
-USA,USA,2020,m,15,26992,stmf
-USA,USA,2020,m,25,52890,stmf
-USA,USA,2020,m,35,69800,stmf
-USA,USA,2020,m,45,122212,stmf
-USA,USA,2020,m,5,3415,stmf
-USA,USA,2020,m,55,276256,stmf
-USA,USA,2020,m,65,398881,stmf
-USA,USA,2020,m,75,435876,stmf
-USA,USA,2020,m,85,401229,stmf
-USA,USA,2020,m,TOT,1800664,stmf
-USA,USA,2020,t,0,19941,stmf
-USA,USA,2020,t,1,3596,stmf
-USA,USA,2020,t,15,36473,stmf
-USA,USA,2020,t,25,74965,stmf
-USA,USA,2020,t,35,106420,stmf
-USA,USA,2020,t,45,194712,stmf
-USA,USA,2020,t,5,5722,stmf
-USA,USA,2020,t,55,448528,stmf
-USA,USA,2020,t,65,685977,stmf
-USA,USA,2020,t,75,835312,stmf
-USA,USA,2020,t,85,1028617,stmf
-USA,USA,2020,t,TOT,3440263,stmf
+USA,USA,2020,f,0,8869,stmf
+USA,USA,2020,f,1,1529,stmf
+USA,USA,2020,f,15,9439,stmf
+USA,USA,2020,f,25,21991,stmf
+USA,USA,2020,f,35,36528,stmf
+USA,USA,2020,f,45,72419,stmf
+USA,USA,2020,f,5,2299,stmf
+USA,USA,2020,f,55,172195,stmf
+USA,USA,2020,f,65,287053,stmf
+USA,USA,2020,f,75,399392,stmf
+USA,USA,2020,f,85,627344,stmf
+USA,USA,2020,f,TOT,1639058,stmf
+USA,USA,2020,m,0,11018,stmf
+USA,USA,2020,m,1,2049,stmf
+USA,USA,2020,m,15,26854,stmf
+USA,USA,2020,m,25,52643,stmf
+USA,USA,2020,m,35,69593,stmf
+USA,USA,2020,m,45,122041,stmf
+USA,USA,2020,m,5,3397,stmf
+USA,USA,2020,m,55,276068,stmf
+USA,USA,2020,m,65,398765,stmf
+USA,USA,2020,m,75,435813,stmf
+USA,USA,2020,m,85,401179,stmf
+USA,USA,2020,m,TOT,1799420,stmf
+USA,USA,2020,t,0,19887,stmf
+USA,USA,2020,t,1,3578,stmf
+USA,USA,2020,t,15,36293,stmf
+USA,USA,2020,t,25,74634,stmf
+USA,USA,2020,t,35,106121,stmf
+USA,USA,2020,t,45,194460,stmf
+USA,USA,2020,t,5,5696,stmf
+USA,USA,2020,t,55,448263,stmf
+USA,USA,2020,t,65,685818,stmf
+USA,USA,2020,t,75,835205,stmf
+USA,USA,2020,t,85,1028523,stmf
+USA,USA,2020,t,TOT,3438478,stmf

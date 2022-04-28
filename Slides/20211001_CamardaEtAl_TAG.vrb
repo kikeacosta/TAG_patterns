@@ -1,0 +1,7 @@
+\frametitle{Sex age-factor $s(x)$}
+	\only<1>{
+		\vspace{-0.7cm}
+		\begin{center}
+			\includegraphics[scale=.38]{Figures/sGoodPop.pdf}		
+		\end{center}
+	}

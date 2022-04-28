@@ -6,11 +6,15 @@ library(tidyverse)
 # ~~~~~~~~~~~~~~~~~~~
 # Peru mortality data
 # ~~~~~~~~~~~~~~~~~~~
-# files from OSF (Version 1) as of 15 March 2021 
 
+# Directly from the ministry of health
+# https://www.datosabiertos.gob.pe/dataset/informaci%C3%B3n-de-fallecidos-del-sistema-inform%C3%A1tico-nacional-de-defunciones-sinadef-ministerio
 # load data
 db_pe <- 
-  read_delim(here("Data", "Peru", "fallecidos_sinadef.csv"), delim = "|")
+  read_delim("https://cloud.minsa.gob.pe/s/nqF2irNbFomCLaa/download", delim = "|")
+
+# db_pe <- 
+#   read_delim(here("Data", "Peru", "fallecidos_sinadef.csv"), delim = "|")
 
 # data wrangling
 db_pe2 <- db_pe %>% 
