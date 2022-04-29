@@ -27,15 +27,12 @@ for(ct in cds_hmd){
     bind_rows(chunk_d)
 }
 
-cts_2020plus <- 
-  hmd %>%
-  filter(Year >= 2020) %>% 
-  pull(Code) %>% 
-  unique()
-
 hmd2 <- 
   hmd %>%
-  filter(Code %in% cts_2020plus) %>% 
+  # only countries with data in 2020
+  group_by(Code) %>% 
+  filter(max(Year) >= 2020) %>% 
+  ungroup() %>% 
   select(-OpenInterval) %>% 
   gather(Female, Male, Total, key = Sex, value = Deaths) %>% 
   mutate(Sex = recode(Sex,
