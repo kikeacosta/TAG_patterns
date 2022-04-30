@@ -357,8 +357,7 @@ American Samoa,ASM,2015,f,65,15.000000000000002,unpd
 American Samoa,ASM,2015,f,70,9,unpd
 American Samoa,ASM,2015,f,75,10.999999999999998,unpd
 American Samoa,ASM,2015,f,80,15.999999999999998,unpd
-American Samoa,ASM,2015,f,85,14,unpd
-American Samoa,ASM,2015,f,90,8,unpd
+American Samoa,ASM,2015,f,85,22,unpd
 American Samoa,ASM,2015,m,0,6,unpd
 American Samoa,ASM,2015,m,1,3,unpd
 American Samoa,ASM,2015,m,15,0,unpd
@@ -376,7 +375,6 @@ American Samoa,ASM,2015,m,70,16,unpd
 American Samoa,ASM,2015,m,75,18.999999999999996,unpd
 American Samoa,ASM,2015,m,80,13.999999999999998,unpd
 American Samoa,ASM,2015,m,85,7,unpd
-American Samoa,ASM,2015,m,90,0,unpd
 American Samoa,ASM,2015,t,0,10,unpd
 American Samoa,ASM,2015,t,1,4,unpd
 American Samoa,ASM,2015,t,15,2,unpd
@@ -393,8 +391,7 @@ American Samoa,ASM,2015,t,65,27.000000000000004,unpd
 American Samoa,ASM,2015,t,70,25,unpd
 American Samoa,ASM,2015,t,75,29.999999999999996,unpd
 American Samoa,ASM,2015,t,80,29.999999999999996,unpd
-American Samoa,ASM,2015,t,85,21,unpd
-American Samoa,ASM,2015,t,90,8,unpd
+American Samoa,ASM,2015,t,85,29,unpd
 American Samoa,ASM,2016,f,0,6,unpd
 American Samoa,ASM,2016,f,1,0,unpd
 American Samoa,ASM,2016,f,15,0,unpd
@@ -411,8 +408,7 @@ American Samoa,ASM,2016,f,65,12,unpd
 American Samoa,ASM,2016,f,70,15,unpd
 American Samoa,ASM,2016,f,75,13,unpd
 American Samoa,ASM,2016,f,80,13,unpd
-American Samoa,ASM,2016,f,85,13,unpd
-American Samoa,ASM,2016,f,90,3,unpd
+American Samoa,ASM,2016,f,85,16,unpd
 American Samoa,ASM,2016,m,0,8,unpd
 American Samoa,ASM,2016,m,1,1,unpd
 American Samoa,ASM,2016,m,15,2,unpd
@@ -429,8 +425,7 @@ American Samoa,ASM,2016,m,65,18,unpd
 American Samoa,ASM,2016,m,70,17,unpd
 American Samoa,ASM,2016,m,75,14,unpd
 American Samoa,ASM,2016,m,80,6,unpd
-American Samoa,ASM,2016,m,85,4.999999999999999,unpd
-American Samoa,ASM,2016,m,90,6,unpd
+American Samoa,ASM,2016,m,85,11,unpd
 American Samoa,ASM,2016,t,0,14,unpd
 American Samoa,ASM,2016,t,1,1,unpd
 American Samoa,ASM,2016,t,15,2,unpd
@@ -447,8 +442,7 @@ American Samoa,ASM,2016,t,65,30,unpd
 American Samoa,ASM,2016,t,70,32,unpd
 American Samoa,ASM,2016,t,75,27,unpd
 American Samoa,ASM,2016,t,80,19,unpd
-American Samoa,ASM,2016,t,85,18,unpd
-American Samoa,ASM,2016,t,90,9,unpd
+American Samoa,ASM,2016,t,85,27,unpd
 American Samoa,ASM,2017,f,0,6.999999999999999,unpd
 American Samoa,ASM,2017,f,1,1,unpd
 American Samoa,ASM,2017,f,15,0,unpd
@@ -465,8 +459,7 @@ American Samoa,ASM,2017,f,65,16,unpd
 American Samoa,ASM,2017,f,70,15,unpd
 American Samoa,ASM,2017,f,75,14,unpd
 American Samoa,ASM,2017,f,80,12,unpd
-American Samoa,ASM,2017,f,85,12,unpd
-American Samoa,ASM,2017,f,90,9,unpd
+American Samoa,ASM,2017,f,85,21,unpd
 American Samoa,ASM,2017,m,0,4.999999999999999,unpd
 American Samoa,ASM,2017,m,1,3,unpd
 American Samoa,ASM,2017,m,15,2.9999999999999996,unpd
@@ -483,8 +476,7 @@ American Samoa,ASM,2017,m,65,18,unpd
 American Samoa,ASM,2017,m,70,21,unpd
 American Samoa,ASM,2017,m,75,23,unpd
 American Samoa,ASM,2017,m,80,11,unpd
-American Samoa,ASM,2017,m,85,9,unpd
-American Samoa,ASM,2017,m,90,2,unpd
+American Samoa,ASM,2017,m,85,11,unpd
 American Samoa,ASM,2017,t,0,11.999999999999998,unpd
 American Samoa,ASM,2017,t,1,4,unpd
 American Samoa,ASM,2017,t,15,2.9999999999999996,unpd
@@ -501,8 +493,7 @@ American Samoa,ASM,2017,t,65,34,unpd
 American Samoa,ASM,2017,t,70,36,unpd
 American Samoa,ASM,2017,t,75,37,unpd
 American Samoa,ASM,2017,t,80,23,unpd
-American Samoa,ASM,2017,t,85,21,unpd
-American Samoa,ASM,2017,t,90,11,unpd
+American Samoa,ASM,2017,t,85,32,unpd
 American Samoa,ASM,2019,f,0,2,unpd
 American Samoa,ASM,2019,f,1,0,unpd
 American Samoa,ASM,2019,f,15,3,unpd
@@ -40481,162 +40472,282 @@ Norway,NOR,2020,t,107,3,hmd
 Norway,NOR,2020,t,108,1,hmd
 Norway,NOR,2020,t,109,1,hmd
 Norway,NOR,2020,t,110,2,hmd
-Oman,OMN,2019,f,0,319,unpd
-Oman,OMN,2019,f,1,93,unpd
-Oman,OMN,2019,f,5,43,unpd
-Oman,OMN,2019,f,10,31.000000000000004,unpd
-Oman,OMN,2019,f,15,28.000000000000004,unpd
-Oman,OMN,2019,f,20,47,unpd
-Oman,OMN,2019,f,25,56,unpd
-Oman,OMN,2019,f,30,74,unpd
-Oman,OMN,2019,f,35,89,unpd
-Oman,OMN,2019,f,40,73,unpd
-Oman,OMN,2019,f,45,80,unpd
-Oman,OMN,2019,f,50,88,unpd
-Oman,OMN,2019,f,55,137.99999999999997,unpd
-Oman,OMN,2019,f,60,254,unpd
-Oman,OMN,2019,f,65,1797.0000000000002,unpd
-Oman,OMN,2019,m,0,367,unpd
-Oman,OMN,2019,m,1,99.99999999999999,unpd
-Oman,OMN,2019,m,5,52,unpd
-Oman,OMN,2019,m,10,40,unpd
-Oman,OMN,2019,m,15,72,unpd
-Oman,OMN,2019,m,20,140,unpd
-Oman,OMN,2019,m,25,223,unpd
-Oman,OMN,2019,m,30,250.99999999999997,unpd
-Oman,OMN,2019,m,35,275,unpd
-Oman,OMN,2019,m,40,289,unpd
-Oman,OMN,2019,m,45,279,unpd
-Oman,OMN,2019,m,50,292,unpd
-Oman,OMN,2019,m,55,361,unpd
-Oman,OMN,2019,m,60,379.99999999999994,unpd
-Oman,OMN,2019,m,65,2250,unpd
-Oman,OMN,2019,t,0,686,unpd
-Oman,OMN,2019,t,1,193,unpd
-Oman,OMN,2019,t,5,95,unpd
-Oman,OMN,2019,t,10,71,unpd
-Oman,OMN,2019,t,15,100,unpd
-Oman,OMN,2019,t,20,187,unpd
-Oman,OMN,2019,t,25,279,unpd
-Oman,OMN,2019,t,30,325,unpd
-Oman,OMN,2019,t,35,364,unpd
-Oman,OMN,2019,t,40,362,unpd
-Oman,OMN,2019,t,45,359,unpd
-Oman,OMN,2019,t,50,380,unpd
-Oman,OMN,2019,t,55,499,unpd
-Oman,OMN,2019,t,60,634,unpd
-Oman,OMN,2019,t,65,4047,unpd
-Oman,OMN,2020,f,0,381.4820979363342,unpd
-Oman,OMN,2020,f,1,83.52080234995404,unpd
-Oman,OMN,2020,f,5,31.327082213726655,unpd
-Oman,OMN,2020,f,10,38.68296971770476,unpd
-Oman,OMN,2020,f,15,39.03803357559478,unpd
-Oman,OMN,2020,f,20,45.61533459458088,unpd
-Oman,OMN,2020,f,25,86.10631125398443,unpd
-Oman,OMN,2020,f,30,108.86720805566709,unpd
-Oman,OMN,2020,f,35,121.65172933198139,unpd
-Oman,OMN,2020,f,40,150.53265080705197,unpd
-Oman,OMN,2020,f,45,114.29887384393636,unpd
-Oman,OMN,2020,f,50,170.9386573010321,unpd
-Oman,OMN,2020,f,55,202.45981747487386,unpd
-Oman,OMN,2020,f,60,360.83915243304125,unpd
-Oman,OMN,2020,f,65,475.4293868707,unpd
-Oman,OMN,2020,f,70,599.6416761305652,unpd
-Oman,OMN,2020,f,75,621.3655600909213,unpd
-Oman,OMN,2020,f,80,1239.8000594731184,unpd
-Oman,OMN,2020,m,0,391.96742515366486,unpd
-Oman,OMN,2020,m,1,85.4073306182205,unpd
-Oman,OMN,2020,m,5,44.69057762195188,unpd
-Oman,OMN,2020,m,10,42.16120820277875,unpd
-Oman,OMN,2020,m,15,78.00502998092614,unpd
-Oman,OMN,2020,m,20,148.65201831881978,unpd
-Oman,OMN,2020,m,25,265.02287941557836,unpd
-Oman,OMN,2020,m,30,326.72604909798287,unpd
-Oman,OMN,2020,m,35,399.6122238269571,unpd
-Oman,OMN,2020,m,40,425.02963080594276,unpd
-Oman,OMN,2020,m,45,462.4700372902595,unpd
-Oman,OMN,2020,m,50,524.0799469108858,unpd
-Oman,OMN,2020,m,55,586.6758893907413,unpd
-Oman,OMN,2020,m,60,644.2832387275971,unpd
-Oman,OMN,2020,m,65,612.9504412528242,unpd
-Oman,OMN,2020,m,70,702.3115772455798,unpd
-Oman,OMN,2020,m,75,765.0517597693109,unpd
-Oman,OMN,2020,m,80,1400.3053329152094,unpd
-Oman,OMN,2020,t,0,773.449523089999,unpd
-Oman,OMN,2020,t,1,168.9281329681745,unpd
-Oman,OMN,2020,t,5,76.01765983567853,unpd
-Oman,OMN,2020,t,10,80.84417792048352,unpd
-Oman,OMN,2020,t,15,117.04306355652092,unpd
-Oman,OMN,2020,t,20,194.26735291340069,unpd
-Oman,OMN,2020,t,25,351.1291906695628,unpd
-Oman,OMN,2020,t,30,435.59325715365,unpd
-Oman,OMN,2020,t,35,521.2639531589385,unpd
-Oman,OMN,2020,t,40,575.5622816129946,unpd
-Oman,OMN,2020,t,45,576.7689111341958,unpd
-Oman,OMN,2020,t,50,695.018604211918,unpd
-Oman,OMN,2020,t,55,789.1357068656152,unpd
-Oman,OMN,2020,t,60,1005.1223911606384,unpd
-Oman,OMN,2020,t,65,1088.3798281235242,unpd
-Oman,OMN,2020,t,70,1301.953253376145,unpd
-Oman,OMN,2020,t,75,1386.4173198602323,unpd
-Oman,OMN,2020,t,80,2640.105392388328,unpd
-Oman,OMN,2021,f,0,338.37689517419113,unpd
-Oman,OMN,2021,f,1,74.58878768998835,unpd
-Oman,OMN,2021,f,5,44.30340246634296,unpd
-Oman,OMN,2021,f,10,40.02667436976808,unpd
-Oman,OMN,2021,f,15,35.85642577513219,unpd
-Oman,OMN,2021,f,20,43.51420137069475,unpd
-Oman,OMN,2021,f,25,62.04060262772739,unpd
-Oman,OMN,2021,f,30,116.36578026858105,unpd
-Oman,OMN,2021,f,35,142.55249668530544,unpd
-Oman,OMN,2021,f,40,184.90685904225654,unpd
-Oman,OMN,2021,f,45,164.35580809584,unpd
-Oman,OMN,2021,f,50,182.84992510245883,unpd
-Oman,OMN,2021,f,55,234.76853203025738,unpd
-Oman,OMN,2021,f,60,346.065326177818,unpd
-Oman,OMN,2021,f,65,521.4854801701878,unpd
-Oman,OMN,2021,f,70,561.3707689864028,unpd
-Oman,OMN,2021,f,75,668.8303172780552,unpd
-Oman,OMN,2021,f,80,557.0003526341446,unpd
-Oman,OMN,2021,f,85,607.7270381760611,unpd
-Oman,OMN,2021,m,0,362.1226088760651,unpd
-Oman,OMN,2021,m,1,78.94535018404041,unpd
-Oman,OMN,2021,m,5,44.19196866938195,unpd
-Oman,OMN,2021,m,10,47.40248747516498,unpd
-Oman,OMN,2021,m,15,86.75764266593245,unpd
-Oman,OMN,2021,m,20,132.4103316099632,unpd
-Oman,OMN,2021,m,25,210.90897581499036,unpd
-Oman,OMN,2021,m,30,333.5745404455866,unpd
-Oman,OMN,2021,m,35,461.98817119368283,unpd
-Oman,OMN,2021,m,40,545.446505150172,unpd
-Oman,OMN,2021,m,45,560.6665096426292,unpd
-Oman,OMN,2021,m,50,616.8070429914411,unpd
-Oman,OMN,2021,m,55,601.1395519505659,unpd
-Oman,OMN,2021,m,60,636.9796399322828,unpd
-Oman,OMN,2021,m,65,627.8881353034442,unpd
-Oman,OMN,2021,m,70,649.8429853531576,unpd
-Oman,OMN,2021,m,75,660.7326683394024,unpd
-Oman,OMN,2021,m,80,637.1540530527457,unpd
-Oman,OMN,2021,m,85,677.0551572281377,unpd
-Oman,OMN,2021,t,0,700.4995040502562,unpd
-Oman,OMN,2021,t,1,153.53413787402874,unpd
-Oman,OMN,2021,t,5,88.49537113572491,unpd
-Oman,OMN,2021,t,10,87.42916184493305,unpd
-Oman,OMN,2021,t,15,122.61406844106463,unpd
-Oman,OMN,2021,t,20,175.92453298065794,unpd
-Oman,OMN,2021,t,25,272.9495784427178,unpd
-Oman,OMN,2021,t,30,449.9403207141677,unpd
-Oman,OMN,2021,t,35,604.5406678789883,unpd
-Oman,OMN,2021,t,40,730.3533641924286,unpd
-Oman,OMN,2021,t,45,725.0223177384692,unpd
-Oman,OMN,2021,t,50,799.6569680938999,unpd
-Oman,OMN,2021,t,55,835.9080839808232,unpd
-Oman,OMN,2021,t,60,983.0449661101009,unpd
-Oman,OMN,2021,t,65,1149.373615473632,unpd
-Oman,OMN,2021,t,70,1211.2137543395604,unpd
-Oman,OMN,2021,t,75,1329.5629856174576,unpd
-Oman,OMN,2021,t,80,1194.1544056868904,unpd
-Oman,OMN,2021,t,85,1284.782195404199,unpd
+Oman,OMN,2016,f,1,11.852473619001433,who_mort_db
+Oman,OMN,2016,f,5,3.9508797229372488,who_mort_db
+Oman,OMN,2016,f,10,3.191333280373447,who_mort_db
+Oman,OMN,2016,f,15,4.476519324551632,who_mort_db
+Oman,OMN,2016,f,20,5.930275746292574,who_mort_db
+Oman,OMN,2016,f,25,7.584519464998158,who_mort_db
+Oman,OMN,2016,f,30,7.368611590197627,who_mort_db
+Oman,OMN,2016,f,35,9.5790053009329,who_mort_db
+Oman,OMN,2016,f,40,7.1790688031582395,who_mort_db
+Oman,OMN,2016,f,45,6.962740429847086,who_mort_db
+Oman,OMN,2016,f,50,12.00323104797129,who_mort_db
+Oman,OMN,2016,f,55,20.58275049903636,who_mort_db
+Oman,OMN,2016,f,60,24.10501984994008,who_mort_db
+Oman,OMN,2016,f,65,35.92172607058906,who_mort_db
+Oman,OMN,2016,f,70,40.624033460320824,who_mort_db
+Oman,OMN,2016,f,75,45.430790942957366,who_mort_db
+Oman,OMN,2016,f,80,35.41605567412665,who_mort_db
+Oman,OMN,2016,f,85,41.95515107952894,who_mort_db
+Oman,OMN,2016,m,1,10.034869350065163,who_mort_db
+Oman,OMN,2016,m,5,5.940515657314002,who_mort_db
+Oman,OMN,2016,m,10,4.911192722598321,who_mort_db
+Oman,OMN,2016,m,15,11.202394629250879,who_mort_db
+Oman,OMN,2016,m,20,23.53345517360476,who_mort_db
+Oman,OMN,2016,m,25,23.036715169609437,who_mort_db
+Oman,OMN,2016,m,30,25.672858084258674,who_mort_db
+Oman,OMN,2016,m,35,22.62064349009776,who_mort_db
+Oman,OMN,2016,m,40,21.442841233313462,who_mort_db
+Oman,OMN,2016,m,45,23.97417703604512,who_mort_db
+Oman,OMN,2016,m,50,25.77348109575423,who_mort_db
+Oman,OMN,2016,m,55,29.610819675217325,who_mort_db
+Oman,OMN,2016,m,60,31.560386066580257,who_mort_db
+Oman,OMN,2016,m,65,36.47486990401583,who_mort_db
+Oman,OMN,2016,m,70,44.715558596953244,who_mort_db
+Oman,OMN,2016,m,75,42.539491375021825,who_mort_db
+Oman,OMN,2016,m,80,35.82303658576798,who_mort_db
+Oman,OMN,2016,m,85,36.018508247770804,who_mort_db
+Oman,OMN,2016,t,1,21.887342969066594,who_mort_db
+Oman,OMN,2016,t,5,9.89139538025125,who_mort_db
+Oman,OMN,2016,t,10,8.102526002971768,who_mort_db
+Oman,OMN,2016,t,15,15.678913953802512,who_mort_db
+Oman,OMN,2016,t,20,29.463730919897337,who_mort_db
+Oman,OMN,2016,t,25,30.621234634607593,who_mort_db
+Oman,OMN,2016,t,30,33.0414696744563,who_mort_db
+Oman,OMN,2016,t,35,32.19964879103066,who_mort_db
+Oman,OMN,2016,t,40,28.6219100364717,who_mort_db
+Oman,OMN,2016,t,45,30.936917465892208,who_mort_db
+Oman,OMN,2016,t,50,37.77671214372552,who_mort_db
+Oman,OMN,2016,t,55,50.193570174253686,who_mort_db
+Oman,OMN,2016,t,60,55.665405916520335,who_mort_db
+Oman,OMN,2016,t,65,72.39659597460489,who_mort_db
+Oman,OMN,2016,t,70,85.33959205727407,who_mort_db
+Oman,OMN,2016,t,75,87.9702823179792,who_mort_db
+Oman,OMN,2016,t,80,71.23909225989463,who_mort_db
+Oman,OMN,2016,t,85,77.97365932729974,who_mort_db
+Oman,OMN,2017,f,1,9.721340980962706,who_mort_db
+Oman,OMN,2017,f,5,6.057914052587362,who_mort_db
+Oman,OMN,2017,f,10,5.216772257358776,who_mort_db
+Oman,OMN,2017,f,15,4.92853559418358,who_mort_db
+Oman,OMN,2017,f,20,6.616423054894628,who_mort_db
+Oman,OMN,2017,f,25,8.29888107276817,who_mort_db
+Oman,OMN,2017,f,30,11.826524573553222,who_mort_db
+Oman,OMN,2017,f,35,11.584604917037328,who_mort_db
+Oman,OMN,2017,f,40,10.640314621748372,who_mort_db
+Oman,OMN,2017,f,45,9.439608985769462,who_mort_db
+Oman,OMN,2017,f,50,14.79811148372629,who_mort_db
+Oman,OMN,2017,f,55,23.36501886878863,who_mort_db
+Oman,OMN,2017,f,60,29.250343725133188,who_mort_db
+Oman,OMN,2017,f,65,40.52674605347328,who_mort_db
+Oman,OMN,2017,f,70,50.169882868560826,who_mort_db
+Oman,OMN,2017,f,75,54.13025475305749,who_mort_db
+Oman,OMN,2017,f,80,41.77889068392642,who_mort_db
+Oman,OMN,2017,f,85,51.317501188471624,who_mort_db
+Oman,OMN,2017,m,1,9.437525202293717,who_mort_db
+Oman,OMN,2017,m,5,4.352105723286074,who_mort_db
+Oman,OMN,2017,m,10,4.52877817111848,who_mort_db
+Oman,OMN,2017,m,15,7.364147332645688,who_mort_db
+Oman,OMN,2017,m,20,20.40533040588322,who_mort_db
+Oman,OMN,2017,m,25,25.14607607950606,who_mort_db
+Oman,OMN,2017,m,30,25.383758880632673,who_mort_db
+Oman,OMN,2017,m,35,22.63556647386577,who_mort_db
+Oman,OMN,2017,m,40,23.13687720422394,who_mort_db
+Oman,OMN,2017,m,45,25.112797078831726,who_mort_db
+Oman,OMN,2017,m,50,27.72792674962902,who_mort_db
+Oman,OMN,2017,m,55,33.11487565988639,who_mort_db
+Oman,OMN,2017,m,60,32.10232601778045,who_mort_db
+Oman,OMN,2017,m,65,32.12190259517536,who_mort_db
+Oman,OMN,2017,m,70,37.65081587896721,who_mort_db
+Oman,OMN,2017,m,75,43.989718879111265,who_mort_db
+Oman,OMN,2017,m,80,39.06487991594174,who_mort_db
+Oman,OMN,2017,m,85,37.056922015219854,who_mort_db
+Oman,OMN,2017,t,1,19.158866183256425,who_mort_db
+Oman,OMN,2017,t,5,10.410019775873435,who_mort_db
+Oman,OMN,2017,t,10,9.745550428477257,who_mort_db
+Oman,OMN,2017,t,15,12.292682926829269,who_mort_db
+Oman,OMN,2017,t,20,27.02175346077785,who_mort_db
+Oman,OMN,2017,t,25,33.44495715227423,who_mort_db
+Oman,OMN,2017,t,30,37.21028345418589,who_mort_db
+Oman,OMN,2017,t,35,34.2201713909031,who_mort_db
+Oman,OMN,2017,t,40,33.77719182597231,who_mort_db
+Oman,OMN,2017,t,45,34.552406064601186,who_mort_db
+Oman,OMN,2017,t,50,42.52603823335531,who_mort_db
+Oman,OMN,2017,t,55,56.47989452867502,who_mort_db
+Oman,OMN,2017,t,60,61.35266974291364,who_mort_db
+Oman,OMN,2017,t,65,72.64864864864865,who_mort_db
+Oman,OMN,2017,t,70,87.82069874752803,who_mort_db
+Oman,OMN,2017,t,75,98.11997363216875,who_mort_db
+Oman,OMN,2017,t,80,80.84377059986817,who_mort_db
+Oman,OMN,2017,t,85,88.37442320369149,who_mort_db
+Oman,OMN,2018,f,1,10.74452476300519,who_mort_db
+Oman,OMN,2018,f,5,5.607854127063743,who_mort_db
+Oman,OMN,2018,f,10,3.9783678824911957,who_mort_db
+Oman,OMN,2018,f,15,3.0932382780971346,who_mort_db
+Oman,OMN,2018,f,20,4.4514492013837454,who_mort_db
+Oman,OMN,2018,f,25,7.74436149305346,who_mort_db
+Oman,OMN,2018,f,30,8.028478461148493,who_mort_db
+Oman,OMN,2018,f,35,11.437078787225836,who_mort_db
+Oman,OMN,2018,f,40,10.024852207713355,who_mort_db
+Oman,OMN,2018,f,45,9.790988321917512,who_mort_db
+Oman,OMN,2018,f,50,12.26917123076173,who_mort_db
+Oman,OMN,2018,f,55,16.482782008646232,who_mort_db
+Oman,OMN,2018,f,60,29.668104683022513,who_mort_db
+Oman,OMN,2018,f,65,31.790133796287677,who_mort_db
+Oman,OMN,2018,f,70,49.259701515348304,who_mort_db
+Oman,OMN,2018,f,75,57.56330267340203,who_mort_db
+Oman,OMN,2018,f,80,38.0572134518736,who_mort_db
+Oman,OMN,2018,f,85,51.89536582481429,who_mort_db
+Oman,OMN,2018,m,1,10.588992402305715,who_mort_db
+Oman,OMN,2018,m,5,4.214012686668506,who_mort_db
+Oman,OMN,2018,m,10,4.787384220087048,who_mort_db
+Oman,OMN,2018,m,15,7.99596618901992,who_mort_db
+Oman,OMN,2018,m,20,12.65760911931114,who_mort_db
+Oman,OMN,2018,m,25,18.130448930219668,who_mort_db
+Oman,OMN,2018,m,30,23.443739931240863,who_mort_db
+Oman,OMN,2018,m,35,20.880031374086723,who_mort_db
+Oman,OMN,2018,m,40,26.199882384869024,who_mort_db
+Oman,OMN,2018,m,45,22.94856772385665,who_mort_db
+Oman,OMN,2018,m,50,24.906066601859255,who_mort_db
+Oman,OMN,2018,m,55,28.19087027316819,who_mort_db
+Oman,OMN,2018,m,60,31.6921600350252,who_mort_db
+Oman,OMN,2018,m,65,27.56351297056741,who_mort_db
+Oman,OMN,2018,m,70,34.173360665818116,who_mort_db
+Oman,OMN,2018,m,75,37.69824427268925,who_mort_db
+Oman,OMN,2018,m,80,32.28002631098314,who_mort_db
+Oman,OMN,2018,m,85,35.762155200968145,who_mort_db
+Oman,OMN,2018,t,1,21.333517165310905,who_mort_db
+Oman,OMN,2018,t,5,9.82186681373225,who_mort_db
+Oman,OMN,2018,t,10,8.765752102578244,who_mort_db
+Oman,OMN,2018,t,15,11.089204467117055,who_mort_db
+Oman,OMN,2018,t,20,17.109058320694885,who_mort_db
+Oman,OMN,2018,t,25,25.87481042327313,who_mort_db
+Oman,OMN,2018,t,30,31.472218392389355,who_mort_db
+Oman,OMN,2018,t,35,32.317110161312556,who_mort_db
+Oman,OMN,2018,t,40,36.22473459258238,who_mort_db
+Oman,OMN,2018,t,45,32.739556045774165,who_mort_db
+Oman,OMN,2018,t,50,37.17523783262099,who_mort_db
+Oman,OMN,2018,t,55,44.67365228181442,who_mort_db
+Oman,OMN,2018,t,60,61.36026471804771,who_mort_db
+Oman,OMN,2018,t,65,59.35364676685509,who_mort_db
+Oman,OMN,2018,t,70,83.43306218116642,who_mort_db
+Oman,OMN,2018,t,75,95.26154694609127,who_mort_db
+Oman,OMN,2018,t,80,70.33723976285674,who_mort_db
+Oman,OMN,2018,t,85,87.65752102578243,who_mort_db
+Oman,OMN,2019,f,1,9.700846692145467,who_mort_db
+Oman,OMN,2019,f,5,4.5197699403959515,who_mort_db
+Oman,OMN,2019,f,10,3.2222474175362814,who_mort_db
+Oman,OMN,2019,f,15,3.0874541251906815,who_mort_db
+Oman,OMN,2019,f,20,5.396608219718917,who_mort_db
+Oman,OMN,2019,f,25,6.162916204269541,who_mort_db
+Oman,OMN,2019,f,30,8.497416741464422,who_mort_db
+Oman,OMN,2019,f,35,9.566223707141361,who_mort_db
+Oman,OMN,2019,f,40,8.707798508218234,who_mort_db
+Oman,OMN,2019,f,45,8.781327190053723,who_mort_db
+Oman,OMN,2019,f,50,10.274420222212624,who_mort_db
+Oman,OMN,2019,f,55,15.433417309180882,who_mort_db
+Oman,OMN,2019,f,60,27.16382080278941,who_mort_db
+Oman,OMN,2019,f,65,29.672782047349262,who_mort_db
+Oman,OMN,2019,f,70,37.64270259188714,who_mort_db
+Oman,OMN,2019,f,75,49.20675035102563,who_mort_db
+Oman,OMN,2019,f,80,33.421307673410986,who_mort_db
+Oman,OMN,2019,f,85,44.779683093267224,who_mort_db
+Oman,OMN,2019,m,1,7.186412702904947,who_mort_db
+Oman,OMN,2019,m,5,3.7442080614372277,who_mort_db
+Oman,OMN,2019,m,10,2.885910235992592,who_mort_db
+Oman,OMN,2019,m,15,5.5358272680265515,who_mort_db
+Oman,OMN,2019,m,20,10.861870240409408,who_mort_db
+Oman,OMN,2019,m,25,17.730759322769874,who_mort_db
+Oman,OMN,2019,m,30,19.88755117787563,who_mort_db
+Oman,OMN,2019,m,35,21.693171343271107,who_mort_db
+Oman,OMN,2019,m,40,23.360029172808343,who_mort_db
+Oman,OMN,2019,m,45,21.849286925436655,who_mort_db
+Oman,OMN,2019,m,50,22.781491785120096,who_mort_db
+Oman,OMN,2019,m,55,27.593163809059256,who_mort_db
+Oman,OMN,2019,m,60,26.911339600510313,who_mort_db
+Oman,OMN,2019,m,65,27.63610887840693,who_mort_db
+Oman,OMN,2019,m,70,33.49936890215503,who_mort_db
+Oman,OMN,2019,m,75,38.463277146682884,who_mort_db
+Oman,OMN,2019,m,80,29.726263362336024,who_mort_db
+Oman,OMN,2019,m,85,29.41646722753938,who_mort_db
+Oman,OMN,2019,t,1,16.887259395050414,who_mort_db
+Oman,OMN,2019,t,5,8.26397800183318,who_mort_db
+Oman,OMN,2019,t,10,6.108157653528873,who_mort_db
+Oman,OMN,2019,t,15,8.623281393217232,who_mort_db
+Oman,OMN,2019,t,20,16.258478460128323,who_mort_db
+Oman,OMN,2019,t,25,23.893675527039413,who_mort_db
+Oman,OMN,2019,t,30,28.384967919340053,who_mort_db
+Oman,OMN,2019,t,35,31.259395050412465,who_mort_db
+Oman,OMN,2019,t,40,32.06782768102658,who_mort_db
+Oman,OMN,2019,t,45,30.630614115490374,who_mort_db
+Oman,OMN,2019,t,50,33.05591200733272,who_mort_db
+Oman,OMN,2019,t,55,43.026581118240145,who_mort_db
+Oman,OMN,2019,t,60,54.075160403299726,who_mort_db
+Oman,OMN,2019,t,65,57.30889092575619,who_mort_db
+Oman,OMN,2019,t,70,71.14207149404217,who_mort_db
+Oman,OMN,2019,t,75,87.67002749770852,who_mort_db
+Oman,OMN,2019,t,80,63.14757103574701,who_mort_db
+Oman,OMN,2019,t,85,74.19615032080661,who_mort_db
+Oman,OMN,2020,f,1,5.423464435374853,who_mort_db
+Oman,OMN,2020,f,5,2.1008299616912334,who_mort_db
+Oman,OMN,2020,f,10,2.5241413612517922,who_mort_db
+Oman,OMN,2020,f,15,2.706751886085832,who_mort_db
+Oman,OMN,2020,f,20,3.220174108120109,who_mort_db
+Oman,OMN,2020,f,25,6.041355774605739,who_mort_db
+Oman,OMN,2020,f,30,7.8201667117354114,who_mort_db
+Oman,OMN,2020,f,35,8.808891062738402,who_mort_db
+Oman,OMN,2020,f,40,10.515399440068384,who_mort_db
+Oman,OMN,2020,f,45,8.411636640247304,who_mort_db
+Oman,OMN,2020,f,50,12.155366860350654,who_mort_db
+Oman,OMN,2020,f,55,14.418483910254007,who_mort_db
+Oman,OMN,2020,f,60,24.42059819869394,who_mort_db
+Oman,OMN,2020,f,65,31.433915378503116,who_mort_db
+Oman,OMN,2020,f,70,39.383810957578376,who_mort_db
+Oman,OMN,2020,f,75,40.86073207349692,who_mort_db
+Oman,OMN,2020,f,80,36.932829248715095,who_mort_db
+Oman,OMN,2020,f,85,23.960298580200302,who_mort_db
+Oman,OMN,2020,f,90,12.279128385820997,who_mort_db
+Oman,OMN,2020,f,95,7.9171258423020845,who_mort_db
+Oman,OMN,2020,m,1,3.736827003605109,who_mort_db
+Oman,OMN,2020,m,5,1.992066213172154,who_mort_db
+Oman,OMN,2020,m,10,1.8286212374124462,who_mort_db
+Oman,OMN,2020,m,15,3.595008891084781,who_mort_db
+Oman,OMN,2020,m,20,7.174482843913892,who_mort_db
+Oman,OMN,2020,m,25,12.733993345005674,who_mort_db
+Oman,OMN,2020,m,30,15.372911612490453,who_mort_db
+Oman,OMN,2020,m,35,19.061782889902766,who_mort_db
+Oman,OMN,2020,m,40,20.018905356531498,who_mort_db
+Oman,OMN,2020,m,45,22.447501186103636,who_mort_db
+Oman,OMN,2020,m,50,25.20043156102154,who_mort_db
+Oman,OMN,2020,m,55,27.54994353358328,who_mort_db
+Oman,OMN,2020,m,60,29.176851710231375,who_mort_db
+Oman,OMN,2020,m,65,26.64623034098687,who_mort_db
+Oman,OMN,2020,m,70,30.45529043890006,who_mort_db
+Oman,OMN,2020,m,75,33.266165315695545,who_mort_db
+Oman,OMN,2020,m,80,30.307607909754847,who_mort_db
+Oman,OMN,2020,m,85,18.00812886363699,who_mort_db
+Oman,OMN,2020,m,90,8.315285700396371,who_mort_db
+Oman,OMN,2020,m,95,3.776863228736169,who_mort_db
+Oman,OMN,2020,t,1,9.160291438979963,who_mort_db
+Oman,OMN,2020,t,5,4.092896174863388,who_mort_db
+Oman,OMN,2020,t,10,4.352762598664238,who_mort_db
+Oman,OMN,2020,t,15,6.301760777170613,who_mort_db
+Oman,OMN,2020,t,20,10.394656952034001,who_mort_db
+Oman,OMN,2020,t,25,18.775349119611413,who_mort_db
+Oman,OMN,2020,t,30,23.193078324225866,who_mort_db
+Oman,OMN,2020,t,35,27.870673952641166,who_mort_db
+Oman,OMN,2020,t,40,30.53430479659988,who_mort_db
+Oman,OMN,2020,t,45,30.859137826350942,who_mort_db
+Oman,OMN,2020,t,50,37.35579842137219,who_mort_db
+Oman,OMN,2020,t,55,41.968427443837285,who_mort_db
+Oman,OMN,2020,t,60,53.59744990892531,who_mort_db
+Oman,OMN,2020,t,65,58.080145719489984,who_mort_db
+Oman,OMN,2020,t,70,69.83910139647844,who_mort_db
+Oman,OMN,2020,t,75,74.12689738919246,who_mort_db
+Oman,OMN,2020,t,80,67.24043715846994,who_mort_db
+Oman,OMN,2020,t,85,41.968427443837285,who_mort_db
+Oman,OMN,2020,t,90,20.594414086217366,who_mort_db
+Oman,OMN,2020,t,95,11.693989071038253,who_mort_db
 Paraguay,PRY,2015,f,0,745.8766268536056,unpd
 Paraguay,PRY,2015,f,1,119.07358372560846,unpd
 Paraguay,PRY,2015,f,5,55.03082971168306,unpd
@@ -56705,120 +56816,6 @@ Ukraine,UKR,2020,t,70,71945.48344031558,unpd
 Ukraine,UKR,2020,t,75,73980.33155849272,unpd
 Ukraine,UKR,2020,t,80,118459.8828264715,unpd
 Ukraine,UKR,2020,t,85,113570.02333774882,unpd
-United Arab Emirates,ARE,2019,f,1,3.470463709759415,who_mort_db
-United Arab Emirates,ARE,2019,f,5,1.522036679951414,who_mort_db
-United Arab Emirates,ARE,2019,f,10,1.7411570527050684,who_mort_db
-United Arab Emirates,ARE,2019,f,15,1.2728890825225114,who_mort_db
-United Arab Emirates,ARE,2019,f,20,2.0782718886376257,who_mort_db
-United Arab Emirates,ARE,2019,f,25,5.472413311751285,who_mort_db
-United Arab Emirates,ARE,2019,f,30,7.692910917235266,who_mort_db
-United Arab Emirates,ARE,2019,f,35,8.153498434472453,who_mort_db
-United Arab Emirates,ARE,2019,f,40,9.414329650689984,who_mort_db
-United Arab Emirates,ARE,2019,f,45,8.763722722426579,who_mort_db
-United Arab Emirates,ARE,2019,f,50,10.424122126774346,who_mort_db
-United Arab Emirates,ARE,2019,f,55,12.916259742300083,who_mort_db
-United Arab Emirates,ARE,2019,f,60,13.5374214539141,who_mort_db
-United Arab Emirates,ARE,2019,f,65,15.644929812604827,who_mort_db
-United Arab Emirates,ARE,2019,f,70,16.977235267519255,who_mort_db
-United Arab Emirates,ARE,2019,f,75,17.155259093802258,who_mort_db
-United Arab Emirates,ARE,2019,f,80,15.602579234274508,who_mort_db
-United Arab Emirates,ARE,2019,f,85,13.398578951183962,who_mort_db
-United Arab Emirates,ARE,2019,f,90,5.853159675870842,who_mort_db
-United Arab Emirates,ARE,2019,f,95,5.7394919532491375,who_mort_db
-United Arab Emirates,ARE,2019,m,1,2.054661320009578,who_mort_db
-United Arab Emirates,ARE,2019,m,5,0.8594827294317725,who_mort_db
-United Arab Emirates,ARE,2019,m,10,0.6879927448657818,who_mort_db
-United Arab Emirates,ARE,2019,m,15,3.34725857168087,who_mort_db
-United Arab Emirates,ARE,2019,m,20,10.25799865196728,who_mort_db
-United Arab Emirates,ARE,2019,m,25,15.342066326257768,who_mort_db
-United Arab Emirates,ARE,2019,m,30,17.979868315915482,who_mort_db
-United Arab Emirates,ARE,2019,m,35,19.85316981987382,who_mort_db
-United Arab Emirates,ARE,2019,m,40,20.0212502492862,who_mort_db
-United Arab Emirates,ARE,2019,m,45,21.767356105865872,who_mort_db
-United Arab Emirates,ARE,2019,m,50,21.20245562983437,who_mort_db
-United Arab Emirates,ARE,2019,m,55,19.091361119809942,who_mort_db
-United Arab Emirates,ARE,2019,m,60,16.755505433440035,who_mort_db
-United Arab Emirates,ARE,2019,m,65,12.838042323618087,who_mort_db
-United Arab Emirates,ARE,2019,m,70,11.315215315953,who_mort_db
-United Arab Emirates,ARE,2019,m,75,10.851409160544016,who_mort_db
-United Arab Emirates,ARE,2019,m,80,7.9744629186190386,who_mort_db
-United Arab Emirates,ARE,2019,m,85,5.9869890411951765,who_mort_db
-United Arab Emirates,ARE,2019,m,90,2.815570974283959,who_mort_db
-United Arab Emirates,ARE,2019,m,95,2.1671524859030415,who_mort_db
-United Arab Emirates,ARE,2019,t,1,5.525125029768993,who_mort_db
-United Arab Emirates,ARE,2019,t,5,2.3815194093831864,who_mort_db
-United Arab Emirates,ARE,2019,t,10,2.42914979757085,who_mort_db
-United Arab Emirates,ARE,2019,t,15,4.6201476542033815,who_mort_db
-United Arab Emirates,ARE,2019,t,20,12.336270540604906,who_mort_db
-United Arab Emirates,ARE,2019,t,25,20.81447963800905,who_mort_db
-United Arab Emirates,ARE,2019,t,30,25.67277923315075,who_mort_db
-United Arab Emirates,ARE,2019,t,35,28.006668254346273,who_mort_db
-United Arab Emirates,ARE,2019,t,40,29.435579899976183,who_mort_db
-United Arab Emirates,ARE,2019,t,45,30.53107882829245,who_mort_db
-United Arab Emirates,ARE,2019,t,50,31.626577756608715,who_mort_db
-United Arab Emirates,ARE,2019,t,55,32.007620862110024,who_mort_db
-United Arab Emirates,ARE,2019,t,60,30.29292688735413,who_mort_db
-United Arab Emirates,ARE,2019,t,65,28.482972136222912,who_mort_db
-United Arab Emirates,ARE,2019,t,70,28.292450583472256,who_mort_db
-United Arab Emirates,ARE,2019,t,75,28.006668254346273,who_mort_db
-United Arab Emirates,ARE,2019,t,80,23.577042152893547,who_mort_db
-United Arab Emirates,ARE,2019,t,85,19.385567992379137,who_mort_db
-United Arab Emirates,ARE,2019,t,90,8.6687306501548,who_mort_db
-United Arab Emirates,ARE,2019,t,95,7.906644439152179,who_mort_db
-United Arab Emirates,ARE,2020,f,1,2.6495013095640654,who_mort_db
-United Arab Emirates,ARE,2020,f,5,1.2357884704400717,who_mort_db
-United Arab Emirates,ARE,2020,f,10,1.2009705533401254,who_mort_db
-United Arab Emirates,ARE,2020,f,15,0.8080424667443877,who_mort_db
-United Arab Emirates,ARE,2020,f,20,2.198907449330228,who_mort_db
-United Arab Emirates,ARE,2020,f,25,3.7049014181725153,who_mort_db
-United Arab Emirates,ARE,2020,f,30,6.479429250443742,who_mort_db
-United Arab Emirates,ARE,2020,f,35,7.505128495820572,who_mort_db
-United Arab Emirates,ARE,2020,f,40,10.114076331919835,who_mort_db
-United Arab Emirates,ARE,2020,f,45,8.428212865108382,who_mort_db
-United Arab Emirates,ARE,2020,f,50,9.325293536939517,who_mort_db
-United Arab Emirates,ARE,2020,f,55,9.66748735507769,who_mort_db
-United Arab Emirates,ARE,2020,f,60,12.472578572899582,who_mort_db
-United Arab Emirates,ARE,2020,f,65,12.267653236207606,who_mort_db
-United Arab Emirates,ARE,2020,f,70,14.28840993131318,who_mort_db
-United Arab Emirates,ARE,2020,f,75,13.8180910264535,who_mort_db
-United Arab Emirates,ARE,2020,f,80,12.797215608473383,who_mort_db
-United Arab Emirates,ARE,2020,f,85,21.003923581736057,who_mort_db
-United Arab Emirates,ARE,2020,m,1,1.5265797579587599,who_mort_db
-United Arab Emirates,ARE,2020,m,5,0.5985648956680854,who_mort_db
-United Arab Emirates,ARE,2020,m,10,0.6333828127680317,who_mort_db
-United Arab Emirates,ARE,2020,m,15,2.3142611351418374,who_mort_db
-United Arab Emirates,ARE,2020,m,20,7.675377691634957,who_mort_db
-United Arab Emirates,ARE,2020,m,25,12.726221286753741,who_mort_db
-United Arab Emirates,ARE,2020,m,30,15.806012708019185,who_mort_db
-United Arab Emirates,ARE,2020,m,35,17.668444294387115,who_mort_db
-United Arab Emirates,ARE,2020,m,40,21.069930891918833,who_mort_db
-United Arab Emirates,ARE,2020,m,45,24.434032544744134,who_mort_db
-United Arab Emirates,ARE,2020,m,50,27.595946555365092,who_mort_db
-United Arab Emirates,ARE,2020,m,55,26.94152237703829,who_mort_db
-United Arab Emirates,ARE,2020,m,60,24.370603929357863,who_mort_db
-United Arab Emirates,ARE,2020,m,65,16.14530954095704,who_mort_db
-United Arab Emirates,ARE,2020,m,70,12.016997914578262,who_mort_db
-United Arab Emirates,ARE,2020,m,75,9.755301167787495,who_mort_db
-United Arab Emirates,ARE,2020,m,80,8.044160934117164,who_mort_db
-United Arab Emirates,ARE,2020,m,85,9.711738101819677,who_mort_db
-United Arab Emirates,ARE,2020,t,1,4.1760810675228255,who_mort_db
-United Arab Emirates,ARE,2020,t,5,1.8343533661081568,who_mort_db
-United Arab Emirates,ARE,2020,t,10,1.8343533661081568,who_mort_db
-United Arab Emirates,ARE,2020,t,15,3.122303601886225,who_mort_db
-United Arab Emirates,ARE,2020,t,20,9.874285140965185,who_mort_db
-United Arab Emirates,ARE,2020,t,25,16.431122704926256,who_mort_db
-United Arab Emirates,ARE,2020,t,30,22.28544195846293,who_mort_db
-United Arab Emirates,ARE,2020,t,35,25.173572790207686,who_mort_db
-United Arab Emirates,ARE,2020,t,40,31.18400722383867,who_mort_db
-United Arab Emirates,ARE,2020,t,45,32.86224540985251,who_mort_db
-United Arab Emirates,ARE,2020,t,50,36.92124009230461,who_mort_db
-United Arab Emirates,ARE,2020,t,55,36.60900973211598,who_mort_db
-United Arab Emirates,ARE,2020,t,60,36.84318250225745,who_mort_db
-United Arab Emirates,ARE,2020,t,65,28.412962777164644,who_mort_db
-United Arab Emirates,ARE,2020,t,70,26.305407845891445,who_mort_db
-United Arab Emirates,ARE,2020,t,75,23.573392194240995,who_mort_db
-United Arab Emirates,ARE,2020,t,80,20.84137654259055,who_mort_db
-United Arab Emirates,ARE,2020,t,85,30.715661683555734,who_mort_db
 United Kingdom,GBR,2015,f,0,1266,unpd
 United Kingdom,GBR,2015,f,1,214.99999999999997,unpd
 United Kingdom,GBR,2015,f,5,132,unpd
