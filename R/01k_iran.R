@@ -13,29 +13,29 @@ iran2 <-
          Sex = str_sub(sex, 1, 1)) %>% 
   group_by(country_name, year, Age, Sex) %>% 
   summarise(Deaths = sum(deaths),
-            Code = "IRN") %>% 
-  ungroup() %>% 
+            Code = "IRN",
+            .groups = "drop") %>% 
   select(Country = country_name, Code, Year = year, Sex, Age, Deaths)
 
 iran_sex_t <- 
   iran2 %>% 
   group_by(Country, Code, Year, Age) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
+  summarise(Deaths = sum(Deaths),
+            .groups = "drop") %>% 
   mutate(Sex = "t")
 
 iran_age_t <- 
   iran2 %>% 
   group_by(Country, Code, Year, Sex) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
+  summarise(Deaths = sum(Deaths),
+            .groups = "drop") %>% 
   mutate(Age = "TOT")
 
 iran_age_sex_t <- 
   iran_age_t %>% 
   group_by(Country, Code, Year, Age) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
+  summarise(Deaths = sum(Deaths),
+            .groups = "drop") %>% 
   mutate(Sex = "t")
 
 iran_out <- 
@@ -43,7 +43,7 @@ iran_out <-
             iran_sex_t,
             iran_age_t,
             iran_age_sex_t) %>% 
-  filter(Year <= 2020) %>% 
+  filter(Year <= 2021) %>% 
   arrange(Country, Code, Year, Sex, suppressWarnings(as.numeric(Age))) %>% 
   mutate(Source = "wmd")
 

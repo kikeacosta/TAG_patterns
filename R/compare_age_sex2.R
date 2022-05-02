@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+
+
+# 1) 
+# calculate cluster medians based on country-specific deltas
+# coming from William's inputs
+
+
+
+
+=======
 library(tidyverse)
 library(readr)
 library(countrycode)
@@ -205,5 +216,6 @@ dx_compare <-
   drop_na(predicted_dx_tag1)
 
 write_csv(dx_compare, "Output/age_sex_deaths_comparison.csv")
+>>>>>>> fd436d1f8f694287dc1a1744899499a925a5d06f
 
 
