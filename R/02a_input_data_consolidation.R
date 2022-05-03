@@ -6,15 +6,10 @@ who  <- read_csv("Output/who.csv")
 unpd <- read_csv("Output/unpd.csv")
 stmf <- read_csv("Output/stmf.csv") 
 eurs <- read_csv("Output/eurs.csv") 
-<<<<<<< HEAD
 zaf <- read_csv("Output/south_africa.csv") %>% mutate(Source = "direct")
 irn <- read_csv("Output/iran.csv") %>% mutate(Source = "direct")
 mse <- read_csv("Output/msemburi_tag.csv") 
 
-=======
-zaf  <- read_csv("Output/south_africa.csv") %>% mutate(Source = "direct")
-irn  <- read_csv("Output/iran.csv") %>% mutate(Source = "direct")
->>>>>>> d174178ba4dd89343b4b82343e8f1c932453a111
 
 # Several dirtect sources have been superceded by UNPD and others
 
