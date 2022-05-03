@@ -14,31 +14,25 @@ hmd_us <- "kikepaila@gmail.com"
 hmd_pw <- "secreto"
 
 # identifying those with data for 2020
-hmd_2020 <- tibble()
+hmd <- tibble()
 for(ct in cds_hmd){
-  chunk_d <- readHMDweb(ct, "Deaths_1x1", hmd_us, hmd_pw) %>%
-    filter(Year == 2020) %>%
-    as_tibble() %>%
-    mutate(Code = ct)
-
-  hmd_2020 <- hmd_2020 %>%
-    bind_rows(chunk_d)
-}
-
-cts_2020 <- unique(hmd_2020$Code)
-hmd_long <- tibble()
-for(ct in cts_2020){
-  chunk_d <- readHMDweb(ct, "Deaths_1x1", hmd_us, hmd_pw) %>%
+  chunk_d <- 
+    readHMDweb(ct, "Deaths_1x1", hmd_us, hmd_pw) %>%
     filter(Year >= 2015) %>%
     as_tibble() %>%
     mutate(Code = ct)
-  
-  hmd_long <- hmd_long %>%
+
+  hmd <- 
+    hmd %>%
     bind_rows(chunk_d)
 }
 
-hmd_long2 <- 
-  hmd_long %>% 
+hmd2 <- 
+  hmd %>%
+  # only countries with data in 2020
+  group_by(Code) %>% 
+  filter(max(Year) >= 2020) %>% 
+  ungroup() %>% 
   select(-OpenInterval) %>% 
   gather(Female, Male, Total, key = Sex, value = Deaths) %>% 
   mutate(Sex = recode(Sex,
@@ -50,19 +44,16 @@ hmd_long2 <-
          Age = Age %>% as.character()) %>% 
   mutate(Source = "hmd")
 
-age_tot <- 
-  hmd_long2 %>% 
+hmd_out <- 
+  hmd2 %>% 
   group_by(Year, Sex, Code, Country, Source) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
-  mutate(Age = "TOT")
+  mutate(Age = "TOT") %>% 
+  bind_rows(hmd2) %>% 
+  arrange(Country, Sex, Year, suppressWarnings(as.integer(Age))) %>% 
+  select(Country, Code, Year, Sex, Age, Deaths, Source)
 
-hmd_out <- 
-  hmd_long2 %>% 
-  bind_rows(age_tot) %>% 
-  arrange(Country, Sex, Year, suppressWarnings(as.integer(Age)))
+write_csv(hmd_out, "Output/hmd.csv")
 
-write_csv(hmd_out, "Output/hmd_2020.csv")
-
-unique(hmd_out$Country)
 

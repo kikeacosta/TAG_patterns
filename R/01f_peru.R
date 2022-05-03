@@ -39,7 +39,7 @@ db_pe3 <-
   group_by(Year, Sex, Age) %>% 
   summarise(Deaths = n()) %>% 
   ungroup() %>% 
-  filter(Year >= 2017 & Year <= 2020) %>% 
+  filter(Year >= 2017 & Year <= 2021) %>% 
   mutate(Country = "Peru") %>% 
   select(Country, Year, Sex, Age, Deaths)
 
@@ -104,3 +104,7 @@ write_csv(db_pe4, "Output/peru.csv")
 #   
 # write_csv(db_pe_mx_adj, "Output/pe_mx_annual_deaths.csv")
 # 
+unique()
+
+db_pe4 %>% 
+  group_by(year)
