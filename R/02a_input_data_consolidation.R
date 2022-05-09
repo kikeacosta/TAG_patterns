@@ -6,10 +6,12 @@ who  <- read_csv("Output/who.csv")
 unpd <- read_csv("Output/unpd.csv")
 stmf <- read_csv("Output/stmf.csv") 
 eurs <- read_csv("Output/eurs.csv") 
-zaf  <- read_csv("Output/south_africa.csv") %>% mutate(Source = "direct")
-irn  <- read_csv("Output/iran.csv") %>% mutate(Source = "direct")
+zaf <- read_csv("Output/south_africa.csv") %>% mutate(Source = "direct")
+irn <- read_csv("Output/iran.csv") %>% mutate(Source = "direct")
+mse <- read_csv("Output/msemburi_tag.csv") 
 
-# Several dirtect sources have been superceded by UNPD and others
+
+# Several direct sources have been superseded by UNPD and others
 
 # putting all together
 all_in <- 
@@ -229,4 +231,25 @@ available <-
   group_by(Country) %>% 
   mutate(age_groupings = n()) %>% 
   ungroup() 
+
+out <- read_csv("Output/annual_deaths_countries_selected_sources.csv")
+unique(out$Country)
+# 
+# unique(mse$Country) %>% sort()
+# length(unique(mse$Code))
+# 
+# 
+# test <- 
+#   out %>% 
+#   select(Code) %>% 
+#   unique() %>% 
+#   mutate(our = 1) %>% 
+#   full_join(mse %>% 
+#               select(Code) %>% 
+#               unique() %>% 
+#               mutate(mse = 1))
+# 
+# test2 <- 
+  
+
 
