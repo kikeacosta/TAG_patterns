@@ -7,13 +7,16 @@ db_eurs <-
   IN %>% 
   mutate(time = as.character(time)) %>% 
   separate(time, sep = "W", into = c("year","week"), convert = TRUE) %>% 
-  dplyr::filter(year >= 2016, 
-                year < 2021, 
+  dplyr::filter(year >= 2015, 
+                year <= 2021, 
                 age != "UNK") %>% 
   group_by(geo, year) %>% 
   mutate(complete = any(week == 52)) %>% # should I check for 53, or make it conditional?
   ungroup() %>% 
   dplyr::filter(complete) %>% 
+  group_by(geo) %>% 
+  filter(max(year) >= 2020) %>% 
+  ungroup() %>% 
   group_by(geo, sex, year, age) %>% 
   summarize(deaths = sum(values), .groups = "drop") %>% 
   mutate(age = recode(age,

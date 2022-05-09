@@ -5,7 +5,7 @@ WPP_hist <- read_csv("https://population.un.org/wpp/Download/Files/1_Indicators%
 WPPproj <- read_csv("https://population.un.org/wpp/Download/Files/1_Indicators%20(Standard)/CSV_FILES/WPP2019_PopulationBySingleAgeSex_2020-2100.csv")
   # WPP <- read_csv("Data/WPP2019_PopulationBySingleAgeSex_1950-2019.csv") 
 
-countries <- read_csv("Output/summary_selected_sources_by_country.csv") %>% 
+countries <- read_csv("Output/annual_deaths_countries_selected_sources.csv") %>% 
   select(Country, Code) %>% 
   distinct()
 
@@ -16,7 +16,7 @@ YrMin <- 2015
 YrMax <- 2021
 
 WPP <- bind_rows(WPP_hist,WPPproj)
-
+WPP$Location %>% unique()
 
 locids <- WPP$LocID %>% unique()
 sum(is.na( countrycode(locids, origin = "unpd", destination = "iso3c")))
@@ -36,7 +36,7 @@ offsets <-
   dplyr::filter(!is.na(Code)) %>% 
   select(Year = Time, Age = AgeGrpStart, Population, Code, Sex) %>% 
   arrange(Code, Year, Sex, Age) %>% 
-  left_join(countries) %>% 
+  left_join(countries, by = "Code") %>% 
   dplyr::filter(!is.na(Country)) %>% 
   select(Country,Code,Year,Sex,Age,Population)
 

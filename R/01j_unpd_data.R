@@ -102,7 +102,6 @@ ipums_sd <- data.table(get_datasources(shortNames = "IPUMS"))
 myDS <- NULL
 
 
-
 ## example of test using Saudi Arabia, either using LocID or name
 ## myLocations <- c(682)
 ## myLocations <- "Saudi Arabia"
@@ -125,7 +124,7 @@ myDT <- lapply(cnty_groups, function(x) {
   
   res <- get_recorddata(dataProcessTypeIds = c(9),    ## Register
                         startYear = 2015,
-                        endYear = 2020,
+                        endYear = 2021,
                         indicatorIds = c(194),  ## Deaths by age and sex - abridged 
                         # isComplete = 1,       ## 0=Abridged or 1=Complete
                         locIds = x,             ## set of locations (M49/ISO3 numerical code or M49 names)
@@ -201,9 +200,10 @@ SeriesID_Characteristics <- unique(DT[, .(SeriesID, LocID, LocName, LocTypeName,
 setorder(SeriesID_Characteristics, LocName, FieldWorkMiddle, DataSourceAuthor, DataSourceYear, DataSourceShortName, DataStatusName, StatisticalConceptName)
 
 library(tidyverse)
+library(lubridate)
 
 un_data <- 
-DT %>% 
+  DT %>% 
   as_tibble() %>% 
   select(LocID, 
          Country = LocName, 
@@ -211,21 +211,169 @@ DT %>%
          Sex = SexName, 
          Age = AgeStart, 
          AgeSpan, 
+         AgeLabel,
          Deaths = DataValue) %>% 
-  dplyr::filter(AgeSpan > 0) %>% 
-  mutate(Date = lubridate::dmy(Date),
-         Year = lubridate::year(Date),
-         Source = "unpd",
+  filter(AgeLabel != "Total") %>%
+  mutate(Date = dmy(Date),
+         Year = year(Date),
+         Code = countrycode::countrycode(LocID, "un", "iso3c"),
          Sex = case_when(Sex == "Male" ~ "m",
                          Sex == "Female" ~ "f",
                          Sex == "Both sexes" ~ "t")) %>% 
-  mutate(Code = countrycode::countrycode(LocID, "un", "iso3c")) %>% 
-  select(-Date, -AgeSpan, -LocID)  %>% 
-  select(Country,Year,Sex,Age,Deaths,Code,Source) %>% 
+  select(-Date, -LocID) %>% 
   group_by(Country) %>% 
-  mutate(has_2020 = any(Year == 2020)) %>% 
-  dplyr::filter(has_2020) %>% 
-  select(-has_2020)
+  filter(max(Year) >= 2020,
+         !is.na(Sex)) %>% 
+  mutate(Country = recode(Country,
+                          "Czech Republic" = "Czechia",
+                          "Iran (Islamic Republic of)" = "Iran",
+                          "Bolivia (Plurinational State of)" = "Bolivia",
+                          "United States of America" = "USA",
+                          "Republic of Korea" = "South Korea",
+                          "Russian Federation" = "Russia",
+                          "Republic of Moldova" = "Moldova")) %>% 
+  ungroup()
+
+unique(un_data$Sex)
+unique(un_data$Country)
+
+summ <- 
+  un_data %>% 
+  select(Country, Year) %>% 
+  unique()
 
 
-readr::write_csv(un_data, file = "Output/unpd.csv")
+# choosing only one open age interval
+closing_age <- 
+  un_data %>% 
+  filter(AgeSpan == -1) %>% 
+  group_by(Country, Code, Year, Sex) %>% 
+  filter(Age == max(Age)) %>% 
+  ungroup()
+
+# grouping ages 1 to 4
+child_ages <-
+  un_data %>% 
+  filter(Age %in% 0:4,
+         AgeSpan <= 5) %>% 
+  mutate(Age = ifelse(Age %in% 1:4 & AgeSpan == 1, 1, Age),
+         AgeLabel = ifelse(Age %in% 1:4 & AgeSpan == 1, "1-4", AgeLabel),
+         AgeSpan = ifelse(Age %in% 1:4 & AgeSpan == 1, 4, AgeSpan)) %>% 
+  group_by(Country, Code, Year, Sex, Age, AgeLabel, AgeSpan) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() 
+
+child_ages2 <- 
+  child_ages %>% 
+  group_by(Country, Code, Year, Sex) %>% 
+  mutate(has_inf = ifelse(any(AgeLabel == "< 1"), 1, 0),
+         has_1_4 = ifelse(any(AgeLabel == "1-4"), 1, 0),
+         has_0_4 = ifelse(any(AgeLabel == "0-4"), 1, 0)) %>% 
+  ungroup()  
+  
+# children deaths with no infant deaths
+# extracting only infant and 1-4 mortality
+dts_inf <- 
+  child_ages2 %>% 
+  filter(has_inf == 1 & has_1_4 == 1 & ((Age == 0 & AgeSpan == 1) | (Age == 1))) %>% 
+  select(Country, Code, Year, Sex, Age, Deaths) %>% 
+  mutate(AgeSpan = case_when(Age == 0 ~ 1,
+                             Age == 1 ~ 4))
+
+# dts_0_4_inf <- 
+#   dts_inf %>% 
+#   group_by(Country, Code, Year, Sex) %>% 
+#   summarise(Deaths = sum(Deaths)) %>% 
+#   ungroup() %>% 
+#   mutate(Age = 0)
+
+cts_inf <- 
+  dts_inf %>% 
+  select(Country, Code, Year, Sex) %>% 
+  mutate(to_rep = 1)
+
+# extracting 0-4 mortality
+dts_0_4 <- 
+  child_ages2 %>% 
+  filter(has_inf == 0 & has_1_4 == 0 & has_0_4 == 1) %>% 
+  left_join(cts_inf) %>% 
+  filter(is.na(to_rep)) %>% 
+  select(Country, Code, Year, Sex, Age, Deaths) %>%
+  mutate(AgeSpan = 5) %>% 
+  bind_rows(dts_inf) %>% 
+  arrange(Sex, Age, Country, Year)
+
+
+# all ages ====
+# ~~~~~~~~~~~~~
+all_ages <- 
+  un_data %>% 
+  group_by(Country, Year, Code, Sex) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Age = "TOT")
+  
+
+# putting together all ages
+un_data2 <- 
+  un_data %>% 
+  filter(AgeSpan != -1,
+         Age >= 5) %>% 
+  left_join(closing_age %>% 
+              select(Country, Year, Sex, max_age = Age)) %>% 
+  filter(Age < max_age | is.na(max_age)) %>% 
+  # adding closing age groups
+  bind_rows(closing_age) %>% 
+  # grouping all in 5yrs
+  mutate(Age = Age - Age%%5) %>% 
+  group_by(Country, Code, Year, Sex, Age, AgeSpan) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  bind_rows(dts_0_4) %>% 
+  mutate(Age = Age %>% as.character()) %>% 
+  bind_rows(all_ages) %>% 
+  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) 
+  
+
+
+# Total sex ====
+# ~~~~~~~~~~~~~~
+
+# identifying missing total sex values
+test_sex <- 
+  un_data2 %>% 
+  select(Country, Year, Sex) %>% 
+  unique() %>% 
+  group_by(Country, Year) %>% 
+  summarise(n = n()) %>% 
+  select(Country, n) %>% 
+  unique() %>% 
+  filter(n == 2)
+
+# total sex for those missing it
+miss_tot_sex <- 
+  un_data2 %>% 
+  group_by(Country, Code, Age, Year) %>% 
+  filter(n() == 2) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Sex = "t")
+
+un_data3 <- 
+  un_data2 %>% 
+  bind_rows(miss_tot_sex) %>% 
+  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) %>% 
+  select(-AgeSpan) %>% 
+  mutate(Deaths = round(Deaths),
+         Source = "unpd") %>% 
+  # TODO: Ask Tim about some countries with missing ages in some periods,
+  # filtering those cases out meanwhile
+  group_by(Country, Year) %>% 
+  filter(min(Age) == 0) %>% 
+  ungroup()
+
+# saving for TAG analysis
+readr::write_csv(un_data3, file = "Output/unpd.csv")
+
+
+
