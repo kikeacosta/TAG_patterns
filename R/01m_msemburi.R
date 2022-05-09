@@ -214,10 +214,10 @@ colnames(db_who)
 
 db_msemburi_tag_who <- 
   db_who %>% 
-  dplyr::filter(Country %in% tag_countries) %>% 
   mutate(Source = "Msemburi(TAG)",
          Age = as.character(Age)) %>% 
   bind_rows(who_totals) %>% 
+  dplyr::filter(Country %in% tag_countries) %>% 
   bind_rows(TAGout)
 # save out
 write_csv(db_msemburi_tag_who, file = "Output/msemburi_tag.csv")  
