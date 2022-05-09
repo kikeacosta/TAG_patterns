@@ -26,9 +26,9 @@ db20_2 <-
   db20 %>% 
   select(Country, Year, Sex, starts_with("Deaths")) %>% 
   gather(starts_with("Deaths"), key = Age, value = Deaths) %>% 
-  filter(Age %in% paste0("Deaths", 2:25)) %>% 
+  filter(Age %in% paste0("Deaths", 1:25)) %>% 
   mutate(Age = recode(Age,
-                      'Deaths2' = "TOT",
+                      'Deaths1' = "TOT",
                       'Deaths2' = "0",
                       'Deaths3' = "1",
                       'Deaths4' = "1",
