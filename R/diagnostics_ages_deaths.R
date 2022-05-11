@@ -12,6 +12,7 @@ out %>%
   facet_grid(vars(Year),vars(Sex)) +
   labs(title = code)
 
+unique(out$Code) %>% sort
 
 # AZE lower open age in 2021 only
 # BLZ (Belize) low open age 65+
