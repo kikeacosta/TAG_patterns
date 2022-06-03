@@ -685,7 +685,7 @@ rm(list = ls())
 ## plotting in a difference device
 options(device="X11")
 ## !!!! to be changed
-setwd("~/WORK/TAG_patterns/")
+setwd("~/WORK/TAG_patterns/R")
 library(MortalitySmooth)
 library(magic)
 library(colorspace)
