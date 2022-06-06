@@ -277,12 +277,14 @@ for(c in 1:8){
 }
 
 
-save.image("Output/OutPrepandemic2020sex_StratifiedBySex_WMdata.Rdata")
+## save.image("Output/OutPrepandemic2020sex_StratifiedBySex_WMdata.Rdata")
 
-
+# write.table(data1, "data2019_GC.txt")
+# write.table(data2, "data2020_GC.txt")
+# write.table(DELTAs, "Deltas_GC.txt")
 
 ## 2019
-pdf("ActualFittedLogMortalityClusterDelta.pdf", width = 12, height = 10)
+pdf("Figures/ActualFittedLogMortality2019.pdf", width = 14, height = 10)
 data1.obs <- subset(data1, !is.na(lmx.hat))
 aa <- ggplot(data=data1.obs, aes(x=age, y=lmx, col=sex))+
   geom_point()+
@@ -291,8 +293,10 @@ aa <- ggplot(data=data1.obs, aes(x=age, y=lmx, col=sex))+
   theme(axis.text.y = element_blank())+
 labs(x = "age", y = "", title = "log-mortality, 2019")
 plot(aa)
+dev.off()
 
 ## 2020
+pdf("Figures/ActualFittedLogMortality2020.pdf", width = 14, height = 10)
 aa <- ggplot(data=data2, aes(x=age, y=lmx, col=sex))+
   geom_point()+
   geom_line(aes(y=lmx.hat))+
@@ -300,7 +304,11 @@ aa <- ggplot(data=data2, aes(x=age, y=lmx, col=sex))+
   theme(axis.text.y = element_blank())+
   labs(x = "age", y = "", title = "log-mortality, 2020")
 plot(aa)
-# dev.off()
+dev.off()
+
+
+
+
 # ## deltas
 # pdf("/home/gccamarda/WORK/TAG_patterns/Slides/Figures/ClusterDeltas.pdf", 
 #    width=12, height = 8)
@@ -311,7 +319,7 @@ ggplot(DELTAs, aes(x = age, y = delta.hat)) +
   geom_hline(yintercept=0,linetype=2)+
   theme()+
   labs(x = "age", y = expression(hat(delta)))
-dev.off()
+#dev.off()
 
 
 

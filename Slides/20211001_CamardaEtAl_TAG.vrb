@@ -1,7 +1,13 @@
-\frametitle{Sex age-factor $s(x)$}
-	\only<1>{
-		\vspace{-0.7cm}
-		\begin{center}
-			\includegraphics[scale=.38]{Figures/sGoodPop.pdf}		
-		\end{center}
-	}
+\frametitle{Concluding remarks}
+	\vspace{-0.2cm}
+	\begin{itemize}
+		\item<1-> \textbf{Adequate coherence between WM and spin-off group outcomes}
+		\bigskip
+		\item<2-> More data are now available in 2020 (model can be easily accommodated)
+		\item<3-> Diverse data sources contains diverse age-grouping structure
+		\item<4-> Include uncertainty measures, coming from $\delta^{k}(x)$ \& $\eta(x)$
+		\item<5-> Should we aim outcomes by single year of age?
+		\item<6-> How sensible the model is with respect to the clusters and/or overall excess deaths?
+		\medskip
+		\item<7-> \emph{Something else from your side?}
+	\end{itemize}
