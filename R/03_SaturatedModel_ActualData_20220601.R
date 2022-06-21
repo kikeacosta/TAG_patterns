@@ -268,7 +268,7 @@ for(j in 1:nc){
   veta <- rep(1, nrow(Deta.F1))
   if(up1[1]==0){
     veta[1] <- 0 ## kink at age 0 only 
-                 ## when age 0 is explictly given in pre-pandemic years
+                 ## when age 0 is explicitly given in pre-pandemic years
   }
   Veta <- diag(veta)
   tDDeta.F1 <- t(Deta.F1)%*%Veta%*%Deta.F1
@@ -295,7 +295,7 @@ for(j in 1:nc){
   Dmon <- diff(diag(m), diff=1)
   wmon <- rep(0, nrow(Dmon))
   Wmon <- diag(wmon)
-  eps <- 0.1
+  eps <- 0.01
   epsvec <- rep(eps, m - 1)
   
   ## constraining delta to sum up to 0
