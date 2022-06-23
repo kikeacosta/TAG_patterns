@@ -1,4 +1,4 @@
-
+rm(list=ls())
 library(HMDHFDplus)
 library(tidyverse)
 library(countrycode)
@@ -27,6 +27,9 @@ for(ct in cds_hmd){
     bind_rows(chunk_d)
 }
 
+cods_exc <- c("GBRTENW", "GBRCENW", "GBR_SCO", "GBR_NIR",
+              "DEUTE", "DEUTW")
+
 hmd2 <- 
   hmd %>%
   # only countries with data in 2020
@@ -35,14 +38,22 @@ hmd2 <-
   ungroup() %>% 
   select(-OpenInterval) %>% 
   gather(Female, Male, Total, key = Sex, value = Deaths) %>% 
+  filter(!Code %in% cods_exc) %>% 
   mutate(Sex = recode(Sex,
                       "Female" = "f",
                       "Male" = "m",
                       "Total" = "t"),
+         Code = case_when(Code == "GBR_NP" ~ "GBR",
+                          Code == "DEUTNP" ~ "DEU",
+                          Code == "NZL_NP" ~ "NZL",
+                          TRUE ~ Code),
          Country = countrycode(Code, origin = "iso3c",
                                destination = "country.name"),
          Age = Age %>% as.character()) %>% 
   mutate(Source = "hmd")
+
+unique(hmd2$Code)
+unique(hmd2$Country)
 
 hmd_out <- 
   hmd2 %>% 

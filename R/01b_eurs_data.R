@@ -49,6 +49,7 @@ db_eurs <-
                              TRUE ~ Country),
          Code = countryname(Country, destination = "iso3c"),
          Source = "eurs") %>% 
+  arrange(Country, year, sex, suppressWarnings(as.integer(age))) %>% 
   dplyr::select(Country, Code, Year = year, Sex = sex, Age = age, Deaths = deaths, Source)
   
 write_csv(db_eurs, "Output/eurs.csv")

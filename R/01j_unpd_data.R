@@ -199,6 +199,12 @@ SeriesID_Characteristics <- unique(DT[, .(SeriesID, LocID, LocName, LocTypeName,
                                           DataStatusName, StatisticalConceptName, DataTypeName, ModelPatternName, DataReliabilityName, PeriodTypeName, PeriodGroupName, TimeUnit, FootNoteID)])
 setorder(SeriesID_Characteristics, LocName, FieldWorkMiddle, DataSourceAuthor, DataSourceYear, DataSourceShortName, DataStatusName, StatisticalConceptName)
 
+
+
+# ==============================================================================
+# ==============================================================================
+
+
 library(tidyverse)
 library(lubridate)
 
@@ -241,7 +247,6 @@ summ <-
   un_data %>% 
   select(Country, Year) %>% 
   unique()
-
 
 # choosing only one open age interval
 closing_age <- 
