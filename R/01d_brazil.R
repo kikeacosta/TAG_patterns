@@ -1,6 +1,14 @@
 library(readr)
 library(tidyverse)
 library(janitor)
+source("R/00_functions.R")
+
+# files downloaded from Datasus, the source is the Ministry of Health
+# data 2015-2020
+# https://opendatasus.saude.gov.br/dataset/sim-1979-2019
+# data 2021
+# https://dados.gov.br/dataset/sistema-de-informacao-sobre-mortalidade
+
 
 links <- paste0("Data/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
 i <- links[1]
@@ -39,7 +47,8 @@ for (i in links){
 
 dts <- 
   out %>% 
-  bind_rows()
+  bind_rows() %>% 
+  ungroup()
 
 tot_age <- 
   dts %>% 
@@ -69,3 +78,5 @@ dts3 <-
   arrange(Year, Sex, Age)
 
 write_rds(dts3, "Output/brazil.rds")
+dts3 <- read_rds("Output/brazil.rds")
+write_csv(dts3, "Output/brazil.csv")

@@ -125,7 +125,7 @@ myDT <- lapply(cnty_groups, function(x) {
   res <- get_recorddata(dataProcessTypeIds = c(9),    ## Register
                         startYear = 2015,
                         endYear = 2021,
-                        indicatorIds = c(194),  ## Deaths by age and sex - abridged 
+                        indicatorIds = c(195),  ## Deaths by age and sex - complete 
                         # isComplete = 1,       ## 0=Abridged or 1=Complete
                         locIds = x,             ## set of locations (M49/ISO3 numerical code or M49 names)
                         locAreaTypeIds = 2,     ## "Whole area"
@@ -277,7 +277,7 @@ child_ages2 <-
          has_1_4 = ifelse(any(AgeLabel == "1-4"), 1, 0),
          has_0_4 = ifelse(any(AgeLabel == "0-4"), 1, 0)) %>% 
   ungroup()  
-  
+
 # children deaths with no infant deaths
 # extracting only infant and 1-4 mortality
 dts_inf <- 
@@ -319,7 +319,7 @@ all_ages <-
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
   mutate(Age = "TOT")
-  
+
 
 # putting together all ages
 un_data2 <- 
@@ -340,7 +340,7 @@ un_data2 <-
   mutate(Age = Age %>% as.character()) %>% 
   bind_rows(all_ages) %>% 
   arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) 
-  
+
 
 
 # Total sex ====
@@ -380,7 +380,7 @@ un_data3 <-
   ungroup()
 
 # saving for TAG analysis
-readr::write_csv(un_data3, file = "Output/unpd.csv")
+readr::write_csv(un_data3, file = "Output/unpd_single.csv")
 
 
 

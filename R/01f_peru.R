@@ -9,19 +9,20 @@ library(tidyverse)
 
 # Directly from the ministry of health
 # https://www.datosabiertos.gob.pe/dataset/informaci%C3%B3n-de-fallecidos-del-sistema-inform%C3%A1tico-nacional-de-defunciones-sinadef-ministerio
+# https://www.minsa.gob.pe/reunis/data/defunciones_registradas.asp
 # load data
-db_pe <- 
-  read_delim("https://cloud.minsa.gob.pe/s/nqF2irNbFomCLaa/download", delim = "|")
-
 # db_pe <- 
-#   read_delim(here("Data", "Peru", "fallecidos_sinadef.csv"), delim = "|")
+#   read_delim("https://cloud.minsa.gob.pe/s/nqF2irNbFomCLaa/download", delim = "|")
+db_pe <- 
+  read.csv("Data/peru/SINADEF_DATOS_ABIERTOS.csv")
 
 # data wrangling
-db_pe2 <- db_pe %>% 
+db_pe2 <- 
+  db_pe %>% 
   select(Sex = SEXO,
          Age = EDAD, 
          Year = AÑO,
-         unit_age = 'TIEMPO EDAD') %>% 
+         unit_age = TIEMPO.EDAD) %>% 
   mutate(Sex = recode(Sex,
                       "MASCULINO" = "m",
                       "FEMENINO" = "f"))
