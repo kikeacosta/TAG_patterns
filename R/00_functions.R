@@ -3,6 +3,9 @@ library(tidyverse)
 library(countrycode)
 library(lubridate)
 
+write_excel <- function(x,row.names=FALSE,col.names=TRUE,...) {
+  write.table(x,file = paste0("clipboard-", object.size(x)),sep="\t",row.names=row.names,col.names=col.names,...)
+}
 
 rescale_age <- function(chunk){
   TOT <- chunk %>% dplyr::filter(Age == "TOT") %>% dplyr::pull(Deaths)

@@ -130,6 +130,8 @@ sum_all <-
   unique() %>% 
   arrange(Country)
 
+write_excel(sum_all)
+
 # selection based on source
 sel_source <- 
   sum_all %>% 
@@ -217,6 +219,8 @@ available <-
             Age_groups = unique(Age_groups) %>% paste(collapse = ", "),
             Sex_groups = unique(Sex_groups) %>% paste(collapse = ", ")) %>% 
   ungroup() 
+
+write_excel(available)
 
 out <- read_csv("Output/annual_deaths_countries_selected_sources.csv")
 unique(out$Country)
