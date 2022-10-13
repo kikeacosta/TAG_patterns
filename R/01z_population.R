@@ -1,5 +1,9 @@
 source("R/00_functions.R")
 
+# Data from the WPP 2022
+# https://population.un.org/wpp/Download/Files/1_Indicators%20(Standard)/EXCEL_FILES/2_Population/WPP2022_POP_F01_2_POPULATION_SINGLE_AGE_MALE.xlsx
+# https://population.un.org/wpp/Download/Files/1_Indicators%20(Standard)/EXCEL_FILES/2_Population/WPP2022_POP_F01_3_POPULATION_SINGLE_AGE_FEMALE.xlsx
+
 pop_f1 <- 
   read_xlsx("Data/WPP2022_POP_F01_3_POPULATION_SINGLE_AGE_FEMALE.xlsx",
             skip = 16) %>% 

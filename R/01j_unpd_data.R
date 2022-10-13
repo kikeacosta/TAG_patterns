@@ -206,9 +206,9 @@ setorder(SeriesID_Characteristics, LocName, FieldWorkMiddle, DataSourceAuthor, D
 # saving raw unpd data 
 # ~~~~~~~~~~~~~~~~~~~~
 write_rds(DT, "Data/unpd_raw.rds")
-DT <- read_rds("Data/unpd_raw.rds")
-
 # ==============================================================================
+source("R/00_functions.R")
+DT <- read_rds("Data/unpd_raw.rds")
 
 un_data <- 
   DT %>% 
@@ -268,7 +268,7 @@ closing_age <-
 child_ages <-
   un_data %>% 
   filter(Age %in% 0:4,
-         AgeSpan <= 5) %>% 
+         AgeSpan %in% 0:5) %>% 
   mutate(Age = ifelse(Age %in% 1:4 & AgeSpan == 1, 1, Age),
          AgeLabel = ifelse(Age %in% 1:4 & AgeSpan == 1, "1-4", AgeLabel),
          AgeSpan = ifelse(Age %in% 1:4 & AgeSpan == 1, 4, AgeSpan)) %>% 
@@ -286,12 +286,12 @@ child_ages2 <-
   ungroup()  
   
 # weird cases
+# children deaths with no infant deaths
 # having deaths 1-4 but without infant mortality (neither <1 or 0-4)
 no_inf <- 
   child_ages2 %>% 
   filter(has_inf == 0  & has_1_4 == 1 & has_0_4 == 0)
 
-# children deaths with no infant deaths
 # extracting only infant and 1-4 mortality
 dts_inf <- 
   child_ages2 %>% 
@@ -378,7 +378,7 @@ miss_tot_sex <-
   mutate(Sex = "t") %>%
   arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) 
 
-# adding total sexes and re-scaling age and sex
+# adding total sexes when missing and re-scaling age and sex
 un_data4 <- 
   un_data3 %>% 
   bind_rows(miss_tot_sex) %>% 
@@ -405,11 +405,21 @@ age_incomp <-
   filter(sum_spans != open_int) %>% 
   select(Country, Year, Sex) %>% 
   ungroup()
-  
+
+# Countries without data on age 0
+no_zero <- 
+  un_data4 %>% 
+  group_by(Country, Year, Sex) %>% 
+  filter(min(Age) != 0) %>% 
+  select(Country, Year, Sex) %>% 
+  ungroup() %>% 
+  select(Country, Year, Sex)
+
 # cases with incomplete ages
 un_data5 <- 
   un_data4 %>% 
   anti_join(age_incomp, by = c("Country", "Year", "Sex")) %>% 
+  anti_join(no_zero, by = c("Country", "Year", "Sex")) %>% 
   mutate(Source = "unpd")
 
 
