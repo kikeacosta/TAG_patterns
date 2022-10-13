@@ -1,5 +1,5 @@
 rm(list=ls())
-library(here)
+# library(here)
 library(tidyverse)
 library(countrycode)
 source("R/00_functions.R")
@@ -13,15 +13,19 @@ download.file("https://www.mortality.org/File/GetDocument/Public/STMF/Inputs/STM
               "Data/STMFinput.zip")
 
 # list of country codes in STMF
-zipdf <- unzip(here("Data", "STMFinput.zip"), list = TRUE)
+zipdf <- unzip("Data/STMFinput.zip", list = TRUE)
 
 # loading all cause deaths from all countries in STMF
 db_d <- tibble()
 for(i in 1:length(zipdf$Name)){
   csv_file <- zipdf$Name[i]
   print(csv_file)
-  temp <- read_csv(unz(here("Data", "STMFinput.zip"), csv_file))
-  db_d <- db_d %>% 
+  temp <- 
+    read_csv(unz("Data/STMFinput.zip", csv_file)) %>% 
+    mutate(Week = Week %>% as.double,
+           Deaths = Deaths %>% as.double())
+  db_d <- 
+    db_d %>% 
     bind_rows(temp)
 }
 
@@ -76,26 +80,9 @@ unique_sex_year <-
   unique() %>% 
   filter(n < 3)
 
-rus_sext_19_20 <- 
-  dts %>% 
-  filter(PopCode == "RUS",
-         Sex != "b",
-         Year >= 2019) %>% 
-  group_by(PopCode, Year, Week, Age, AgeInterval) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
-  mutate(Sex = "b")
-
-rus <- 
-  dts %>% 
-  filter(PopCode == "RUS",
-         !(Sex == "b" & Year >= 2019)) %>% 
-  bind_rows(rus_sext_19_20)
-
 # manual homogenization ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # France: group 0-4 and close at 90
-# Russia: group 0-4 and close at 90; calculate both sexes in 2019 and 2020
 # Scotland: exclude it
 # England and Wales: exclude it
 # Northern Ireland: exclude it
@@ -104,10 +91,10 @@ exc <- c("USA", "GBR_NIR", "GBRTENW", "GBR_SCO")
 
 dts2 <- 
   dts %>% 
-  filter(!PopCode %in% c(exc, "RUS")) %>% 
-  bind_rows(rus) %>% 
-  mutate(Age = case_when(PopCode %in% c("RUS", "FRATNP") & Age == "1" ~ "0", 
-                         PopCode %in% c("RUS", "FRATNP") & Age == "95" ~ "90", 
+  filter(!PopCode %in% exc) %>% 
+  drop_na(Deaths) %>% 
+  mutate(Age = case_when(PopCode %in% c("FRATNP") & Age == "1" ~ "0", 
+                         PopCode %in% c("FRATNP") & Age == "95" ~ "90", 
                          TRUE ~ Age)) %>% 
   group_by(PopCode, Year, Sex, Age) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
@@ -119,25 +106,30 @@ dts2 <-
                           "AUS2" = "AUS",
                           "DEUTNP" = "DEU",
                           "FRATNP" = "FRA",
-                          "NZL_NP" = "NZL",
-                          "GBR_NIR" = "GBR-NIR", 
-                          "GBR_SCO" = "GBR-SCO", 
-                          "GBRTENW" = "GBR-ENW")) %>%
-  rename(Code = PopCode) %>% 
-  drop_na(Deaths) %>% 
+                          "NZL_NP" = "NZL")) %>%
+  rename(Code = PopCode) 
+
+dts3 <- 
+  dts2 %>% 
+  group_by(Code, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Code, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Code, Year, Sex, Age)
+
+dts4 <- 
+  dts3 %>% 
   mutate(Source = "stmf",
          Country = countrycode(sourcevar = Code, 
                                origin = "iso3c", 
-                               destination = "country.name"),
-         Country = case_when(Code == "GBR-NIR" ~ "Northern Ireland", 
-                             Code == "GBR-SCO" ~ "Scotland", 
-                             Code == "GBR-ENW" ~ "England and Wales",
-                             Code == "USA" ~ "USA", 
-                             TRUE ~ Country)) %>% 
+                               destination = "country.name")) %>% 
   select(Country, Code, Year, Sex, Age, Deaths, Source) %>% 
   arrange(Code, Year, Sex, Age)
 
 # saving data
-write_csv(dts2, "Output/stmf.csv")
+write_csv(dts4, "Output/stmf.csv")
 
 

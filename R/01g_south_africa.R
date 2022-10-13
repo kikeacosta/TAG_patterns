@@ -25,4 +25,19 @@ zaf2 <-
   arrange(Year, Sex) %>% 
   mutate(Source = "samrc/uct")
 
-write_csv(zaf2, "Output/south_africa.csv")
+
+
+zaf3 <- 
+  zaf2 %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Code, Year, Sex, Age)
+
+
+
+write_csv(zaf3, "Output/south_africa.csv")

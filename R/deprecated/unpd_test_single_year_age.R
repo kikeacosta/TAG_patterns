@@ -1,4 +1,28 @@
 rm (list = ls())
+library(tidyverse)
+library(lubridate)
+
+rescale_age <- function(chunk){
+  TOT <- chunk %>% dplyr::filter(Age == "TOT") %>% dplyr::pull(Deaths)
+  chunk %>% 
+    dplyr::filter(Age != "TOT") %>% 
+    mutate(Deaths = (Deaths / sum(Deaths)) * TOT)
+}
+
+# rescale deaths by sex to total sexes
+rescale_sex <- function(chunk){
+  TOT <- chunk %>% dplyr::filter(Sex == "t") %>% dplyr::pull(Deaths)
+  temp1 <- 
+    chunk %>% 
+    dplyr::filter(Sex != "t") %>% 
+    mutate(Deaths = (Deaths / sum(Deaths)) * TOT) %>% 
+    bind_rows(chunk %>% 
+                dplyr::filter(Sex == "t"))
+  
+}
+
+
+
 
 ## R wrapper to connect to DemoData (and optionally to DemoTools library)
 ## https://timriffe.github.io/DDSQLtools/
@@ -200,14 +224,11 @@ SeriesID_Characteristics <- unique(DT[, .(SeriesID, LocID, LocName, LocTypeName,
 setorder(SeriesID_Characteristics, LocName, FieldWorkMiddle, DataSourceAuthor, DataSourceYear, DataSourceShortName, DataStatusName, StatisticalConceptName)
 
 
+write_rds(DT, "Output/unpd_raw.rds")
 
+DT <- read_rds("Output/unpd_raw.rds")
 # ==============================================================================
 # ==============================================================================
-
-
-library(tidyverse)
-library(lubridate)
-
 un_data <- 
   DT %>% 
   as_tibble() %>% 
@@ -222,7 +243,6 @@ un_data <-
   filter(AgeLabel != "Total") %>%
   mutate(Date = dmy(Date),
          Year = year(Date),
-         Code = countrycode::countrycode(LocID, "un", "iso3c"),
          Sex = case_when(Sex == "Male" ~ "m",
                          Sex == "Female" ~ "f",
                          Sex == "Both sexes" ~ "t")) %>% 
@@ -254,94 +274,24 @@ write.excel(summ)
 closing_age <- 
   un_data %>% 
   filter(AgeSpan == -1) %>% 
-  group_by(Country, Code, Year, Sex) %>% 
+  group_by(Country, Year, Sex) %>% 
   filter(Age == max(Age)) %>% 
   ungroup()
 
-# grouping ages 1 to 4
-child_ages <-
-  un_data %>% 
-  filter(Age %in% 0:4,
-         AgeSpan <= 5) %>% 
-  mutate(Age = ifelse(Age %in% 1:4 & AgeSpan == 1, 1, Age),
-         AgeLabel = ifelse(Age %in% 1:4 & AgeSpan == 1, "1-4", AgeLabel),
-         AgeSpan = ifelse(Age %in% 1:4 & AgeSpan == 1, 4, AgeSpan)) %>% 
-  group_by(Country, Code, Year, Sex, Age, AgeLabel, AgeSpan) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() 
+unique(un_data$Age)
 
-child_ages2 <- 
-  child_ages %>% 
-  group_by(Country, Code, Year, Sex) %>% 
-  mutate(has_inf = ifelse(any(AgeLabel == "< 1"), 1, 0),
-         has_1_4 = ifelse(any(AgeLabel == "1-4"), 1, 0),
-         has_0_4 = ifelse(any(AgeLabel == "0-4"), 1, 0)) %>% 
-  ungroup()  
-
-# children deaths with no infant deaths
-# extracting only infant and 1-4 mortality
-dts_inf <- 
-  child_ages2 %>% 
-  filter(has_inf == 1 & has_1_4 == 1 & ((Age == 0 & AgeSpan == 1) | (Age == 1))) %>% 
-  select(Country, Code, Year, Sex, Age, Deaths) %>% 
-  mutate(AgeSpan = case_when(Age == 0 ~ 1,
-                             Age == 1 ~ 4))
-
-# dts_0_4_inf <- 
-#   dts_inf %>% 
-#   group_by(Country, Code, Year, Sex) %>% 
-#   summarise(Deaths = sum(Deaths)) %>% 
-#   ungroup() %>% 
-#   mutate(Age = 0)
-
-cts_inf <- 
-  dts_inf %>% 
-  select(Country, Code, Year, Sex) %>% 
-  mutate(to_rep = 1)
-
-# extracting 0-4 mortality
-dts_0_4 <- 
-  child_ages2 %>% 
-  filter(has_inf == 0 & has_1_4 == 0 & has_0_4 == 1) %>% 
-  left_join(cts_inf) %>% 
-  filter(is.na(to_rep)) %>% 
-  select(Country, Code, Year, Sex, Age, Deaths) %>%
-  mutate(AgeSpan = 5) %>% 
-  bind_rows(dts_inf) %>% 
-  arrange(Sex, Age, Country, Year)
-
-
-# all ages ====
-# ~~~~~~~~~~~~~
-all_ages <- 
-  un_data %>% 
-  group_by(Country, Year, Code, Sex) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
-  mutate(Age = "TOT")
-
-
-# putting together all ages
 un_data2 <- 
   un_data %>% 
-  filter(AgeSpan != -1,
-         Age >= 5) %>% 
+  filter(AgeSpan != -1) %>% 
   left_join(closing_age %>% 
               select(Country, Year, Sex, max_age = Age)) %>% 
   filter(Age < max_age | is.na(max_age)) %>% 
   # adding closing age groups
   bind_rows(closing_age) %>% 
-  # grouping all in 5yrs
-  mutate(Age = Age - Age%%5) %>% 
-  group_by(Country, Code, Year, Sex, Age, AgeSpan) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
-  bind_rows(dts_0_4) %>% 
-  mutate(Age = Age %>% as.character()) %>% 
-  bind_rows(all_ages) %>% 
-  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) 
+  arrange(Country, Year, Sex, Age) %>% 
+  select(-AgeSpan, -max_age) 
 
-
+unique(un_data2$AgeLabel)
 
 # Total sex ====
 # ~~~~~~~~~~~~~~
@@ -360,27 +310,112 @@ test_sex <-
 # total sex for those missing it
 miss_tot_sex <- 
   un_data2 %>% 
-  group_by(Country, Code, Age, Year) %>% 
+  group_by(Country, Age, Year) %>% 
   filter(n() == 2) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
   mutate(Sex = "t")
 
+unique(miss_tot_sex$Country)
+
 un_data3 <- 
   un_data2 %>% 
   bind_rows(miss_tot_sex) %>% 
-  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) %>% 
-  select(-AgeSpan) %>% 
-  mutate(Deaths = round(Deaths),
-         Source = "unpd") %>% 
-  # TODO: Ask Tim about some countries with missing ages in some periods,
-  # filtering those cases out meanwhile
-  group_by(Country, Year) %>% 
-  filter(min(Age) == 0) %>% 
+  arrange(Country, Year, Sex, Age) 
+
+# Total age ====
+# ~~~~~~~~~~~~~~
+tot_age <- 
+  un_data3 %>% 
+  group_by(Country, Year, Sex) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Age = "TOT")
+
+un_data4 <- 
+  un_data3 %>% 
+  filter(Age >= 0) %>% 
+  mutate(Age = Age %>% as.character()) %>% 
+  bind_rows(tot_age) %>% 
+  arrange(Country, Year, Sex, suppressWarnings(as.integer(Age))) 
+
+# re-scaling age and sex
+# ~~~~~~~~~~~~~~~~~~~~~~~
+un_data5 <- 
+  un_data4 %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() 
+
+only_sex_t <- 
+  un_data5 %>% 
+  filter(Age == 0) %>% 
+  select(Country, Sex, Year) %>% 
+  group_by(Country, Year) %>%
+  filter(n() == 1) %>% 
+  ungroup() %>% 
+  mutate(one_sex = 1)
+
+# ct <- "Uzbekistan"
+
+# countries with issues
+cts_exc <- c("Ireland", "Kuwait", "Uruguay")
+
+loop_test <- 
+  un_data5 %>% 
+  filter(!Country %in% cts_exc)
+  
+out <- tibble()
+cts <- unique(loop_test$Country)
+for(ct in cts){
+  temp <- 
+    loop_test %>% 
+    filter(Country == ct)
+  
+  yrs <- unique(temp$Year)
+  
+  for(yr in yrs){
+    temp2 <- 
+      temp %>% 
+      filter(Year == yr)
+    
+    ags <- unique(temp$Age)
+    
+    for(ag in ags){
+      temp3 <- 
+        temp2 %>% 
+        filter(Age == ag)
+      
+      temp4 <- rescale_sex(temp3)
+      
+      out <- 
+        out %>% 
+        bind_rows(temp4)
+    }
+  }
+}
+    
+test <- 
+  un_data5 %>% 
+  select(Country, Age, Year, Sex) %>% 
+  group_by(Country, Year, Age) %>%
+  summarise(n = n())
+
+un_data6 <- 
+  un_data5 %>%
+  filter(!Country %in% cts_exc) %>% 
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>%
   ungroup()
 
+un_out <- 
+  un_data6 %>%
+  mutate(Source = "unpd", 
+         Code = countrycode(Country, origin = "country.name",
+                     destination = "iso3c"))
+
 # saving for TAG analysis
-readr::write_csv(un_data3, file = "Output/unpd_single.csv")
+readr::write_csv(un_out, file = "Output/unpd_single.csv")
 
 
 

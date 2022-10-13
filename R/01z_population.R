@@ -1,61 +1,75 @@
-library(tidyverse)
-library(readr)
-library(countrycode)
-WPP_hist <- read_csv("https://population.un.org/wpp/Download/Files/1_Indicators%20(Standard)/CSV_FILES/WPP2019_PopulationBySingleAgeSex_1950-2019.csv")
-WPPproj <- read_csv("https://population.un.org/wpp/Download/Files/1_Indicators%20(Standard)/CSV_FILES/WPP2019_PopulationBySingleAgeSex_2020-2100.csv")
-  # WPP <- read_csv("Data/WPP2019_PopulationBySingleAgeSex_1950-2019.csv") 
+source("R/00_functions.R")
 
-countries <- read_csv("Output/annual_deaths_countries_selected_sources.csv") %>% 
-  select(Country, Code) %>% 
-  distinct()
+pop_f1 <- 
+  read_xlsx("Data/WPP2022_POP_F01_3_POPULATION_SINGLE_AGE_FEMALE.xlsx",
+            skip = 16) %>% 
+  select(3, 11:112) %>% 
+  rename(Country = 1, 
+         Year = 2) %>% 
+  filter(Year >= 2010) %>% 
+  gather(-Country, -Year, key = "Age", value = "Population") %>% 
+  mutate(Sex = "f") %>% 
+  arrange(Country, Age)
 
-colnames(WPP_hist)
-colnames(WPPproj)
+pop_f2 <- 
+  read_xlsx("Data/WPP2022_POP_F01_3_POPULATION_SINGLE_AGE_FEMALE.xlsx",
+            sheet = 2,
+            skip = 16) %>% 
+  select(3, 11:112) %>% 
+  rename(Country = 1, 
+         Year = 2) %>% 
+  filter(Year <= 2025) %>% 
+  gather(-Country, -Year, key = "Age", value = "Population") %>% 
+  mutate(Sex = "f") %>% 
+  arrange(Country, Age)
 
-YrMin <- 2015
-YrMax <- 2021
+pop_m1 <- 
+  read_xlsx("Data/WPP2022_POP_F01_2_POPULATION_SINGLE_AGE_MALE.xlsx",
+            skip = 16) %>% 
+  select(3, 11:112) %>% 
+  rename(Country = 1, 
+         Year = 2) %>% 
+  filter(Year >= 2010) %>% 
+  gather(-Country, -Year, key = "Age", value = "Population") %>% 
+  mutate(Sex = "m") %>% 
+  arrange(Country, Age)
 
-WPP <- bind_rows(WPP_hist,WPPproj)
-WPP$Location %>% unique()
+pop_m2 <- 
+  read_xlsx("Data/WPP2022_POP_F01_2_POPULATION_SINGLE_AGE_MALE.xlsx",
+            sheet = 2,
+            skip = 16) %>% 
+  select(3, 11:112) %>% 
+  rename(Country = 1, 
+         Year = 2) %>% 
+  filter(Year <= 2025) %>% 
+  gather(-Country, -Year, key = "Age", value = "Population") %>% 
+  mutate(Sex = "m") %>% 
+  arrange(Country, Age)
 
-locids <- WPP$LocID %>% unique()
-sum(is.na( countrycode(locids, origin = "unpd", destination = "iso3c")))
+pop <- 
+  bind_rows(pop_f1, pop_f2, pop_m1, pop_m2) %>% 
+  mutate(Country = case_when(Country == "United States of America" ~ "USA",
+                             Country == "Republic of Korea" ~ "South Korea",
+                             Country == "Russian Federation" ~ "Russia",
+                             Country == "China, Taiwan Province of China" ~ "Taiwan",
+                             Country == "Iran (Islamic Republic of)" ~ "Iran",
+                             Country == "Republic of Moldova" ~ "Moldova",
+                             Country == "Bolivia (Plurinational State of)" ~ "Bolivia",
+                             TRUE ~ Country),
+         Age = ifelse(Age == "100+", "100", Age),
+         Age = as.integer(Age),
+         Population = as.double(Population) * 1000) %>% 
+  arrange(Country, Year, Sex, Age)
 
-offsets <-
-  WPP %>% 
-  dplyr::filter(between(Time, YrMin, YrMax)) %>% 
-  pivot_longer(PopMale:PopTotal, names_to = "Sex", values_to = "Population") %>% 
-  mutate(Sex = recode(Sex, 
-                      "PopMale" = "m",
-                      "PopFemale" = "f",
-                      "PopTotal" = "t"),
-         Region = "All") %>% 
-  mutate(Population = Population * 1000,
-         Code = suppressWarnings(countrycode(LocID, origin = "un", destination = "iso3c")),
-         Code = ifelse(Location == "China, Taiwan Province of China","TWN",Code)) %>% 
-  dplyr::filter(!is.na(Code)) %>% 
-  select(Year = Time, Age = AgeGrpStart, Population, Code, Sex) %>% 
-  arrange(Code, Year, Sex, Age) %>% 
-  left_join(countries, by = "Code") %>% 
-  dplyr::filter(!is.na(Country)) %>% 
-  select(Country,Code,Year,Sex,Age,Population)
+pop2 <- 
+  pop %>% 
+  group_by(Country, Year, Age) %>% 
+  summarise(Population = sum(Population)) %>% 
+  ungroup() %>% 
+  mutate(Sex = "t") %>% 
+  bind_rows(pop) %>% 
+  select(Country, Year, Sex, Age, Population) %>% 
+  arrange(Country, Year, Sex, Age)
 
-countries$Country
-denom <-offsets$Country %>% unique()
-
-countries$Country[!countries$Country%in% denom]
-
-write_csv(offsets, file = "Output/offsets.csv")
-
-
-# countries$Code[!countries$Code %in% offsets$Code]
-
-# library(HMDHFDplus)
-# get_these <- c("GBRTENW", "GBR_SCO", "GBR_NIR", "TWN")
-# get_names <- c("England and Wales", "Scotland","Northern Ireland", "Taiwan")
-# fir (i in 1:length(get_these)){
-#   X <- readHMDweb(get_these[i],"Population",us,pw)
-#   X$Country <-
-# }
-
+write_csv(pop2, file = "Output/offsets.csv")
 

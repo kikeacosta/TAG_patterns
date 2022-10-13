@@ -10,7 +10,7 @@ zaf <- read_csv("Output/south_africa.csv") %>% mutate(Source = "direct")
 irn <- read_csv("Output/iran.csv") %>% mutate(Source = "direct")
 mse <- read_csv("Output/msemburi_tag.csv") 
 
-
+unique(unpd$Country)
 # Several direct sources have been superseded by UNPD and others
 
 # putting all together
@@ -21,7 +21,8 @@ all_in <-
             stmf,
             eurs,
             zaf,
-            irn)
+            irn) %>% 
+  replace_na(list(Deaths = 0))
 
 # excluding sources with insufficient data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,23 +50,23 @@ insuf_ages <-
   select(-ages)
 
 
-# imputing unknown ages and sexes
+# imputing unknown ages and sexes (already done in each script)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-all_in_adj <- 
-  all_in %>% 
-  left_join(insuf_pers) %>% 
-  left_join(insuf_ages) %>% 
-  filter(is.na(exc_yrs) & is.na(exc_ags)) %>% 
-  select(-exc_yrs, -exc_ags) %>% 
-  group_by(Country, Sex, Year, Source) %>% 
-  do(rescale_age(chunk = .data)) %>% 
-  ungroup() %>% 
-  group_by(Country, Age, Year, Source) %>% 
-  do(rescale_sex(chunk = .data)) %>% 
-  ungroup() %>% 
-  mutate(Age = as.double(Age)) %>% 
-  arrange(Source, Country, Year, Sex, Age) %>% 
-  replace_na(list(Deaths = 0))
+# all_in_adj <- 
+#   all_in %>% 
+#   left_join(insuf_pers) %>% 
+#   left_join(insuf_ages) %>% 
+#   filter(is.na(exc_yrs) & is.na(exc_ags)) %>% 
+#   select(-exc_yrs, -exc_ags) %>% 
+#   group_by(Country, Sex, Year, Source) %>% 
+#   do(rescale_age(chunk = .data)) %>% 
+#   ungroup() %>% 
+#   group_by(Country, Age, Year, Source) %>% 
+#   do(rescale_sex(chunk = .data)) %>% 
+#   ungroup() %>% 
+#   mutate(Age = as.double(Age)) %>% 
+#   arrange(Source, Country, Year, Sex, Age) %>% 
+#   replace_na(list(Deaths = 0))
 
 
 # harmonizing ages before 2020
@@ -73,7 +74,7 @@ all_in_adj <-
 # harmonizing to the minimum common amount of age intervals before 2020
 
 age_groups <- 
-  all_in_adj %>% 
+  all_in %>% 
   select(Source, Country, Year, Age) %>% 
   unique() %>% 
   group_by(Source, Country, Year) %>% 
@@ -109,7 +110,7 @@ ref_period <-
 
 # closing age groups
 age_close <- 
-  all_in_adj %>% 
+  all_in %>% 
   left_join(cts_to_harmonize) %>% 
   filter(Year < 2020 & to_harmon == 1) %>% 
   filter(Sex == "t") %>% 
@@ -122,7 +123,7 @@ age_close <-
   
 # pulling reference age groups
 ref_ages <- 
-  all_in_adj %>%
+  all_in %>%
   left_join(ref_period) %>% 
   filter(Sex == "t",
          is_reference == 1) %>% 
@@ -132,15 +133,15 @@ ref_ages <-
   select(-Age_close)
 
 harmonized_ages <- 
-  all_in_adj %>%
+  all_in %>%
   left_join(cts_to_harmonize) %>% 
   filter(Year < 2020 & to_harmon == 1) %>% 
   group_by(Source, Country, Code, Year, Sex) %>% 
   do(assign_age_intervals(chunk = .data)) %>% 
   ungroup()
 
-all_in_adj2 <- 
-  all_in_adj %>% 
+all_in2 <- 
+  all_in %>% 
   left_join(cts_to_harmonize) %>% 
   filter(is.na(to_harmon) | Year >= 2020) %>% 
   select(-to_harmon) %>% 
@@ -152,7 +153,7 @@ all_in_adj2 <-
 
 # summarizing content by source
 sum_all <- 
-  sum_source(all_in_adj2) %>% 
+  sum_source(all_in) %>% 
   unique() %>% 
   arrange(Country)
 
@@ -203,12 +204,13 @@ best_source <-
   mutate(best = "y")
 
 out <- 
-  all_in_adj2 %>% 
+  all_in2 %>% 
   left_join(best_source) %>% 
   filter(best == "y") %>% 
   arrange(Country, Year, Sex, Age) %>% 
   select(-best)
 
+unique(out$Country)
 
 # 3) output mortality data based on selected sources
 write_csv(out, "Output/annual_deaths_countries_selected_sources.csv")
@@ -234,6 +236,13 @@ available <-
 
 out <- read_csv("Output/annual_deaths_countries_selected_sources.csv")
 unique(out$Country)
+
+test <- 
+out %>% 
+  select(Country, Year) %>% 
+  unique() %>% 
+  mutate(id = 1) %>% 
+  spread(Year, id)
 # 
 # unique(mse$Country) %>% sort()
 # length(unique(mse$Code))

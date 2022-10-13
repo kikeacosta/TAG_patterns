@@ -1,7 +1,6 @@
 rm(list=ls())
+source("R/00_functions.R")
 library(HMDHFDplus)
-library(tidyverse)
-library(countrycode)
 
 cds_hmd <- getHMDcountries()
 
@@ -28,7 +27,7 @@ for(ct in cds_hmd){
 }
 
 cods_exc <- c("GBRTENW", "GBRCENW", "GBR_SCO", "GBR_NIR",
-              "DEUTE", "DEUTW")
+              "DEUTE", "DEUTW", "FRACNP")
 
 hmd2 <- 
   hmd %>%
@@ -46,6 +45,7 @@ hmd2 <-
          Code = case_when(Code == "GBR_NP" ~ "GBR",
                           Code == "DEUTNP" ~ "DEU",
                           Code == "NZL_NP" ~ "NZL",
+                          Code == "FRATNP" ~ "FRA",
                           TRUE ~ Code),
          Country = countrycode(Code, origin = "iso3c",
                                destination = "country.name"),
@@ -55,7 +55,8 @@ hmd2 <-
 unique(hmd2$Code)
 unique(hmd2$Country)
 
-hmd_out <- 
+# adding total age
+hmd3 <- 
   hmd2 %>% 
   group_by(Year, Sex, Code, Country, Source) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
@@ -65,6 +66,18 @@ hmd_out <-
   arrange(Country, Sex, Year, suppressWarnings(as.integer(Age))) %>% 
   select(Country, Code, Year, Sex, Age, Deaths, Source)
 
-write_csv(hmd_out, "Output/hmd.csv")
+# re-scaling age and sex
+hmd4 <- 
+  hmd3 %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Code, Year, Sex, Age)
+
+write_csv(hmd4, "Output/hmd.csv")
 
 

@@ -218,7 +218,16 @@ db_msemburi_tag_who <-
          Age = as.character(Age)) %>% 
   bind_rows(who_totals) %>% 
   dplyr::filter(Country %in% tag_countries) %>% 
-  bind_rows(TAGout)
+  bind_rows(TAGout) %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Code, Year, Sex, Age)
+
 # save out
 write_csv(db_msemburi_tag_who, file = "Output/msemburi_tag.csv")  
 
