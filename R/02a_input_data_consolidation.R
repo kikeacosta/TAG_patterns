@@ -63,24 +63,6 @@ all_in2 <-
   anti_join(insuf_ages) %>% 
   arrange(Source, Country, Year, Sex, Age)
 
-# imputing unknown ages and sexes (already done in each script)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# all_in_adj <- 
-#   all_in %>% 
-#   left_join(insuf_pers) %>% 
-#   left_join(insuf_ages) %>% 
-#   filter(is.na(exc_yrs) & is.na(exc_ags)) %>% 
-#   select(-exc_yrs, -exc_ags) %>% 
-#   group_by(Country, Sex, Year, Source) %>% 
-#   do(rescale_age(chunk = .data)) %>% 
-#   ungroup() %>% 
-#   group_by(Country, Age, Year, Source) %>% 
-#   do(rescale_sex(chunk = .data)) %>% 
-#   ungroup() %>% 
-#   mutate(Age = as.double(Age)) %>% 
-#   arrange(Source, Country, Year, Sex, Age) %>% 
-#   replace_na(list(Deaths = 0))
-
 # harmonizing ages before 2020
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 min_open_age <- 

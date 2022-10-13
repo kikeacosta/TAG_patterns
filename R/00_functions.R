@@ -101,27 +101,31 @@ assign_age_intervals <- function(chunk){
 # db <- all_in3
 sum_source <- function(db){
  # test <-
-   db %>% 
-   group_by(Source, Country, Year, Sex) %>% 
-   mutate(ages = n()) %>% 
-   ungroup() %>% 
-   group_by(Source, Country, Year, Age) %>% 
-   mutate(sexs = n()) %>% 
-   ungroup() %>% 
-   group_by(Source, Country, Sex, Age) %>% 
-   mutate(years = n()) %>% 
-   ungroup() %>% 
-   group_by(Source, Country, Sex) %>% 
-   mutate(years = ifelse(Year >= 2020, max(years), years)) %>% 
-   ungroup() %>% 
-   group_by(Source, Country) %>% 
-   filter(!(sexs == 3 & Sex == "t")) %>% 
-   summarise(Deaths = sum(Deaths),
-             ages = min(ages),
-             sexs = min(sexs),
-             years = min(years)) %>% 
-   ungroup() %>% 
-   unique()  
+  db %>% 
+    group_by(Source, Country, Year, Sex) %>% 
+    mutate(ages = n()) %>% 
+    ungroup() %>% 
+    group_by(Source, Country, Year, Age) %>% 
+    mutate(sexs = n()) %>% 
+    ungroup() %>% 
+    group_by(Source, Country, Sex, Age) %>% 
+    mutate(years = n()) %>% 
+    ungroup() %>% 
+    group_by(Source, Country, Sex) %>% 
+    mutate(years = ifelse(Year >= 2020, max(years), years)) %>% 
+    ungroup() %>% 
+    group_by(Source, Country) %>% 
+    filter(!(sexs == 3 & Sex == "t")) %>% 
+    summarise(Deaths = sum(Deaths),
+              ages = min(ages),
+              sexs = min(sexs),
+              years = min(years),
+              period = paste(min(Year), max(Year), sep = "-")) %>% 
+    ungroup() %>% 
+    unique() %>% 
+    group_by(Country) %>% 
+    mutate(Sources = n()) %>% 
+    select(Country, Sources, everything())
 }
 
 
