@@ -45,6 +45,14 @@ iran_out <-
             iran_age_sex_t) %>% 
   filter(Year <= 2021) %>% 
   arrange(Country, Code, Year, Sex, suppressWarnings(as.numeric(Age))) %>% 
-  mutate(Source = "wmd")
+  mutate(Source = "wmd") %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Code, Year, Sex, Age)
 
 write_csv(iran_out, "Output/iran.csv")

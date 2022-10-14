@@ -1,4 +1,5 @@
 rm (list = ls())
+source("R/00_functions.R")
 
 ## R wrapper to connect to DemoData (and optionally to DemoTools library)
 ## https://timriffe.github.io/DDSQLtools/
@@ -199,8 +200,15 @@ SeriesID_Characteristics <- unique(DT[, .(SeriesID, LocID, LocName, LocTypeName,
                                           DataStatusName, StatisticalConceptName, DataTypeName, ModelPatternName, DataReliabilityName, PeriodTypeName, PeriodGroupName, TimeUnit, FootNoteID)])
 setorder(SeriesID_Characteristics, LocName, FieldWorkMiddle, DataSourceAuthor, DataSourceYear, DataSourceShortName, DataStatusName, StatisticalConceptName)
 
-library(tidyverse)
-library(lubridate)
+
+
+# ==============================================================================
+# saving raw unpd data 
+# ~~~~~~~~~~~~~~~~~~~~
+write_rds(DT, "Data/unpd_raw.rds")
+# ==============================================================================
+source("R/00_functions.R")
+DT <- read_rds("Data/unpd_raw.rds")
 
 un_data <- 
   DT %>% 
@@ -213,7 +221,7 @@ un_data <-
          AgeSpan, 
          AgeLabel,
          Deaths = DataValue) %>% 
-  filter(AgeLabel != "Total") %>%
+  # filter(AgeLabel != "Total") %>%
   mutate(Date = dmy(Date),
          Year = year(Date),
          Code = countrycode::countrycode(LocID, "un", "iso3c"),
@@ -236,13 +244,16 @@ un_data <-
 
 unique(un_data$Sex)
 unique(un_data$Country)
+unique(un_data$Age)
+unique(un_data$AgeLabel)
 
 summ <- 
   un_data %>% 
   select(Country, Year) %>% 
   unique()
 
-
+# Closing/open age interval
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
 # choosing only one open age interval
 closing_age <- 
   un_data %>% 
@@ -251,11 +262,13 @@ closing_age <-
   filter(Age == max(Age)) %>% 
   ungroup()
 
+# Child mortality harmonization
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # grouping ages 1 to 4
 child_ages <-
   un_data %>% 
   filter(Age %in% 0:4,
-         AgeSpan <= 5) %>% 
+         AgeSpan %in% 0:5) %>% 
   mutate(Age = ifelse(Age %in% 1:4 & AgeSpan == 1, 1, Age),
          AgeLabel = ifelse(Age %in% 1:4 & AgeSpan == 1, "1-4", AgeLabel),
          AgeSpan = ifelse(Age %in% 1:4 & AgeSpan == 1, 4, AgeSpan)) %>% 
@@ -263,6 +276,7 @@ child_ages <-
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup() 
 
+# countries with three data on infant-child mortality
 child_ages2 <- 
   child_ages %>% 
   group_by(Country, Code, Year, Sex) %>% 
@@ -271,109 +285,146 @@ child_ages2 <-
          has_0_4 = ifelse(any(AgeLabel == "0-4"), 1, 0)) %>% 
   ungroup()  
   
+# weird cases
 # children deaths with no infant deaths
+# having deaths 1-4 but without infant mortality (neither <1 or 0-4)
+no_inf <- 
+  child_ages2 %>% 
+  filter(has_inf == 0  & has_1_4 == 1 & has_0_4 == 0)
+
 # extracting only infant and 1-4 mortality
 dts_inf <- 
   child_ages2 %>% 
   filter(has_inf == 1 & has_1_4 == 1 & ((Age == 0 & AgeSpan == 1) | (Age == 1))) %>% 
-  select(Country, Code, Year, Sex, Age, Deaths) %>% 
-  mutate(AgeSpan = case_when(Age == 0 ~ 1,
-                             Age == 1 ~ 4))
+  select(Country, Code, Year, Sex, Age, Deaths, AgeSpan) 
 
-# dts_0_4_inf <- 
-#   dts_inf %>% 
-#   group_by(Country, Code, Year, Sex) %>% 
-#   summarise(Deaths = sum(Deaths)) %>% 
-#   ungroup() %>% 
-#   mutate(Age = 0)
-
-cts_inf <- 
-  dts_inf %>% 
-  select(Country, Code, Year, Sex) %>% 
-  mutate(to_rep = 1)
-
-# extracting 0-4 mortality
+# extracting only 0-4 mortality where there is no data on infant deaths
 dts_0_4 <- 
   child_ages2 %>% 
   filter(has_inf == 0 & has_1_4 == 0 & has_0_4 == 1) %>% 
-  left_join(cts_inf) %>% 
-  filter(is.na(to_rep)) %>% 
-  select(Country, Code, Year, Sex, Age, Deaths) %>%
-  mutate(AgeSpan = 5) %>% 
-  bind_rows(dts_inf) %>% 
-  arrange(Sex, Age, Country, Year)
-
-
-# all ages ====
-# ~~~~~~~~~~~~~
-all_ages <- 
-  un_data %>% 
-  group_by(Country, Year, Code, Sex) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
-  mutate(Age = "TOT")
+  select(Country, Code, Year, Sex, Age, Deaths, AgeSpan) 
   
+dts_chd <- 
+  bind_rows(dts_inf,
+            dts_0_4) %>% 
+  arrange(Country, Year, Sex, Age)
+
+# unknown ages
+unks <- 
+  un_data %>% 
+  filter(Age == -2) %>% 
+  select(-AgeLabel)
 
 # putting together all ages
 un_data2 <- 
   un_data %>% 
   filter(AgeSpan != -1,
          Age >= 5) %>% 
+  # adding closing age groups
   left_join(closing_age %>% 
               select(Country, Year, Sex, max_age = Age)) %>% 
   filter(Age < max_age | is.na(max_age)) %>% 
-  # adding closing age groups
   bind_rows(closing_age) %>% 
   # grouping all in 5yrs
   mutate(Age = Age - Age%%5) %>% 
   group_by(Country, Code, Year, Sex, Age, AgeSpan) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
-  bind_rows(dts_0_4) %>% 
-  mutate(Age = Age %>% as.character()) %>% 
-  bind_rows(all_ages) %>% 
-  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) 
-  
+  # adding child mortality
+  bind_rows(dts_chd) %>% 
+  # adding unknown ages
+  bind_rows(unks) %>% 
+  arrange(Country, Code, Year, Sex, Age) 
 
+# total age 
+# ~~~~~~~~~
+all_ages <-
+  un_data2 %>%
+  group_by(Country, Year, Code, Sex) %>%
+  summarise(Deaths = sum(Deaths)) %>%
+  ungroup() %>%
+  mutate(Age = "TOT")
+
+# adding all together
+un_data3 <- 
+  un_data2 %>% 
+  mutate(Age = Age %>% as.character()) %>% 
+  bind_rows(all_ages) %>%
+  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) %>% 
+  # excluding unknown ages
+  filter(Age != "-2")
+  
 
 # Total sex ====
 # ~~~~~~~~~~~~~~
 
 # identifying missing total sex values
 test_sex <- 
-  un_data2 %>% 
-  select(Country, Year, Sex) %>% 
+  un_data3 %>% 
+  select(Country, Year, Sex, Age) %>% 
   unique() %>% 
-  group_by(Country, Year) %>% 
-  summarise(n = n()) %>% 
-  select(Country, n) %>% 
-  unique() %>% 
-  filter(n == 2)
+  mutate(id = 1) %>% 
+  spread(Sex, id) %>% 
+  filter(is.na(t)) %>% 
+  select(Country, Year, Age)
 
 # total sex for those missing it
 miss_tot_sex <- 
-  un_data2 %>% 
+  un_data3 %>% 
+  inner_join(test_sex, by = c("Country", "Year", "Age")) %>% 
   group_by(Country, Code, Age, Year) %>% 
-  filter(n() == 2) %>% 
   summarise(Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
-  mutate(Sex = "t")
+  mutate(Sex = "t") %>%
+  arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) 
 
-un_data3 <- 
-  un_data2 %>% 
+# adding total sexes when missing and re-scaling age and sex
+un_data4 <- 
+  un_data3 %>% 
   bind_rows(miss_tot_sex) %>% 
   arrange(Country, Code, Year, Sex, suppressWarnings(as.integer(Age))) %>% 
   select(-AgeSpan) %>% 
-  mutate(Deaths = round(Deaths),
-         Source = "unpd") %>% 
-  # TODO: Ask Tim about some countries with missing ages in some periods,
-  # filtering those cases out meanwhile
-  group_by(Country, Year) %>% 
-  filter(min(Age) == 0) %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Country, Code, Year, Sex, Age) 
+
+# Countries with incomplete data on age
+age_incomp <- 
+  un_data4 %>% 
+  group_by(Country, Year, Sex) %>% 
+  arrange(Country, Year, Sex, Age) %>% 
+  mutate(AgeSpan = lead(Age) - Age,
+         open_int = max(Age)) %>% 
+  drop_na(AgeSpan) %>% 
+  mutate(sum_spans = sum(AgeSpan)) %>% 
+  filter(sum_spans != open_int) %>% 
+  select(Country, Year, Sex) %>% 
   ungroup()
 
+# Countries without data on age 0
+no_zero <- 
+  un_data4 %>% 
+  group_by(Country, Year, Sex) %>% 
+  filter(min(Age) != 0) %>% 
+  select(Country, Year, Sex) %>% 
+  ungroup() %>% 
+  select(Country, Year, Sex)
+
+# cases with incomplete ages
+un_data5 <- 
+  un_data4 %>% 
+  anti_join(age_incomp, by = c("Country", "Year", "Sex")) %>% 
+  anti_join(no_zero, by = c("Country", "Year", "Sex")) %>% 
+  mutate(Source = "unpd")
+
+
 # saving for TAG analysis
-readr::write_csv(un_data3, file = "Output/unpd.csv")
+readr::write_csv(un_data5, file = "Output/unpd.csv")
 
 
 

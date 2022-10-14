@@ -49,9 +49,21 @@ db_eurs <-
                              TRUE ~ Country),
          Code = countryname(Country, destination = "iso3c"),
          Source = "eurs") %>% 
+  arrange(Country, year, sex, suppressWarnings(as.integer(age))) %>% 
   dplyr::select(Country, Code, Year = year, Sex = sex, Age = age, Deaths = deaths, Source)
   
-write_csv(db_eurs, "Output/eurs.csv")
+db_eurs2 <- 
+  db_eurs %>% 
+  group_by(Country, Sex, Year) %>% 
+  do(rescale_age(chunk = .data)) %>% 
+  ungroup() %>%
+  group_by(Country, Age, Year) %>%
+  do(rescale_sex(chunk = .data)) %>% 
+  ungroup() %>% 
+  mutate(Age = Age %>% as.double()) %>% 
+  arrange(Code, Year, Sex, Age)
+
+write_csv(db_eurs2, "Output/eurs.csv")
 
 
 

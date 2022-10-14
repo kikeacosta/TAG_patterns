@@ -1,9 +1,11 @@
-library(here)
 library(readxl)
 library(tidyverse)
 library(countrycode)
 library(lubridate)
 
+write_excel <- function(x,row.names=FALSE,col.names=TRUE,...) {
+  write.table(x,file = paste0("clipboard-", object.size(x)),sep="\t",row.names=row.names,col.names=col.names,...)
+}
 
 rescale_age <- function(chunk){
   TOT <- chunk %>% dplyr::filter(Age == "TOT") %>% dplyr::pull(Deaths)
@@ -29,16 +31,26 @@ std_db <- function(db){
     select(Country, Year = YearOccurrence, Sex, Age = AgeStart, Deaths)
 }
 
-assign_age_intervals <- function(chunk){
-  ct <- unique(chunk$Country)
+# chunk <- 
+#   all_in2 %>% 
+#   filter(Source == "unpd",
+#          Country == "Belgium", 
+#          Year == 2018, 
+#          Sex == "f")
+
+# chunk <- temp5
+
+harmon_age_intervals <- function(chunk){
+  
   int <- 
     ref_ages %>% 
-    filter(Country == ct) %>% 
-    pull(Age) %>% 
-    unique()
+    semi_join(chunk, by = c("Source", "Country")) %>% 
+    pull(Age)
+  
   if(max(int) <= 110){
-    int <- c(int, 110)
+    int <- c(int, 120)
   }
+  
   labs <- int[1:length(int)-1]
   chunk %>% 
     mutate(Age = cut(Age, breaks = int, include.lowest = TRUE, right = FALSE, labels = labs),
@@ -48,6 +60,25 @@ assign_age_intervals <- function(chunk){
     ungroup()
 }
 
+assign_age_intervals <- function(chunk){
+  ct <- unique(chunk$Country)
+  int <- 
+    ref_ages %>% 
+    filter(Country == ct) %>% 
+    pull(Age)
+  
+  if(max(int) <= 110){
+    int <- c(int, 110)
+  }
+  
+  labs <- int[1:length(int)-1]
+  chunk %>% 
+    mutate(Age = cut(Age, breaks = int, include.lowest = TRUE, right = FALSE, labels = labs),
+           Age = as.numeric(as.character(Age))) %>% 
+    group_by(Age) %>% 
+    summarise(Deaths = sum(Deaths)) %>% 
+    ungroup()
+}
 
 # sum_source <- function(db){
 #   db %>% 
@@ -70,8 +101,9 @@ assign_age_intervals <- function(chunk){
 #     ungroup() %>% 
 #     unique()  
 # }
-
+# db <- all_in3
 sum_source <- function(db){
+ # test <-
   db %>% 
     group_by(Source, Country, Year, Sex) %>% 
     mutate(ages = n()) %>% 
@@ -82,14 +114,21 @@ sum_source <- function(db){
     group_by(Source, Country, Sex, Age) %>% 
     mutate(years = n()) %>% 
     ungroup() %>% 
+    group_by(Source, Country, Sex) %>% 
+    mutate(years = ifelse(Year >= 2020, max(years), years)) %>% 
+    ungroup() %>% 
     group_by(Source, Country) %>% 
     filter(!(sexs == 3 & Sex == "t")) %>% 
     summarise(Deaths = sum(Deaths),
               ages = min(ages),
               sexs = min(sexs),
-              years = min(years)) %>% 
+              years = min(years),
+              period = paste(min(Year), max(Year), sep = "-")) %>% 
     ungroup() %>% 
-    unique()  
+    unique() %>% 
+    group_by(Country) %>% 
+    mutate(Sources = n()) %>% 
+    select(Country, Sources, everything())
 }
 
 
