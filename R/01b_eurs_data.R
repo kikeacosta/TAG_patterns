@@ -1,6 +1,7 @@
 library(eurostat)
-library(tidyverse)
-library(countrycode)
+source("R/00_functions.R")
+# library(tidyverse)
+# library(countrycode)
 IN <- get_eurostat("demo_r_mwk_05")
 
 db_eurs <-
@@ -52,6 +53,7 @@ db_eurs <-
   arrange(Country, year, sex, suppressWarnings(as.integer(age))) %>% 
   dplyr::select(Country, Code, Year = year, Sex = sex, Age = age, Deaths = deaths, Source)
   
+# re-scaling ages and sexes
 db_eurs2 <- 
   db_eurs %>% 
   group_by(Country, Sex, Year) %>% 
@@ -63,7 +65,7 @@ db_eurs2 <-
   mutate(Age = Age %>% as.double()) %>% 
   arrange(Code, Year, Sex, Age)
 
-write_csv(db_eurs2, "Output/eurs.csv")
+write_csv(db_eurs2, "data_inter/eurs.csv")
 
 
 

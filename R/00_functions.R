@@ -80,6 +80,36 @@ assign_age_intervals <- function(chunk){
     ungroup()
 }
 
+
+# Groupping population using the same age intervals as mortality data
+assign_age_invals_pop <- function(chunk){
+  ct <- unique(chunk$Country)
+  yr <- unique(chunk$Year)
+  sx <- unique(chunk$Sex)
+  
+  int <- 
+    ref_ages %>% 
+    filter(Country == ct) %>% 
+    pull(Age) %>% 
+    sort
+  
+  if(max(int) <= 110){
+    int <- c(int, 110)
+  }
+  
+  labs <- int[1:length(int)-1]
+  chunk %>% 
+    mutate(Age = cut(Age, breaks = int, include.lowest = TRUE, right = FALSE, labels = labs),
+           Age = as.numeric(as.character(Age))) %>% 
+    group_by(Age) %>% 
+    summarise(Population = sum(Population)) %>% 
+    ungroup()
+}
+
+
+
+
+
 # sum_source <- function(db){
 #   db %>% 
 #     group_by(Country, Year, Sex) %>% 

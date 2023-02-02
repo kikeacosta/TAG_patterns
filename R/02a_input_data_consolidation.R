@@ -2,17 +2,28 @@ rm(list=ls())
 source("R/00_functions.R")
 
 # loading pre-processed data
-hmd  <- read_csv("Output/hmd.csv")
-who  <- read_csv("Output/who.csv")
-unpd <- read_csv("Output/unpd.csv")
-stmf <- read_csv("Output/stmf.csv") 
-eurs <- read_csv("Output/eurs.csv") 
-bra <- read_csv("Output/brazil.csv") %>% mutate(Source = "direct")
-per <- read_csv("Output/peru.csv") %>% mutate(Source = "direct")
-mex <- read_csv("Output/mexico.csv") %>% mutate(Source = "direct")
-zaf <- read_csv("Output/south_africa.csv") %>% mutate(Source = "direct")
-irn <- read_csv("Output/iran.csv") %>% mutate(Source = "direct")
-mse <- read_csv("Output/msemburi_tag.csv") 
+hmd  <- read_csv("data_inter/hmd.csv")
+who  <- read_csv("data_inter/who.csv")
+unpd <- read_csv("data_inter/unpd.csv")
+stmf <- read_csv("data_inter/stmf.csv") 
+eurs <- read_csv("data_inter/eurs.csv") 
+bra <- read_csv("data_inter/brazil.csv") %>% mutate(Source = "direct")
+per <- read_csv("data_inter/peru.csv") %>% mutate(Source = "direct")
+mex <- read_csv("data_inter/mexico.csv") %>% mutate(Source = "direct")
+zaf <- read_csv("data_inter/south_africa.csv") %>% mutate(Source = "direct")
+irn <- read_csv("data_inter/iran.csv") %>% mutate(Source = "direct")
+mse <- read_csv("data_inter/msemburi_tag.csv") 
+
+
+cts_exclude <- tibble(Country = 
+                        c("Scotland", 
+                          "England and Wales", 
+                          "Northern Ireland",
+                          "Kenya",
+                          "Puerto Rico",
+                          "Anguilla"))
+
+# unique(out$Country)
 
 unique(unpd$Country)
 # Several direct sources have been superseded by UNPD and others
@@ -31,7 +42,13 @@ all_in <-
             irn) %>% 
   replace_na(list(Deaths = 0)) %>% 
   group_by(Source, Country) %>% 
-  filter(max(Year) >= 2020 & min(Year) <= 2017)
+  filter(max(Year) >= 2020 & min(Year) <= 2017) %>% 
+  ungroup() %>% 
+  mutate(Age = ifelse(Age >= 100, 100, Age)) %>% 
+  group_by(Country, Code, Source, Year, Sex, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup()
+
 
 # excluding sources with insufficient data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,10 +97,11 @@ min_open_age <-
   select(-Year) %>% 
   unique()
 
+# Largest age groups before 2020
 ref_ages <- 
   all_in2 %>% 
   filter(Year < 2020) %>% 
-  # no ages overpassing the minimum open age interval
+  # no ages surpassing the minimum open age interval
   left_join(min_open_age) %>% 
   filter(Age <= min_open) %>% 
   select(Source, Country, Year, Age) %>% 
@@ -94,7 +112,7 @@ ref_ages <-
                        Inf,
                        lead(Age) - Age)) %>%
   ungroup() %>% 
-  # identify and choose the largest age span in al periods for each age
+  # identify and choose the largest age span in all periods for each age
   group_by(Source, Country, Age) %>% 
   mutate(max_span = max(span)) %>% 
   ungroup() %>% 
@@ -178,7 +196,7 @@ comp <-
   left_join(sel_criteria %>% 
               select(Country, ages_c = ages, years_c = years, Source_c = Source)) %>% 
   mutate(same = ifelse(Source_s == Source_c, 1, 0),
-           ages_ratio = ages_c / ages_s,
+         ages_ratio = ages_c / ages_s,
          years_ratio = years_c / years_s)
   
 
@@ -194,12 +212,14 @@ best_source <-
 out <- 
   all_in3 %>% 
   inner_join(best_source) %>% 
-  arrange(Country, Year, Sex, Age)
+  arrange(Country, Year, Sex, Age) %>% 
+  mutate(Country = ifelse(Country == "Faeroe Islands", "Faroe Islands", Country)) %>% 
+  anti_join(cts_exclude)
 
 unique(out$Country)
 
 # 3) output mortality data based on selected sources
-write_csv(out, "Output/annual_deaths_countries_selected_sources.csv")
+write_csv(out, "data_inter/annual_deaths_countries_selected_sources.csv")
 
 # summary of selected sources by country 
 available <- 
@@ -222,62 +242,124 @@ available <-
 
 write_excel(available)
 
-out <- read_csv("Output/annual_deaths_countries_selected_sources.csv")
-unique(out$Country)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-test <- 
-out %>% 
-  select(Country, Year) %>% 
+# Harmonizing age groups in all periods
+# =====================================
+d1 <- 
+  read_csv("data_inter/annual_deaths_countries_selected_sources.csv")
+
+# harmonizing ages before 2020
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+min_open_age <- 
+  d1 %>% 
+  # filter(Year < 2020) %>% 
+  select(Source, Country, Year, Sex, Age) %>% 
   unique() %>% 
-  mutate(id = 1) %>% 
-  spread(Year, id)
-# 
-# unique(mse$Country) %>% sort()
-# length(unique(mse$Code))
-# 
-# 
-# test <- 
-#   out %>% 
-#   select(Code) %>% 
-#   unique() %>% 
-#   mutate(our = 1) %>% 
-#   full_join(mse %>% 
-#               select(Code) %>% 
-#               unique() %>% 
-#               mutate(mse = 1))
-# 
-# test2 <- 
-  
-# temp1 <- 
-#   all_in2 %>% 
-#   filter(Year < 2020)
-# 
-# srs <- unique(temp1$Source)
-# for(sr in srs){
-#   temp2 <- 
-#     temp1 %>% 
-#     filter(Source == sr)
-#   cts <- unique(temp2$Country)
-#   for(ct in cts){
-#     temp3 <- 
-#       temp2 %>% 
-#       filter(Country == ct)
-#     sxs <- unique(temp3$Sex)
-#     for(sx in sxs){
-#       temp4 <- 
-#         temp3 %>% 
-#         filter(Sex == sx)
-#       yrs <- unique(temp4$Year)
-#       for(yr in yrs){
-#         temp5 <- 
-#           temp4 %>% 
-#           filter(Year == yr)
-#         
-#         test <- harmon_age_intervals(temp5)
-#       }
-#     }
-#   }
-# }
+  group_by(Source, Country, Year, Sex) %>% 
+  filter(Age == max(Age)) %>% 
+  ungroup() %>% 
+  group_by(Source, Country, Sex) %>% 
+  filter(Age == min(Age)) %>% 
+  ungroup() %>% 
+  rename(min_open = Age) %>% 
+  select(-Year) %>% 
+  unique()
+
+# Largest age groups before 2020
+ref_ages <- 
+  d1 %>% 
+  # filter(Year < 2020) %>% 
+  # no ages surpassing the minimum open age interval
+  left_join(min_open_age) %>% 
+  filter(Age <= min_open) %>% 
+  select(Source, Country, Year, Age) %>% 
+  unique() %>% 
+  # calculate age span in each interval
+  group_by(Source, Country, Year) %>% 
+  mutate(span = ifelse(Age == max(Age),
+                       Inf,
+                       lead(Age) - Age)) %>%
+  ungroup() %>% 
+  # identify and choose the largest age span in all periods for each age
+  group_by(Source, Country, Age) %>% 
+  mutate(max_span = max(span)) %>% 
+  ungroup() %>% 
+  select(Source, Country, Age, max_span) %>% 
+  unique() %>% 
+  group_by(Source, Country) %>%
+  mutate(test = ifelse(Age == 0, 0, lag(Age + max_span))) %>% 
+  ungroup() %>% 
+  filter(Age == test) %>% 
+  select(-test, -max_span)
+
+# harmonizing ages within countries before 2020 
+d2 <- 
+  d1 %>%
+  # filter(Year < 2020) %>% 
+  group_by(Source, Country, Code, Year, Sex) %>% 
+  do(harmon_age_intervals(chunk = .data)) %>% 
+  ungroup()
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Adding population exposures to each age interval
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+p1 <- 
+  read_csv("data_inter/offsets.csv") %>% 
+  mutate()
+
+cts_yrs <- 
+  d2 %>% 
+  select(Country, Year, Sex) %>% 
+  unique()
+
+p2 <- 
+  p1 %>% 
+  inner_join(cts_yrs)
 
 
+p3 <- 
+  p2 %>% 
+  group_by(Country, Year, Sex) %>% 
+  do(assign_age_invals_pop(chunk = .data)) %>% 
+  ungroup()
 
+d3 <- 
+  d2 %>% 
+  left_join(p3)
+
+no_pop <- 
+  d3 %>% 
+  filter(is.na(Population)) %>% 
+  pull(Country) %>% 
+  unique
+
+write_csv(d3, "data_inter/annual_deaths_countries_selected_sources_harm.csv")
+
+available2 <- 
+  d3 %>% 
+  group_by(Country, Code, Year, Source, Sex) %>% 
+  summarise(Age_groups = n(),
+            Deaths = sum(Deaths),
+            Population = sum(Population)) %>% 
+  ungroup() %>% 
+  filter(Sex != "t") %>% 
+  group_by(Country, Code, Year, Source, Age_groups) %>% 
+  summarise(Sex_groups = n(),
+            Deaths = sum(Deaths),
+            Population = sum(Population)) %>% 
+  ungroup() %>% 
+  group_by(Country, Code, Source) %>% 
+  summarise(Period = paste(min(Year), max(Year), sep = "-"),
+            Deaths = sum(Deaths),
+            Population = mean(Population),
+            # putting together all the age and sex groups configurations between 2015 and 2021
+            Age_groups = unique(Age_groups) %>% paste(collapse = ", "),
+            Sex_groups = unique(Sex_groups) %>% paste(collapse = ", ")) %>% 
+  ungroup() 
+
+write_excel(available2)

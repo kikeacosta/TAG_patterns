@@ -56,6 +56,7 @@ pop <-
                              Country == "Republic of Korea" ~ "South Korea",
                              Country == "Russian Federation" ~ "Russia",
                              Country == "China, Taiwan Province of China" ~ "Taiwan",
+                             Country == "China, Hong Kong SAR" ~ "Hong Kong",
                              Country == "Iran (Islamic Republic of)" ~ "Iran",
                              Country == "Republic of Moldova" ~ "Moldova",
                              Country == "Bolivia (Plurinational State of)" ~ "Bolivia",
@@ -75,5 +76,5 @@ pop2 <-
   select(Country, Year, Sex, Age, Population) %>% 
   arrange(Country, Year, Sex, Age)
 
-write_csv(pop2, file = "Output/offsets.csv")
+write_csv(pop2, file = "data_inter/offsets.csv")
 

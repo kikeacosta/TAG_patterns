@@ -10,13 +10,16 @@ source("R/00_functions.R")
 # https://dados.gov.br/dataset/sistema-de-informacao-sobre-mortalidade
 
 
-links <- paste0("Data/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
-i <- links[1]
+links <- paste0("Data/brazil/Mortalidade_Geral_", 2015:2022, ".csv")
+i <- links[8]
 out <- list()
 for (i in links){
   cat(i)
+  
+  separ <- ifelse(str_detect(i, "2021|2022"), ",", ";")
+  
   out[[i]] <- read_delim(i, 
-                         delim = ";",
+                         delim = separ,
                          col_types = cols(.default = "c")) %>%  
     filter(TIPOBITO == "2") %>% 
     select(date_e = DTOBITO, 
@@ -48,7 +51,8 @@ for (i in links){
 dts <- 
   out %>% 
   bind_rows() %>% 
-  ungroup()
+  ungroup() %>% 
+  filter(Year <= 2021)
 
 tot_age <- 
   dts %>% 
@@ -56,7 +60,7 @@ tot_age <-
   summarise(Deaths = sum(Deaths), .groups = "drop") %>% 
   mutate(Age = "TOT")
 
-# rescaling age and sex
+# re-scaling age and sex
 dts2 <- 
   dts %>% 
   filter(Age != "UNK") %>% 
@@ -77,6 +81,6 @@ dts3 <-
   select(Country, Code, Year, Sex, Age, Deaths, Source) %>% 
   arrange(Year, Sex, Age)
 
-write_rds(dts3, "Output/brazil.rds")
-dts3 <- read_rds("Output/brazil.rds")
-write_csv(dts3, "Output/brazil.csv")
+# write_rds(dts3, "data_inter/brazil.rds")
+# dts3 <- read_rds("Output/brazil.rds")
+write_csv(dts3, "data_inter/brazil.csv")
