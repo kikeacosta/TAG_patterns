@@ -252,6 +252,15 @@ write_excel(available)
 d1 <- 
   read_csv("data_inter/annual_deaths_countries_selected_sources.csv")
 
+span <- 
+  d1 %>% 
+  filter(Year < 2020) %>% 
+  select(Country, Age) %>%
+  unique() %>% 
+  group_by(Country) %>% 
+  mutate(age_int = lead(Age) - Age) %>% 
+  filter(Age == 0)
+
 # harmonizing ages before 2020
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 min_open_age <- 
