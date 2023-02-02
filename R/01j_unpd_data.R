@@ -238,6 +238,7 @@ un_data <-
                           "Bolivia (Plurinational State of)" = "Bolivia",
                           "United States of America" = "USA",
                           "Republic of Korea" = "South Korea",
+                          "China, Hong Kong SAR" = "Hong Kong",
                           "Russian Federation" = "Russia",
                           "Republic of Moldova" = "Moldova")) %>% 
   ungroup()
@@ -257,7 +258,7 @@ summ <-
 # choosing only one open age interval
 closing_age <- 
   un_data %>% 
-  filter(AgeSpan == -1) %>% 
+  filter(AgeSpan == -1 & AgeLabel != "Total") %>% 
   group_by(Country, Code, Year, Sex) %>% 
   filter(Age == max(Age)) %>% 
   ungroup()
@@ -267,7 +268,8 @@ closing_age <-
 # grouping ages 1 to 4
 child_ages <-
   un_data %>% 
-  filter(Age %in% 0:4,
+  filter(AgeLabel != "Total",
+         Age %in% 0:4,
          AgeSpan %in% 0:5) %>% 
   mutate(Age = ifelse(Age %in% 1:4 & AgeSpan == 1, 1, Age),
          AgeLabel = ifelse(Age %in% 1:4 & AgeSpan == 1, "1-4", AgeLabel),
@@ -404,7 +406,8 @@ age_incomp <-
   mutate(sum_spans = sum(AgeSpan)) %>% 
   filter(sum_spans != open_int) %>% 
   select(Country, Year, Sex) %>% 
-  ungroup()
+  ungroup() %>% 
+  unique()
 
 # Countries without data on age 0
 no_zero <- 
@@ -413,7 +416,8 @@ no_zero <-
   filter(min(Age) != 0) %>% 
   select(Country, Year, Sex) %>% 
   ungroup() %>% 
-  select(Country, Year, Sex)
+  select(Country, Year, Sex) %>% 
+  unique()
 
 # cases with incomplete ages
 un_data5 <- 
@@ -422,9 +426,36 @@ un_data5 <-
   anti_join(no_zero, by = c("Country", "Year", "Sex")) %>% 
   mutate(Source = "unpd")
 
+# countries with data in 2020 or 2021
+pand <- 
+  un_data5 %>% 
+  select(Country, Year, Sex) %>% 
+  unique() %>% 
+  group_by(Country, Sex) %>% 
+  filter(max(Year) >= 2020) %>% 
+  ungroup() %>% 
+  select(Country, Sex) %>% unique()
 
+# minimum three periods before 2020
+three <- 
+  un_data5 %>% 
+  select(Country, Year, Sex) %>% 
+  unique() %>% 
+  filter(Year < 2020) %>% 
+  group_by(Country, Sex) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  filter(n >= 3) %>% 
+  select(-n)
+
+
+un_data6 <- 
+  un_data5 %>% 
+  semi_join(pand, by = c("Country", "Sex")) %>% 
+  semi_join(three, by = c("Country", "Sex"))
+  
 # saving for TAG analysis
-readr::write_csv(un_data5, file = "Output/unpd.csv")
+readr::write_csv(un_data6, file = "data_inter/unpd.csv")
 
 
 

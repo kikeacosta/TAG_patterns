@@ -82,11 +82,12 @@ unique_sex_year <-
 
 # manual homogenization ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# France: group 0-4 and close at 90
+# France: leave it as it is
+# USA: exclude it
 # Scotland: exclude it
 # England and Wales: exclude it
 # Northern Ireland: exclude it
-# USA: exclude it
+
 exc <- c("USA", "GBR_NIR", "GBRTENW", "GBR_SCO")
 
 dts2 <- 
@@ -109,6 +110,7 @@ dts2 <-
                           "NZL_NP" = "NZL")) %>%
   rename(Code = PopCode) 
 
+# re-scaling ages and sexes
 dts3 <- 
   dts2 %>% 
   group_by(Code, Sex, Year) %>% 
@@ -130,6 +132,6 @@ dts4 <-
   arrange(Code, Year, Sex, Age)
 
 # saving data
-write_csv(dts4, "Output/stmf.csv")
+write_csv(dts4, "data_inter/stmf.csv")
 
 

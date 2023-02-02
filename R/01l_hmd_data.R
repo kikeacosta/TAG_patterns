@@ -2,7 +2,14 @@ rm(list=ls())
 source("R/00_functions.R")
 library(HMDHFDplus)
 
+# exclude populations that are subsets of other populations
+cts_exclude <- c("GBRCENW", "GBRTENW", "GBR_SCO", "GBR_NIR",
+                 "DEUTE", "DEUTW", 
+                 "FRACNP", 
+                 "NZL_NM", "NZL_MA")
+
 cds_hmd <- getHMDcountries()
+cds_hmd2 <- cds_hmd[!cds_hmd %in% cts_exclude]
 
 # cds_hmd <- c("AUS", "AUT")
 # Extract deaths and exposures in 2020 from the HMD
@@ -14,7 +21,8 @@ hmd_pw <- "secreto"
 
 # identifying those with data for 2020
 hmd <- tibble()
-for(ct in cds_hmd){
+for(ct in cds_hmd2){
+  cat(paste0(ct, "\n"))
   chunk_d <- 
     readHMDweb(ct, "Deaths_1x1", hmd_us, hmd_pw) %>%
     filter(Year >= 2015) %>%
@@ -26,9 +34,6 @@ for(ct in cds_hmd){
     bind_rows(chunk_d)
 }
 
-cods_exc <- c("GBRTENW", "GBRCENW", "GBR_SCO", "GBR_NIR",
-              "DEUTE", "DEUTW", "FRACNP")
-
 hmd2 <- 
   hmd %>%
   # only countries with data in 2020
@@ -37,7 +42,7 @@ hmd2 <-
   ungroup() %>% 
   select(-OpenInterval) %>% 
   gather(Female, Male, Total, key = Sex, value = Deaths) %>% 
-  filter(!Code %in% cods_exc) %>% 
+  # filter(!Code %in% cods_exc) %>% 
   mutate(Sex = recode(Sex,
                       "Female" = "f",
                       "Male" = "m",
@@ -49,6 +54,9 @@ hmd2 <-
                           TRUE ~ Code),
          Country = countrycode(Code, origin = "iso3c",
                                destination = "country.name"),
+         Country = recode(Country,
+                          "United States" = "USA",
+                          "Hong Kong SAR China" = "Hong Kong"),
          Age = Age %>% as.character()) %>% 
   mutate(Source = "hmd")
 
@@ -78,6 +86,6 @@ hmd4 <-
   mutate(Age = Age %>% as.double()) %>% 
   arrange(Code, Year, Sex, Age)
 
-write_csv(hmd4, "Output/hmd.csv")
+write_csv(hmd4, "data_inter/hmd.csv")
 
 
