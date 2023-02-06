@@ -66,7 +66,7 @@ db20 <-
   filter(max(Year) >= 2020 &  Frmat != "09") %>% 
   ungroup() %>% 
   filter(Cause %in% c("1000", "AAA"),
-         Year >= 2015) %>% 
+         Year >= 2010) %>% 
   select(-Admin1, -SubDiv, -Cause, -List) %>% 
   arrange(Country, Year)
 
@@ -150,6 +150,9 @@ db20_4 <-
   do(rescale_sex(chunk = .data)) %>% 
   ungroup() %>% 
   mutate(Age = Age %>% as.double()) %>% 
-  arrange(Code, Year, Sex, Age)
+  arrange(Code, Year, Sex, Age) %>% 
+  group_by(Country, Year, Sex) %>% 
+  mutate(age_spn = ifelse(Age == max(Age), -1, lead(Age) - Age)) %>% 
+  ungroup()
 
 write_csv(db20_4, "data_inter/who.csv")

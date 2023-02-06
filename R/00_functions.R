@@ -89,7 +89,8 @@ assign_age_invals_pop <- function(chunk){
   
   int <- 
     ref_ages %>% 
-    filter(Country == ct) %>% 
+    filter(Country == ct,
+           Year == yr) %>% 
     pull(Age) %>% 
     sort
   
@@ -106,37 +107,12 @@ assign_age_invals_pop <- function(chunk){
     ungroup()
 }
 
-
-
-
-
-# sum_source <- function(db){
-#   db %>% 
-#     group_by(Country, Year, Sex) %>% 
-#     mutate(ages = n()) %>% 
-#     ungroup() %>% 
-#     group_by(Country, Year, Age) %>% 
-#     mutate(sexs = n()) %>% 
-#     ungroup() %>% 
-#     group_by(Country, Sex, Age) %>% 
-#     mutate(years = n()) %>% 
-#     ungroup() %>% 
-#     group_by(Country) %>% 
-#     filter(!(sexs == 3 & Sex == "t")) %>% 
-#     summarise(Deaths = sum(Deaths),
-#               ages = min(ages),
-#               sexs = min(sexs),
-#               years = min(years),
-#               Source = unique(Source) %>% paste(collapse = ", ")) %>% 
-#     ungroup() %>% 
-#     unique()  
-# }
-# db <- all_in3
 sum_source <- function(db){
  # test <-
   db %>% 
     group_by(Source, Country, Year, Sex) %>% 
-    mutate(ages = n()) %>% 
+    mutate(ages = n(),
+           infd = ifelse(any(Age == 0 & age_spn == 1), 1, 0)) %>% 
     ungroup() %>% 
     group_by(Source, Country, Year, Age) %>% 
     mutate(sexs = n()) %>% 
@@ -150,6 +126,7 @@ sum_source <- function(db){
     group_by(Source, Country) %>% 
     filter(!(sexs == 3 & Sex == "t")) %>% 
     summarise(Deaths = sum(Deaths),
+              infd = min(infd),
               ages = min(ages),
               sexs = min(sexs),
               years = min(years),
