@@ -91,7 +91,7 @@ nc <- length(codes)
 nc
 
 OUTPUT <- list()
-j=1
+j=60
 
 ds <- rep(0,nc)
 ds[c(1,50)] <- 0.8
