@@ -15,8 +15,9 @@ cds_hmd2 <- cds_hmd[!cds_hmd %in% cts_exclude]
 # Extract deaths and exposures between 2010 and 2021 from the HMD
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # HMD user and password
-# hmd_us <- "acosta@demogr.mpg.de"
-# hmd_pw <- "Secreto_1"
+# usethis::edit_r_environ()
+# hmd_us="acosta@demogr.mpg.de"
+# hmd_pw="Secreto_1"
 
 # getting HMD username and password from the R environment
 hmd_us <- Sys.getenv("hmd_us")
