@@ -8,16 +8,19 @@ cts_exclude <- c("GBRCENW", "GBRTENW", "GBR_SCO", "GBR_NIR",
                  "FRACNP", 
                  "NZL_NM", "NZL_MA")
 
-cds_hmd <- getHMDcountries()
+cds_hmd <- getHMDcountries() %>% pull(CNTRY)
 cds_hmd2 <- cds_hmd[!cds_hmd %in% cts_exclude]
 
-# cds_hmd <- c("AUS", "AUT")
-# Extract deaths and exposures in 2020 from the HMD
 
+# Extract deaths and exposures between 2010 and 2021 from the HMD
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # HMD user and password
-# ~~~~~~~~~~~~~~~~~~~~
-hmd_us <- "kikepaila@gmail.com"
-hmd_pw <- "secreto"
+# hmd_us <- "acosta@demogr.mpg.de"
+# hmd_pw <- "Secreto_1"
+
+# getting HMD username and password from the R environment
+hmd_us <- Sys.getenv("hmd_us")
+hmd_pw <- Sys.getenv("hmd_pw")
 
 # identifying those with data for 2020
 hmd <- tibble()
@@ -25,7 +28,7 @@ for(ct in cds_hmd2){
   cat(paste0(ct, "\n"))
   chunk_d <- 
     readHMDweb(ct, "Deaths_1x1", hmd_us, hmd_pw) %>%
-    filter(Year >= 2015) %>%
+    filter(Year >= 2010) %>%
     as_tibble() %>%
     mutate(Code = ct)
 
@@ -38,7 +41,7 @@ hmd2 <-
   hmd %>%
   # only countries with data in 2020
   group_by(Code) %>% 
-  filter(max(Year) >= 2020) %>% 
+  filter(max(Year) >= 2019) %>% 
   ungroup() %>% 
   select(-OpenInterval) %>% 
   gather(Female, Male, Total, key = Sex, value = Deaths) %>% 
@@ -57,35 +60,21 @@ hmd2 <-
          Country = recode(Country,
                           "United States" = "USA",
                           "Hong Kong SAR China" = "Hong Kong"),
-         Age = Age %>% as.character()) %>% 
-  mutate(Source = "hmd")
+         # Age = Age %>% as.character(),
+         Age = ifelse(Age > 100, 100, Age)) %>% 
+  group_by(Code, Country, Year, Sex, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup() %>% 
+  mutate(Source = "hmd") %>% 
+  group_by(Country, Year, Sex) %>% 
+  mutate(age_spn = ifelse(Age == max(Age), -1, lead(Age) - Age)) %>% 
+  ungroup()
 
 unique(hmd2$Code)
 unique(hmd2$Country)
 
-# adding total age
-hmd3 <- 
-  hmd2 %>% 
-  group_by(Year, Sex, Code, Country, Source) %>% 
-  summarise(Deaths = sum(Deaths)) %>% 
-  ungroup() %>% 
-  mutate(Age = "TOT") %>% 
-  bind_rows(hmd2) %>% 
-  arrange(Country, Sex, Year, suppressWarnings(as.integer(Age))) %>% 
-  select(Country, Code, Year, Sex, Age, Deaths, Source)
+write_csv(hmd2, "data_inter/hmd.csv")
 
-# re-scaling age and sex
-hmd4 <- 
-  hmd3 %>% 
-  group_by(Country, Sex, Year) %>% 
-  do(rescale_age(chunk = .data)) %>% 
-  ungroup() %>%
-  group_by(Country, Age, Year) %>%
-  do(rescale_sex(chunk = .data)) %>% 
-  ungroup() %>% 
-  mutate(Age = Age %>% as.double()) %>% 
-  arrange(Code, Year, Sex, Age)
 
-write_csv(hmd4, "data_inter/hmd.csv")
 
 

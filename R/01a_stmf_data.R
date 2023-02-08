@@ -52,7 +52,7 @@ cts_2021 <-
 dts <- 
   db_d %>% 
   mutate(PopCode = ifelse(PopCode == "a", "NOR", PopCode)) %>% 
-  filter(Year %in% 2015:2021) %>% 
+  filter(Year %in% 2010:2021) %>% 
   filter(PopCode %in% cts_2020) %>% 
   filter(Year <= 2020 | PopCode %in% cts_2021) %>% 
   select(-Access, -Type, -Area)
@@ -87,9 +87,9 @@ unique_sex_year <-
 # Scotland: exclude it
 # England and Wales: exclude it
 # Northern Ireland: exclude it
-
-exc <- c("USA", "GBR_NIR", "GBRTENW", "GBR_SCO")
-
+# Australia: Exclude it because it is hospital data and age groups are horrible
+exc <- c("USA", "GBR_NIR", "GBRTENW", "GBR_SCO", "AUS")
+unique(dts$PopCode)
 dts2 <- 
   dts %>% 
   filter(!PopCode %in% exc) %>% 
@@ -104,7 +104,6 @@ dts2 <-
   mutate(Sex = recode(Sex,
                       "b" = "t"),
          PopCode = recode(PopCode,
-                          "AUS2" = "AUS",
                           "DEUTNP" = "DEU",
                           "FRATNP" = "FRA",
                           "NZL_NP" = "NZL")) %>%
@@ -129,9 +128,13 @@ dts4 <-
                                origin = "iso3c", 
                                destination = "country.name")) %>% 
   select(Country, Code, Year, Sex, Age, Deaths, Source) %>% 
-  arrange(Code, Year, Sex, Age)
+  arrange(Code, Year, Sex, Age) %>% 
+  group_by(Country, Year, Sex) %>% 
+  mutate(age_spn = ifelse(Age == max(Age), -1, lead(Age) - Age)) %>% 
+  ungroup()
 
 # saving data
 write_csv(dts4, "data_inter/stmf.csv")
 
+dts4 <- read_csv("data_inter/stmf.csv") 
 
