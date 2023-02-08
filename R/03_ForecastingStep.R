@@ -37,14 +37,18 @@ cou <- unique(deaths$Country)
 nc <- length(cou)
 
 ## questions:
+##
+## American Samoa: age 10 is missing in 2016 and year 2018 and off low value in the open-age groups
+## Andorra: really weird observed age-pattern
 ## Kazakhstan sure upper age-group is 100
 ## Tunisia: how come we have zero deaths in the last age-group 85-100
-## American Samoa age 10 is missing in 2016 and year 2018
 
 
 
 
-j=2
+
+
+j=3
 
 #for(j in 1:2){
 couj <- cou[j]
@@ -95,7 +99,7 @@ p <- ggplot(DFg, aes(x=ages, y=eta1, color=type)) +
   geom_segment(data=filter(DFg, type=="Actual grouped"),
                aes(x=ages, y=eta1, xend=ages.up, yend=eta1.up))+
   facet_wrap(~years1, 2, 7, scales="free_y")+
-  labs(x="age", y="log-mortality")
+  labs(x="age", y="log-mortality", title=couj)
 p
 #locator(1)
 }
