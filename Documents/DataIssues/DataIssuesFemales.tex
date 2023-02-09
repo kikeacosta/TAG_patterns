@@ -1,0 +1,705 @@
+\documentclass{article}
+
+\usepackage[
+a4paper, % Paper size
+top=1in, % Top margin
+bottom=1in, % Bottom margin
+left=1in, % Left margin
+right=1in, % Right margin
+%showframe % Uncomment to show frames around the margins for debugging purposes
+]{geometry}
+\title{First questions on female data}
+
+
+\begin{document}
+	\maketitle
+	\section*{Currently impossible to fit+forecast}
+	
+	
+\begin{itemize}
+	\item too few data
+	\begin{itemize}
+	\item 30) French Polynesia: 3 available years are too few (unless I modified the whole forecasting model)
+	\item 54) Moldova: 4 available years are too few (unless I modified the whole forecasting model)
+	\item 64) Peru: 3 available years are too few (unless I modified the whole forecasting model)
+	\item 67) Quatar: 4 available years and old ones (2010 2011 2012 2014) are too few (unless I modified the whole forecasting model)
+	\end{itemize}
+	\item 2019 not available (likely solvable if 2019 is interpolated as previous not-available years)
+	\begin{itemize}
+	\item 19) Cuba: missing 2019, what to do?
+	\item 88) Uruguay: missing 2019, what to do?
+	\end{itemize}
+\end{itemize}
+	
+	\section*{Issues with infant mortality}
+	
+	\begin{itemize}
+	\item Bermuda: no infant deaths for all pre-pandemic years but 2014 (~impossible to have a infant-soecialized coeff)
+	\item Faroe Islands: no infant deaths in last years
+	\item Liechtenstein: absence of infant deaths in the last period causes some issue (solvable?) 
+	\item Montserrat: no infant deaths for all pre-pandemic years but 2015 (~impossible to have a infant-specialized coeff)
+	\item Turks and Caicos Islands: No infant deaths for all pre-pandemic years but 2015 (~impossible to have a infant-specialized coeff)
+	\item Tuvalu: no infant deaths in the first available years (~impossible to have a infant-specialized coeff)
+	
+	\end{itemize}
+	
+	\section*{Evident strange age-patterns (it could be solvable, but it denotes issues in actual data)}
+	
+	\begin{itemize}
+		\item Albania: strange age-pattern at highest ages and increasing infant mortality
+		\item Aruba: strange increasing of infant mortality. Actually death at age 0 in 2012 and 2014
+		\item Azerbaijan: odd rapid increase of oldest-age mortality
+		\item Bosnia and Herzegovina: decreasing observed mortality at higher ages (I can force monotonicity over age, but weird data)
+		\item Bulgaria: wiggling age-pattern in first years at old ages (force monotonicity over age?)
+		\item Croatia: wiggling age-pattern in first years at old ages (force monotonicity over age?)
+		\item Lesotho: special treatment is needed (would enforcement of monotonicity be enough?)
+		\item Lithuania: wiggling age-pattern at old ages (force monotonicity over age?)
+		\item Maldives: too strong leveling-off at odest ages and odd data in 2019 (missing 2018)
+		\item Mauritius: very weird 2011 data
+		\item Montenegro: decreasing observed mortality at higher ages (I can force monotonicity over age, but weird data)
+		\item New Zeland: a bit too strong leveling-off at oldest ages in last observed years
+		\item North Macedonia: wiggling age-pattern at old ages (force monotonicity over age?)
+		\item Romania: odd rapid increase of oldest-age mortality
+		\item Serbia: a bit too strong leveling-off at oldest ages in all observed years
+		\item South Korea: wiggling/decreasing age-pattern at old ages (force monotonicity over age?)
+		\item Taiwan: optimal smoothing parameter produces wiggling age-pattern, likely need to impose extra-smoothness
+		\item Turks and Caicos Islands: 3 available years, the fit is possible because they cover 5 years and include 2019. 
+		\item Ukraine: optimal smoothing parameter produces wiggling age-pattern, likely need to impose extra-smoothness
+	\end{itemize}
+	
+	
+	\section*{Issues only in computing e0}
+	\begin{itemize}
+	\item due to large open-age group
+		\begin{itemize}
+\item Belize: extremely large open-age interval, 65+ => issues in e0 computation
+\item Iran: extremely large open-age interval, 65+ => issues in e0 computation
+\item Thailand: extremely large open-age interval, 65+ => issues in e0 computation
+\end{itemize}
+	\item general issue (due to GC lifetable code?) also because the fit on log-rates seems OK
+		\begin{itemize}
+	\item Colombia: good fit on rates, but likely issues in computing e0
+\item Costa Rica: good fit on rates, but likely issues in computing e0
+\item Ecuador: good fit on rates, but likely issues in computing e0
+\item Honk-Kong: good fit on rates, but likely issues in computing e0
+\item Japan: good fit on rates, but likely issues in computing e0
+\item Malasya: good fit on rates, but likely issues in computing e0
+\item Oman: good fit on rates, but likely issues in computing e0
+\item Panama: good fit on rates, but likely issues in computing e0
+\item State of Palestine: good fit on rates, but likely issues in computing e0
+\item Suriname: good fit on rates, but likely issues in computing e0
+\item Uzbekistan: good fit on rates, but likely issues in computing e0
+\end{itemize}
+	
+	\end{itemize}
+	
+\section*{General questions from GC:}
+	
+	\begin{itemize}
+	\item Iceland: data available only from 2013?
+\item Italy: only by age-group? and from 2011?
+	\end{itemize}
+
+	
+
+\end{document}
+
+
+%\documentclass{beamer}
+%\usepackage[table]{xcolor}
+%
+%\definecolor{maroon}{cmyk}{0,0.87,0.68,0.32}
+%
+%\begin{document}
+%	
+%	\noindent\begin{tabular}{|l|c|}
+%		\rowcolor[HTML]{EFEFEF} %\rowcolor{maroon}
+%		one & two \\
+%%		\rowcolor{maroon!50}
+%		three & four \\
+%%		\rowcolor{maroon!10}
+%		five & six
+%	\end{tabular}
+%	
+%\end{document}
+
+%\documentclass{article}
+%
+%\usepackage[backend=biber,style=alphabetic,]{biblatex}
+%
+%\title{A bibLaTeX example}
+%
+%\addbibresource{sample.bib} %Imports bibliography file
+%
+%\begin{document}
+%	\section{First section}
+%	
+%	Items that are cited: \textit{The \LaTeX\ Companion} book \cite{latexcompanion} together with Einstein's journal paper \cite{einstein} and Dirac's book \cite{dirac}---which are physics-related items. Next, citing two of Knuth's books: \textit{Fundamental Algorithms} \cite{knuth-fa} and \textit{The Art of Computer Programming} \cite{knuth-acp}.
+%	
+%	\medskip
+%	
+%	\printbibliography
+%\end{document}
+
+
+%\documentclass[12pt,a4paper]{article}
+%
+%\usepackage{filecontents}
+
+%\begin{filecontents*}{mybib.bib}
+%	@book{aristotle:physics,
+%		options    = {useauthor=false,usetranslator=true},
+%		author       = {Aristotle},
+%		title        = {Physics},
+%		date         = 1929,
+%		translator   = {Wicksteed, P. H. and Cornford, F. M.},
+%		publisher    = {G. P. Putnam},
+%		location     = {New York},
+%		keywords     = {primary},
+%		langid       = {english},
+%		langidopts   = {variant=american},
+%		shorttitle   = {Physics},
+%		annotation   = {A \texttt{book} entry with a \texttt{translator} field},
+%	}
+%\end{filecontents*}
+%
+%
+%\usepackage[backend=bibtex,giveninits=true,style=authoryear-ibid]{biblatex} 
+%\addbibresource{mybib.bib}
+%
+%\begin{document}
+%	
+%	\cite{aristotle:physics}
+%	
+%	\printbibliography
+%\end{document}
+%\documentclass{article}
+%\usepackage{amsmath,bm}
+%\usepackage{multirow}
+%\usepackage[table,xcdraw]{xcolor}
+%\begin{document}
+%%	% ...
+%%	\[\arraycolsep=0pt\def\arraystretch{2}
+%%	\begin{array}{ccccc}
+%%	x(1) & = & \dfrac{x(0)}{1} & = & x(0)\\
+%%	x(2) & = & \dfrac{x(1)}{2} & = & \dfrac{x(0)}{2}\\
+%%	x(3) & = & \dfrac{x(2)}{3} & = & \dfrac{x(0)}{2.3}\\
+%%	x(4) & = & \dfrac{x(3)}{4} & = & \dfrac{x(0)}{4!}\\
+%%	&  &  &  & \vdots\\
+%%	x(n) & = & \dfrac{x(n-1)}{n!} & = & \dfrac{x(0)}{n!}
+%%	\end{array}
+%%	\]
+%%	% ...
+%%	
+%%	\bigskip
+%%	
+%%	
+%%	\[\arraycolsep=1pt\def\arraystretch{1.2}
+%%	\begin{array}{rll}
+%%	x(1) &= \dfrac{x(0)}{1} &= x(0)\\
+%%	x(2) &= \dfrac{x(1)}{2} &= \dfrac{x(0)}{2}\\
+%%	x(3) &= \dfrac{x(2)}{3} &= \dfrac{x(0)}{2.3}\\
+%%	x(4) &= \dfrac{x(3)}{4} &= \dfrac{x(0)}{4!}\\
+%%	&                  & \vdots\\
+%%	x(n) &= \dfrac{x(n-1)}{n!} &= \dfrac{x(0)}{n!}
+%%	\end{array}
+%%	\]
+%%	
+%%	
+%%	
+%%	
+%%	\[\arraycolsep=1pt\def\arraystretch{1.2}
+%%			\left[
+%%	\begin{array}{c}
+%%	\bm{\alpha}^{(i+1)}\\
+%%	\bm{\nu}^{(i+1)}
+%%	\end{array}\right] =
+%%	\left[
+%%	\begin{array}{c}
+%%	\bm{\alpha}^{(i)}\\
+%%	\bm{\nu}^{(i)}
+%%	\end{array}\right] - 	
+%%	 \left[ \begin{array}{ccc}
+%%	\bm{L}^{(i)}  &:& \bm{H}^{(i)}\\
+%%	\bm{H}^{(i)'}  &:& \bm{0}
+%%	\end{array}	\right]^{-1}
+%%		\left[ \begin{array}{c}
+%%	\bm{r}^{(i)} - \bm{L}^{(i)}\bm{\alpha}^{(i)}\\
+%%	\bm{\delta}(\bm{\alpha}^{(i+1)})
+%%	\end{array}\right]
+%%	\]
+%%	
+%
+%\begin{table}[]
+%	\begin{tabular}{c|l|l|l}
+%		Model                           & à comparer avec & $\quad$ $\Delta$ AIC $\quad$& âge de séparation \\ \hline\hline
+%		& \cellcolor[HTML]{EFEFEF}Weibull    & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		& Kannisto                           &                                   &                                       \\
+%		& \cellcolor[HTML]{EFEFEF}Beard      & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		\multirow{-4}{*}{Gompertz}      & Log-quadratic                      &                                   &                                       \\ \hline
+%		& \cellcolor[HTML]{EFEFEF}Gompertz   & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		& Kannisto                           &                                   &                                       \\
+%		& \cellcolor[HTML]{EFEFEF}Beard      & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		\multirow{-4}{*}{Weibull}       & Log-quadratic                      &                                   &                                       \\ \hline
+%		& \cellcolor[HTML]{EFEFEF}Gompertz   & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		& Weibull                            &                                   &                                       \\
+%		& \cellcolor[HTML]{EFEFEF}Beard      & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		\multirow{-4}{*}{Kannisto}      & Log-quadratic                      &                                   &                                       \\ \hline
+%		& \cellcolor[HTML]{EFEFEF}Gompertz   & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		& Weibull                            &                                   &                                       \\
+%		& \cellcolor[HTML]{EFEFEF}Kannisto   & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		\multirow{-4}{*}{Beard}         & Log-quadratic                      &                                   &                                       \\ \hline
+%		& \cellcolor[HTML]{EFEFEF}Gompertz   & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		& Weibull                            &                                   &                                       \\
+%		& \cellcolor[HTML]{EFEFEF}Kannisto   & \cellcolor[HTML]{EFEFEF}          & \cellcolor[HTML]{EFEFEF}              \\
+%		\multirow{-4}{*}{Log-quadratic} & Beard                              &                                   &                                      
+%	\end{tabular}
+%\end{table}
+%	
+%\end{document}
+%
+%%\documentclass{article}
+%%
+%%\usepackage{longtable}
+%%\usepackage{lipsum} % just for dummy text- not needed for a longtable
+%%
+%%\begin{document}
+%%	\lipsum[1]
+%%	\lipsum[1]
+%%	\lipsum[1]
+%%	
+%%	%\begin{table}[h] 
+%%	%\centering
+%%	\begin{longtable}{| p{.20\textwidth} | p{.80\textwidth} |} 
+%%		\hline
+%%		foo & bar \\ \hline 
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		foo & bar \\ \hline
+%%		\caption{Your caption here} % needs to go inside longtable environment
+%%		\label{tab:myfirstlongtable}
+%%	\end{longtable}
+%%
+%%Table \ref{tab:myfirstlongtable} shows my first longtable.
+%%\end{document}
+%%\documentclass[12pt]{article}
+%%
+%%\usepackage[a4paper,left=2.3cm,right=2.3cm,bottom=2.3cm,top=2.8cm,footskip=32pt]{geometry}
+%%\usepackage{rotating}
+%%%\usepackage{euler}
+%%\usepackage{makeidx}
+%%\usepackage[ansinew]{inputenc}
+%%\usepackage{graphicx}
+%%\usepackage{epsfig}
+%%\usepackage{fancybox}
+%%\usepackage{rotating}
+%%\usepackage{boxedminipage}
+%%\usepackage{fancyhdr}
+%%\usepackage{url}
+%%\usepackage[sort]{natbib}
+%%\usepackage{amsmath, amssymb, bm}
+%%
+%%\begin{document}
+%%	
+%%	\pagestyle{fancy} 
+%%	\lhead{\textsl{Event History Analysis: Breakout Rooms}} 
+%%	\rhead{\includegraphics[width=0.70cm]{INEDLogoSHORTissimo.jpg}$\,$
+%%		\includegraphics[width=0.92cm]{MPIDRLogoNEW.jpg}$\,$
+%%		\includegraphics[width=1.8cm]{EDSDLogoLarge.jpg}\textsl{EDSD 2020/21}} 
+%%	\title{\normalsize{\textit{Event History Analysis - EDSD 2020/21}} \\$\,$ \\ 
+%%		\Huge{Breakout Rooms for the lab-sessions}}
+%%	\author{Giancarlo Camarda}
+%%	\date{}
+%%	
+%%	\maketitle \thispagestyle{empty}
+%%	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\maketitle
+%%	
+%%	
+%%\subsubsection*{Room 1:}
+%%\begin{itemize}\itemsep-0.5em
+%%	\item Lucas Pitombeira
+%%	\item Gianluca Superti        
+%%	\item Liliana Patricia Calder\'on Bernal
+%%	\item Marilyn-Anne Tremblay
+%%	\item Anna Vera J{\o}rring Pallesen
+%%\end{itemize}
+%%
+%%\subsubsection*{Room 2:}
+%%\begin{itemize}\itemsep-0.5em
+%%	\item Gonzalo Daniel Garcia
+%%	\item Donata Stonkute
+%%	\item Ursula Gazeley
+%%	\item Ainhoa-Elena Leger
+%%	\item Josephine Ackah
+%%	\item Silvia Gaston-Guiu
+%%\end{itemize}
+%%
+%%\subsubsection*{Room 3:}
+%%\begin{itemize}\itemsep-0.5em
+%%	\item Alon Pertzikovitz
+%%	\item \"Ozer Bakar
+%%	\item Rafael Navarro
+%%	\item Alice Wolfle
+%%	\item Su Yeon Jang
+%%	\item \"Ozge Elif \"Ozer
+%%\end{itemize}
+%%
+%%
+%%\subsubsection*{Room 4:}
+%%\begin{itemize}\itemsep-0.5em
+%%	\item Carlos F\'elix Vega
+%%	\item Silvio Cabral
+%%	\item Milena Che{\l}chowska
+%%	\item Paola V\'azquez-Castillo
+%%	\item Arno Muller
+%%\end{itemize}
+%%
+%%
+%%
+%%%$$
+%%%e_{x} = \int_{x}^{\infty}e^{-\int_{x}^{a} \mu(y) \diff y} \diff a
+%%%$$
+%%%blabla \cite{CamardaJSSpackage2012}
+%%%
+%%%\bibliographystyle{chicago}
+%%%\bibliography{bibliografia1}
+%%
+%%%	$$
+%%%	\begin{array}{rrrr}
+%%%	8 &\times& 1 = &8\\
+%%%	8 &\times& 2 = &16\\
+%%%	8 &\times& 3 = &24\\
+%%%	8 &\times& 4 = &32\\
+%%%	8 &\times& 5 = &40\\
+%%%	8 &\times& 6 = &48\\
+%%%	8 &\times& 7 = &56\\
+%%%	8 &\times& 8 = &64\\
+%%%	8 &\times& 9 = &72\\
+%%%	8 &\times& 10 = &80
+%%%	\end{array}
+%%%	$$
+%%%
+%%%\bigskip
+%%%\bigskip
+%%%\bigskip
+%%%\bigskip
+%%%\bigskip
+%%%\bigskip
+%%%
+%%%	$$
+%%%\begin{array}{rrrr}
+%%%9 &\times& 1 = &9\\
+%%%9 &\times& 2 = &18\\
+%%%9 &\times& 3 = &27\\
+%%%9 &\times& 4 = &36\\
+%%%9 &\times& 5 = &45\\
+%%%9 &\times& 6 = &54\\
+%%%9 &\times& 7 = &63\\
+%%%9 &\times& 8 = &72\\
+%%%9 &\times& 9 = &81\\
+%%%9 &\times& 10 = &90
+%%%\end{array}
+%%%$$
+%%%\end{Huge}
+%%%	
+%%
+%%
+%%\end{document}
+%
+%
+%
+%%
+%%%% \documentclass[10pt,xcolor={dvipsnames}]{beamer}
+%%%% \setbeamertemplate{navigation symbols}{}
+%%%% \usepackage{caption}
+%%%% \usepackage{subcaption}
+%%%% \usepackage{url}
+%%
+%%%% \author{The author}
+%%%% \title{Package conflicts}
+%%%% \date{October 3rd, 2012}
+%%
+%%%% \begin{document}
+%%
+%%%% This is supposed to be \textcolor{OliveGreen}{olivegreen}
+%%%% \end{document}
+%%\documentclass{article}
+%%\usepackage{tcolorbox}                                 %
+%%\definecolor{lightblue}{rgb}{0.145,0.6666,1} % Defines the color used
+%%% for content box headers 
+%%\definecolor{Red}{rgb}{1,0.05,0.05}
+%%%% \definecolor{Blue}{rgb}{0.1,0.3,1}
+%%\definecolor{Blue}{rgb}{0.1,0.7,1}
+%%\definecolor{Green}{rgb}{0.3,0.8,0.15}
+%%\definecolor{Lightgray}{rgb}{0.86,0.86,0.86}
+%%\definecolor{DarkGreen}{rgb}{0,0.4,0}
+%%\definecolor{Orange}{rgb}{1,0.2,0}
+%%\usepackage[sort]{natbib}
+%%\author{The author}
+%%\title{Package conflicts}
+%%\date{}
+%%
+%%\begin{document}
+%%
+%%\begin{table}[]
+%%\centering
+%%\begin{tabular}{l|l|l|l}
+%%\begin{tabular}[c]{@{}l@{}}Entropy:\\ \\ $H = \frac{-\int_{10}^{\omega} [{\color{Orange}S(x)}]^2 {\color{Orange}S(x)} dx}{\int_{10}^{\omega} {\color{Orange}S(x)} dx}$\end{tabular}                            & \raisebox{-3cm}{\includegraphics[scale=0.3]{fSWEfit}}   & \begin{tabular}[c]{@{}l@{}}Gini coefficient:\\ \\ $H = \frac{-\int_{10}^{\omega} [{\color{Orange}S(x)}]^2 {\color{Orange}S(x)} dx}{\int_{10}^{\omega} {\color{Orange}S(x)} dx}$\end{tabular} & FigG   \\ \hline
+%%\begin{tabular}[c]{@{}l@{}}Stand. dev. above the mode:\\ \\ $SD(M+) = \sqrt{\frac{\int_{\hat{M}}^{\omega} (x-\hat{M})^2 {\color{blue} f(x)},dx}{\int_{\hat{M}}^{\omega} {\color{blue} f(x)} dx}}$\end{tabular} & FigSDM & \begin{tabular}[c]{@{}l@{}}Rate of aging:\\ \\ $H = \frac{-\int_{10}^{\omega} [{\color{Orange}S(x)}]^2 {\color{Orange}S(x)} dx}{\int_{10}^{\omega} {\color{Orange}S(x)} dx}$\end{tabular}    & FigRoA
+%%\end{tabular}
+%%\end{table}
+%%
+%%% \maketitle
+%%
+%%% blabla \cite{giancarlo} 
+%% 
+%%
+%%$$
+%%X_i \stackrel{iid}{\sim} N(\mu, \sigma^2), i={1, 2, ..., n} 
+%%$$
+%%
+%%$$
+%%f(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi}\sigma}\textrm{exp}( {-\frac{(x_i-\mu)^2}{2\sigma^2}} ) $$
+%%
+%%\bigskip
+%%$$
+%%X_i \stackrel{iid}{\sim} N(\mu, \sigma^2), i={1, 2, ..., n}
+%%$$
+%% 
+%%$$
+%%f(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi}\sigma}\textrm{exp}(
+%%{-\frac{(x_i-\mu)^2}{2\sigma^2}} )
+%%$$
+%%
+%%$$
+%% f(x_1, x_2, ..., x_n|\mu,\sigma^2) =
+%% \prod_{i=1}^{n}f(x_i|\mu,\sigma^2) \textrm{ by independence} 
+%%$$
+%%
+%%$$
+%% L(\mu,\sigma^2|x_1,x_2,...,x_n) = f(x_1, x_2, ..., x_n|\mu,\sigma^2) \]
+%%$$
+%%
+%%% \bibliographystyle{chicago}
+%%% \bibliography{bibliografia}
+%%
+%%\end{document}
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%%% \documentclass{article}
+%%%% %% \usepackage[utf8]{inputenc}
+%%%% \usepackage[english]{babel}
+%% 
+%%%% \usepackage[usenames, dvipsnames]{color}
+%% 
+%%%% \begin{document}
+%% 
+%%%% This example shows different examples on how to use the \texttt{color} package 
+%%%% to change the colour of elements in \LaTeX.
+%% 
+%%%% \begin{itemize}
+%%%% \color{ForestGreen}
+%%%% \item Firts item
+%%%% \item Second item
+%%%% \end{itemize}
+%% 
+%%%% \noindent
+%%%% {\color{RubineRed} \rule{\linewidth}{0.5mm} }
+%% 
+%%%% The background colour of some text can also be \textcolor{red}{easily} set. For 
+%%%% instance, you can change to orange the background of \colorbox{BurntOrange}{this 
+%%%% text} and then continue typing.
+%% 
+%%%% \end{document}
+%%
+%%% \documentclass{article}
+%%
+%%% \usepackage[sort]{natbib}
+%%
+%%% \newcommand{\myindex}[1]{#1 \index{#1}}
+%%
+%%% \newcommand{\myindice}[1]{#1 \index{#1@\texttt{#1}}}
+%%
+%%% \usepackage{makeidx}
+%%
+%%% \makeindex
+%%
+%%% \begin{document}
+%%
+%%% % To solve various problems in physics, it can be advantageous
+%%% % to express any arbitrary piecewise-smooth function as a \myindex{Fourier Series}
+%%% % composed of multiples of sine and cosine functions.
+%%
+%%% % \myindex{\texttt{mean()}}
+%%
+%%% % \myindex{\texttt{zzz()}}
+%%
+%%% \myindex{mmm}
+%%
+%%% \myindex{vvv()@\texttt{vvv()}}
+%%
+%%% \texttt{Lin()} \index{Lin()@\texttt{Lin()}} 
+%%
+%%% \texttt{\myindex{lon()}}
+%%
+%%% \myindice{kkk()}
+%%
+%%% kkk()
+%%
+%%% % \index{hello}	hello, 1	Plain entry
+%%
+%%% % \index{hello!Peter}	  Peter, 3	Subentry under 'hello'
+%%
+%%% % \index{hello!Sam@\textsl{Sam}}	  Sam, 2	Subentry
+%%% % formatted and sorted
+%%
+%%% % \index{Sam@\textsl{Sam}}	Sam, 2	Formatted entry
+%%
+%%% % \index{Jenny|textbf}	Jenny, 3	Formatted page number
+%%
+%%% % \index{Joe|textit}	Joe, 5	Same as above
+%%
+%%% % \index{ecole@\'ecole}	école, 4	Handling of accents
+%%
+%%% % \index{Peter|see {hello}}	Peter, see hello
+%%% % Cross-references
+%%
+%%% % \index{Jen|seealso{Jenny}}
+%%
+%%% % blablabla \cite{AslanidouEtAlBayesMultivSurvMC1998} blablabla
+%%% % blablabla \citep{BiatatCurrieJointModel2010} blablabla
+%%% % \bibliographystyle{chicago}
+%%% % \bibliography{bibliografia}
+%%
+%%
+%%% \printindex
+%%
+%%  
+%%   
+%%
+%%
+%%
+%%
+%%% \end{document}
+%%
+%%
+%%
+%%%% Dear Viorela,
+%%
+%%%% thanks for the abstracts and for effort you made to this submission.
+%%
+%%%% In general I'm not sure you could talk about tempo effect here. This
+%%%% concept has a peculiar meaning in demography and unless you introduce
+%%%% it and link it to our ideas, it'd be hard to justify its presence. 
+%%%% Here we are more into the concept of standardization as a way to
+%%%% compare conceptually similar patterns which span over rather different
+%%%% age-range. I am not sure that while standardizing we remove ``tempo effect''.
+%%%% Of course I may have missed something, so please write me back if you don't
+%%%% agree.
+%%
+%%%% Below some comments that loosely follow the paper structure.
+%%
+%%%% Hope it helps and all the bets,
+%%%% Giancarlo 
+%%
+%%%% short abstract:
+%%
+%%%% ``by absolute and standardized by modal age at death scales''
+%%
+%%%% no novel about the nonparametric approach
+%%
+%%%% no need to specify in the short-abstract
+%%%% ``specifically adapted to the context of cause of death analysis.''
+%%
+%%%% I would better write: ``by using a nonparametric approach such the P-splines.'' 
+%%
+%%%% I would add  ``As instance, preliminary results...''
+%%
+%%
+%%%% long abstract:
+%%
+%%%% In general, I agree with NO (I'm writing offline, I do not know whether she
+%%%% already replied) that section on methods is (1) unbalanced with
+%%%% respect to the novelty on standardization which appear secondary (2)
+%%%% there is not a clear reference to our previous work in its first
+%%%% part. I wouldn't subdivide the section on method so, at least, the
+%%%% standardization part will not seem too short.
+%%
+%%%% I agree with RB about the title (and all the other comments): the
+%%%% current one is fine. 
+%% 
+%%%% I am not convinced about the adverb ``Successively,'' in the
+%%%% introduction. It seems to me that genes and behavior have always an
+%%%% important role in probability of surviving.
+%%
+%%%% Not sure about verb ``stipulated'' on Buffon's work. 
+%%
+%%%% on the absolute and relative to the associated mode time scale
+%%
+%%%% I'd specify ``We focus only on six leading causes...''
+%%
+%%
+%%%% I would add k as superscript of the standardized age. 
+%%
+%%%% I'd specify more that with our approach we basically shift the chronological age
+%%%% such that all distributions regardless their peculiar features are
+%%%% place with their modal age at 1.     
+%%
+%%
+%%%% what do you mean with ``K=k'' in the fist paragraph of the theoretical
+%%%% model section?
+%%
+%%%% I would re-phrase the first part of the section on estimation: at
+%%%% least in the abstract no need to define death rates and the
+%%%% approximation of the force of mortality by Thatcher. My English is not
+%%%% great, so fell free to modify, but I would write something like:
+%%
+%%%% A descriptive analysis of cause-specific mortality age-patterns could
+%%%% be carried out by computing death rates. On one hand this approach is
+%%%% attractive for its simplicity, on the other hand it does not allow to
+%%%% precisely compute density functions and associated modal ages at death.      
+%%
+%%%% We cope with these issues by assuming smooth mortality patterns over
+%%%% ages and thus retaining the continuity of mortality presented above.
+%%
+%%%% For a give calendar year and sex, let d^k_i represent observed death
+%%%% counts for age i and cause k. In the following we will focus on
+%%%% mortality over age 10 disregarding causes of death which are distinct
+%%%% of infant mortality.
+%%
+%%%% We assume d^k_i as Poisson distributed data:
+%%%% d^k_i ~ Poi(\mu^k(x) e)
+%%%% where e denote the population’s amount of exposure to the risk of dying for
+%%%% single year of age, and \mu^k(x) is assumed to smoothly
+%%%% varying over x.
+%%
+%%%% Among various smoothing techniques, we opted for the $P$-splines which
+%%%% has proved to be a highly effective approach for smoothing mortality
+%%%% rates and consequently to obtain smooth forces of mortality (Currie et
+%%%% al., 2004; Camarda, 2008). 
+%%
+%%%% [...]
+%%
+%%%% shorten the sentence afterward with something like:
+%%
+%%%% Once smooth cause-specific density functions are obtained, we estimate
+%%%% the modal age at death for each cause by numerically computing the
+%%%% correspondent density (Ouellette and Bourbeau, 2011). 
+%%
+%%%% The B-spline basis is not cause-specific, I guess, so delete its
+%%%% superscript k.
+%%
+%%
