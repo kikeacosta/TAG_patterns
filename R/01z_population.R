@@ -1,3 +1,4 @@
+rm(list=ls())
 source("R/00_functions.R")
 
 # Data from the WPP 2022

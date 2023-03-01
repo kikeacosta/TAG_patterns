@@ -1,6 +1,5 @@
 rm(list=ls())
 source("R/00_functions.R")
-library(HMDHFDplus)
 
 # exclude populations that are subsets of other populations
 cts_exclude <- c("GBRCENW", "GBRTENW", "GBR_SCO", "GBR_NIR",

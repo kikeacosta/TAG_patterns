@@ -2,6 +2,9 @@ library(readxl)
 library(tidyverse)
 library(countrycode)
 library(lubridate)
+library(HMDHFDplus)
+library(eurostat)
+
 
 write_excel <- function(x,row.names=FALSE,col.names=TRUE,...) {
   write.table(x,file = paste0("clipboard-", object.size(x)),sep="\t",row.names=row.names,col.names=col.names,...)
@@ -44,7 +47,7 @@ harmon_age_intervals <- function(chunk){
   
   int <- 
     ref_ages %>% 
-    semi_join(chunk, by = c("Source", "Country")) %>% 
+    semi_join(chunk, by = c("Source", "Country", "Sex")) %>% 
     pull(Age)
   
   if(max(int) <= 110){
@@ -81,7 +84,7 @@ assign_age_intervals <- function(chunk){
 }
 
 
-# Groupping population using the same age intervals as mortality data
+# Grouping population using the same age intervals as mortality data
 assign_age_invals_pop <- function(chunk){
   ct <- unique(chunk$Country)
   yr <- unique(chunk$Year)
@@ -90,7 +93,8 @@ assign_age_invals_pop <- function(chunk){
   int <- 
     ref_ages %>% 
     filter(Country == ct,
-           Year == yr) %>% 
+           Year == yr,
+           Sex == sx) %>% 
     pull(Age) %>% 
     sort
   
@@ -107,8 +111,11 @@ assign_age_invals_pop <- function(chunk){
     ungroup()
 }
 
+# db <-
+#   all_in3
+
 sum_source <- function(db){
- # test <-
+ test <-
   db %>% 
     group_by(Source, Country, Year, Sex) %>% 
     mutate(ages = n(),
