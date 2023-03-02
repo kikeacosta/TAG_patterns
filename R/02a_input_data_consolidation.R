@@ -58,7 +58,7 @@ all_in <-
             # irn
             ) %>% 
   replace_na(list(Deaths = 0)) %>% 
-  mutate(Country = ifelse(Country == "China, Hong Kong SAR", "Hong Kong", Country)) %>% 
+  # mutate(Country = ifelse(Country == "China, Hong Kong SAR", "Hong Kong", Country)) %>% 
   group_by(Source, Country) %>% 
   filter(max(Year) >= 2020 & min(Year) <= 2017) %>% 
   # ungroup() %>% 
