@@ -1,9 +1,8 @@
 rm(list=ls())
-library(eurostat)
 source("R/00_functions.R")
-# library(tidyverse)
-# library(countrycode)
 IN <- get_eurostat("demo_r_mwk_05")
+
+unique(IN$age)
 
 db_eurs <-
   IN %>% 
@@ -54,9 +53,25 @@ db_eurs <-
   arrange(Country, year, sex, suppressWarnings(as.integer(age))) %>% 
   dplyr::select(Country, Code, Year = year, Sex = sex, Age = age, Deaths = deaths, Source)
 
+# excluding series with incomplete ages
+unique(db_eurs$Age)
+
+inc_age <- 
+  db_eurs %>% 
+  filter(Age != "TOT") %>% 
+  mutate(Age = Age %>% as.integer()) %>% 
+  arrange(Country, Year, Sex, Age) %>% 
+  group_by(Country, Sex, Year) %>% 
+  mutate(age_spn = ifelse(Age == max(Age), 0, lead(Age) - Age)) %>% 
+  filter(sum(age_spn) != max(Age)) %>% 
+  ungroup() %>% 
+  select(Country, Year, Sex) %>% 
+  unique()
+  
 # re-scaling ages and sexes
 db_eurs2 <- 
   db_eurs %>% 
+  anti_join(inc_age) %>% 
   group_by(Country, Sex, Year) %>% 
   do(rescale_age(chunk = .data)) %>% 
   ungroup() %>%

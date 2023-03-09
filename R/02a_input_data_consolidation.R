@@ -37,12 +37,10 @@ cts_exclude <- tibble(Country =
                           "Puerto Rico",
                           "Anguilla"))
 
-# unique(out$Country)
-
 unique(unpd$Country)
 unique(unpd$Source)
-# Several direct sources have been superseded by UNPD and others
 
+# Several direct sources have been superseded by UNPD and others
 # putting all together
 all_in <- 
   bind_rows(hmd,
@@ -53,34 +51,37 @@ all_in <-
             eurs_an,
             bra,
             per,
-            # mex,
-            zaf,
-            # irn
-            ) %>% 
+            zaf) %>% 
   replace_na(list(Deaths = 0)) %>% 
   group_by(Source, Country) %>% 
-  filter(max(Year) >= 2020 & min(Year) <= 2017) %>% 
-  # ungroup() %>% 
-  # mutate(Age = ifelse(Age >= 100, 100, Age)) %>% 
-  # group_by(Country, Code, Source, Year, Sex, Age, age_spn) %>% 
-  # summarise(Deaths = sum(Deaths)) %>% 
+  filter(max(Year) >= 2020 & min(Year) <= 2015) %>% 
   ungroup() %>% 
   unique()
 
-
+unique(all_in$Country)
 # excluding sources with insufficient data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # sources to exclude because of insufficient periods for baseline (minimum 3 periods)
 insuf_pers <- 
-  all_in %>% 
+  bind_rows(hmd,
+            who,
+            unpd,
+            stmf,
+            eurs_wk,
+            eurs_an,
+            bra,
+            per,
+            zaf) %>% 
   select(Country, Source, Year, Sex) %>% 
   unique() %>% 
   filter(Year < 2020) %>% 
   group_by(Country, Source, Sex) %>% 
   summarise(yrs = n()) %>% 
   ungroup() %>% 
-  filter(yrs < 3)  %>% 
+  filter(yrs < 5)  %>% 
   select(-yrs)
+
+unique(insuf_pers$Country)
 
 # sources to exclude because of insufficient age groups (minimum 4 intervals)
 insuf_ages <- 
@@ -88,8 +89,10 @@ insuf_ages <-
   group_by(Country, Source, Year, Sex) %>% 
   summarise(ages = n()) %>% 
   ungroup() %>% 
-  filter(ages < 4) %>% 
+  filter(ages <= 7) %>% 
   select(-ages)
+
+unique(insuf_ages$Country)
 
 # excluding cases with insufficient periods and insufficient ages
 all_in2 <- 
@@ -123,32 +126,50 @@ ref_ages <-
   # no ages surpassing the minimum open age interval
   left_join(min_open_age) %>% 
   filter(Age <= min_open) %>% 
-  select(Source, Country, Year, Age) %>% 
+  select(Source, Country, Year, Sex, Age) %>% 
   unique() %>% 
   # calculate age span in each interval
-  group_by(Source, Country, Year) %>% 
+  group_by(Source, Country, Year, Sex) %>% 
   mutate(span = ifelse(Age == max(Age),
                        Inf,
                        lead(Age) - Age)) %>%
   ungroup() %>% 
   # identify and choose the largest age span in all periods for each age
-  group_by(Source, Country, Age) %>% 
+  group_by(Source, Country, Sex, Age) %>% 
   mutate(max_span = max(span)) %>% 
   ungroup() %>% 
-  select(Source, Country, Age, max_span) %>% 
+  select(Source, Country, Sex, Age, max_span) %>% 
   unique() %>% 
-  group_by(Source, Country) %>%
+  group_by(Source, Country, Sex) %>%
   mutate(test = ifelse(Age == 0, 0, lag(Age + max_span))) %>% 
   ungroup() %>% 
   filter(Age == test) %>% 
   select(-test, -max_span)
 
 # harmonizing ages within countries before 2020 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# # # a couple of tests
+# chunk <-
+#   all_in2 %>%
+#   filter(Country == "Armenia",
+#          Year == 2015,
+#          Source == "unpd_dy")
+# 
+# chunk <- 
+#   all_in2 %>%
+#   filter(Year < 2020,
+#          Country == "Germany",
+#          Year == 2015,
+#          Sex == "t",
+#          Source == "eurs_weekly")
+
 harmonized_ages <- 
   all_in2 %>%
   filter(Year < 2020) %>% 
   group_by(Source, Country, Code, Year, Sex) %>% 
   do(harmon_age_intervals(chunk = .data)) %>% 
+  arrange(Age) %>% 
   mutate(age_spn = ifelse(Age == max(Age), -1, lead(Age)-Age)) %>% 
   ungroup() 
 
@@ -174,7 +195,7 @@ sum_all <-
          yrs_bsn = 2020 - (str_sub(period, 1, 4) %>% as.integer()))
 
 write_excel(sum_all)
-
+sum_all
 unique(sum_all$Source)
 
 
@@ -183,17 +204,16 @@ sel_crit_inf <-
   sum_all %>% 
   group_by(Country) %>% 
   filter(infd == max(infd)) %>% 
-  filter(last == max(last)) %>% 
   filter(ages >= max(ages)) %>%
+  filter(last == max(last)) %>% 
   filter(yrs_bsn == max(yrs_bsn)) %>% 
-  # filter(sexs == max(sexs)) %>% 
   filter(Deaths == max(Deaths)) %>%
   unique() %>% 
   filter(1:n() == n()) %>%
   mutate(n = n()) %>% 
   ungroup()
 
-# selection based on 2021 data
+# selection based on the last observed year
 sel_crit_pan <- 
   sum_all %>% 
   group_by(Country) %>% 
@@ -201,7 +221,6 @@ sel_crit_pan <-
   filter(infd == max(infd)) %>% 
   filter(ages >= max(ages)) %>%
   filter(yrs_bsn == max(yrs_bsn)) %>% 
-  # filter(sexs == max(sexs)) %>% 
   filter(Deaths == max(Deaths)) %>%
   unique() %>% 
   filter(1:n() == n()) %>%
@@ -218,8 +237,6 @@ comp2 <-
   mutate(same = ifelse(Source_s == Source_c, 1, 0),
          ages_ratio = ages_c / ages_s,
          years_ratio = years_c / years_s)
-
-
 
 # selecting best source for each population
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,7 +276,7 @@ p1 <-
 # for data with infant priority
 ref_ages <- 
   inf %>% 
-  select(Country, Year, Age, age_spn) %>% 
+  select(Country, Year, Sex, Age, age_spn) %>% 
   unique()
 
 cts_yrs_i <- 
@@ -270,6 +287,12 @@ cts_yrs_i <-
 pi <- 
   p1 %>% 
   inner_join(cts_yrs_i)
+
+test <- 
+  pi %>% 
+  filter(Country == "Armenia",
+         Sex == "t",
+         Year == 2015)
 
 pi2 <- 
   pi %>% 
@@ -284,7 +307,7 @@ inf2 <-
 # for data with pandemic period priority
 ref_ages <- 
   pan %>% 
-  select(Country, Year, Age, age_spn) %>% 
+  select(Country, Year, Sex, Age, age_spn) %>% 
   unique()
 
 cts_yrs_p <- 
@@ -316,6 +339,8 @@ no_pop <-
 write_csv(inf2, "data_inter/deaths_sourced_infant_based.csv")
 write_csv(pan2, "data_inter/deaths_sourced_period_based.csv")
 
+unique(inf2$Country)
+unique(pan2$Country)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

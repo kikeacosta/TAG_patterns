@@ -1,7 +1,4 @@
 rm(list=ls())
-# library(here)
-library(tidyverse)
-library(countrycode)
 source("R/00_functions.R")
 
 # Loading STMF data
@@ -44,6 +41,14 @@ cts_2020 <-
 cts_2021 <- 
   db_d %>% 
   filter(Year == 2021) %>% 
+  group_by(PopCode) %>% 
+  filter(max(Week) == 52) %>% 
+  pull(PopCode) %>% unique()
+
+# countries with full 2022
+cts_2022 <- 
+  db_d %>% 
+  filter(Year == 2022) %>% 
   group_by(PopCode) %>% 
   filter(max(Week) == 52) %>% 
   pull(PopCode) %>% unique()

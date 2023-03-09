@@ -1,5 +1,4 @@
 rm(list=ls())
-library(eurostat)
 source("R/00_functions.R")
 
 # t <- search_eurostat("mort", type = "dataset", fixed = TRUE)
@@ -80,7 +79,7 @@ if(dim(to_scale_sex)[1] == 0){
   }
 
 write_csv(db_eurs3, "data_inter/eurs_annual.csv")
-db_eurs2 <- read_csv("data_inter/eurs_annual.csv")
+db_eurs3 <- read_csv("data_inter/eurs_annual.csv")
 
 
 
