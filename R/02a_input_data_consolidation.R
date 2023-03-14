@@ -51,15 +51,11 @@ all_in <-
             eurs_an,
             bra,
             per,
-<<<<<<< HEAD
             # mex,
             zaf,
             usa
             # irn
             ) %>% 
-=======
-            zaf) %>% 
->>>>>>> bcce82d0c6c685f3653f04a6d001b613592f88fb
   replace_na(list(Deaths = 0)) %>% 
   group_by(Source, Country) %>% 
   filter(max(Year) >= 2020 & min(Year) <= 2015) %>% 
@@ -98,11 +94,7 @@ insuf_ages <-
   group_by(Country, Source, Year, Sex) %>% 
   summarise(ages = n()) %>% 
   ungroup() %>% 
-<<<<<<< HEAD
-  filter(ages < 6) %>% 
-=======
   filter(ages <= 7) %>% 
->>>>>>> bcce82d0c6c685f3653f04a6d001b613592f88fb
   select(-ages)
 
 unique(insuf_ages$Country)
@@ -358,7 +350,6 @@ unique(pan2$Country)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 # summary of selected sources by country 
 available_inf <- 
