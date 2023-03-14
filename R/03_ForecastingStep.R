@@ -34,7 +34,11 @@ nc <- length(cou)
 ## questions:
 ## FEMALES
 
-## Currently impossible to fit+forecast
+# nocou <- c(3,29,61,77)
+# #unique(deaths$Country[which(deaths$age_spn==5)])
+# yescou <- 1:nc
+# yescou <- yescou[-nocou]
+
 
 ## too few data
 ##  3) Andorra is missing age 30-35 in 2015
@@ -126,6 +130,8 @@ yescou <- yescou[-nocou]
 j=1
 #pdf("ForecastFemales.pdf", width = 12, height = 10)
 #for(j in 1:nc){
+#pdf("ForecastFemales.pdf", width = 12, height = 10)
+# for(j in 81:90){
 cou.j <- cou[j]
 print(cou.j)
 ## select the country from deaths
@@ -175,8 +181,6 @@ all(colSums(G)==1)
 Eg1 <- G%*%E1
 ## observed log-mortality, by age-groups, only for plotting and e0
 ETAg1 <- log(Yg1/Eg1)
-}
-
 
 # ## plotting grouped actual log-mortality over ages
 # DFg <- expand.grid(list(ages=ag.low, years1=t1))
