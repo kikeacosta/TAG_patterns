@@ -116,15 +116,18 @@ nc <- length(cou)
 
 
 
-nocou <- c(3,30,54,64,67,19,88)
+nocou <- c(3,54,64,67,19,88)
+cou[nocou]
 #unique(deaths$Country[which(deaths$age_spn==5)])
+# yescou = cou; nocou = c(0)
 yescou <- 1:nc
 yescou <- yescou[-nocou]
 
 j=1
 #pdf("ForecastFemales.pdf", width = 12, height = 10)
-for(j in 1:nc){
+#for(j in 1:nc){
 cou.j <- cou[j]
+print(cou.j)
 ## select the country from deaths
 deaths.j <- subset(deaths, Country==cou.j)
 ## check available pre-pandemic years, country-dependent
