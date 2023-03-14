@@ -34,96 +34,13 @@ nc <- length(cou)
 ## questions:
 ## FEMALES
 
-## Currently impossible to fit+forecast
+# nocou <- c(3,29,61,77)
+# #unique(deaths$Country[which(deaths$age_spn==5)])
+# yescou <- 1:nc
+# yescou <- yescou[-nocou]
 
-## too few data
-## 30) French Polynesia: 3 available years are too few (unless I modified the whole forecasting model)
-## 54) Moldova: 4 available years are too few (unless I modified the whole forecasting model)
-## 64) Peru: 3 available years are too few (unless I modified the whole forecasting model)
-## 67) Quatar: 4 available years and old ones (2010 2011 2012 2014) are too few (unless I modified the whole forecasting model)
-
-## 2019 not available (likely solvable if 2019 is interpolated as previous not-available years)
-## 19) Cuba: missing 2019, what to do?
-## 88) Uruguay: missing 2019, what to do?
-
-## Issues with infant mortality
-
-## Bermuda: no infant deaths for all pre-pandemic years but 2014 (~impossible to have a infant-soecialized coeff)
-## Faroe Islands: no infant deaths in last years
-## Liechtenstein: absence of infant deaths in the last period causes some issue (solvable?) 
-## Montserrat: no infant deaths for all pre-pandemic years but 2015 (~impossible to have a infant-specialized coeff)
-## Tuvalu: no infant deaths in the first available years (~impossible to have a infant-specialized coeff)
-
-
-## Evident strange age-patterns (it could be solvable, but it denotes issues in actual data)
-
-## Albania: strange age-pattern at highest ages and increasing infant mortality
-## Aruba: strange increasing of infant mortality. Actually death at age 0 in 2012 and 2014
-## Azerbaijan: odd rapid increase of oldest-age mortality
-## Bosnia and Herzegovina: decreasing observed mortality at higher ages (I can force monotonicity over age, but weird data)
-## Bulgaria: wiggling age-pattern in first years at old ages (force monotonicity over age?)
-## Croatia: wiggling age-pattern in first years at old ages (force monotonicity over age?)
-## Lesotho: special treatment is needed (would enforcement of monotonicity be enough?)
-## Lithuania: wiggling age-pattern at old ages (force monotonicity over age?)
-## Maldives: too strong leveling-off at odest ages and odd data in 2019 (missing 2018)
-## Mauritius: very weird 2011 data
-## Montenegro: decreasing observed mortality at higher ages (I can force monotonicity over age, but weird data)
-## New Zeland: a bit too strong leveling-off at oldest ages in last observed years
-## North Macedonia: wiggling age-pattern at old ages (force monotonicity over age?)
-## Romania: odd rapid increase of oldest-age mortality
-## Serbia: a bit too strong leveling-off at oldest ages in all observed years
-## South Korea: wiggling/decreasing age-pattern at old ages (force monotonicity over age?)
-## Taiwan: optimal smoothing parameter produces wiggling age-pattern, likely need to impose extra-smoothness
-## Turks and Caicos Islands: 3 available years, the fit is possible because they cover 5 years and include 2019. However no infant deaths for all pre-pandemic years but 2015 (~impossible to have a infant-specialized coeff)
-## Ukraine: optimal smoothing parameter produces wiggling age-pattern, likely need to impose extra-smoothness
-
-## Issues only in computing e0
-
-## due to large open-age group
-## Belize: extremely large open-age interval, 65+ => issues in e0 computation
-## Iran: extremely large open-age interval, 65+ => issues in e0 computation
-## Thailand: extremely large open-age interval, 65+ => issues in e0 computation
-
-## general issue (due to GC lifetable code?) also because the fit on log-rates seems OK
-## Colombia: good fit on rates, but likely issues in computing e0
-## Costa Rica: good fit on rates, but likely issues in computing e0
-## Ecuador: good fit on rates, but likely issues in computing e0
-## Honk-Kong: good fit on rates, but likely issues in computing e0
-## Japan: good fit on rates, but likely issues in computing e0
-## Malasya: good fit on rates, but likely issues in computing e0
-## Oman: good fit on rates, but likely issues in computing e0
-## Panama: good fit on rates, but likely issues in computing e0
-## State of Palestine: good fit on rates, but likely issues in computing e0
-## Suriname: good fit on rates, but likely issues in computing e0
-## Uzbekistan: good fit on rates, but likely issues in computing e0
-
-
-## General questions from GC:
-
-## Iceland: data available only from 2013?
-## Italy: only by age-group? and from 2011?
-
-
-
-
-
-
-
-
-
-
-
-
-
-nocou <- c(30,54,64,67,19,88)
-#unique(deaths$Country[which(deaths$age_spn==5)])
-yescou <- 1:nc
-yescou <- yescou[-nocou]
-
-
-j=45
-pdf("ForecastFemales.pdf", width = 12, height = 10)
-for(j in yescou){
+#pdf("ForecastFemales.pdf", width = 12, height = 10)
+for(j in 81:90){
 cou.j <- cou[j]
 ## select the country from deaths
 deaths.j <- subset(deaths, Country==cou.j)
@@ -145,6 +62,7 @@ if(ag.low[2]==1){
 }else{
   ag.up <- c(ag.up1[ag.up1>0], max(a))
 }
+cbind(ag.low, ag.up)
 lg <- ag.up-ag.low+1
 mg <- length(ag.low)
 ## only for plotting/aesthetic
@@ -353,7 +271,7 @@ p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
             aes(y=eta1),size=1, linetype="dotted")+
   facet_wrap(~years1, 2, 6, scales="free_y")+
   labs(x="age", y="log-mortality", title=cou.j)
-print(p)
+# print(p)
 # ## over years
 # if(mg<=25){
 #   p <- ggplot(DF, aes(x=years1, y=eta1))+
@@ -388,46 +306,46 @@ print(p)
 #   p
 # }
 #   
-## testing fit and forecast by life expectancy
-source("~/WORK/JUNK/LifeTableMatrixAlgebra/LifeTableFUN.R")
-e0hat <- numeric(n)
-e0act <- numeric(n1)
-i=4
-for(i in 1:n){
-  LT.i <- lifetable.mx(x=a, mx=exp(ETAhat)[,i], sex=sexLT)
-  e0hat[i] <- LT.i$ex[1]
-  if(i<=n1& whi.ava[i]){
-    agx.i <- G%*%LT.i$ax
-    LTact.i <- lifetable.mx(x=ag.low, mx=exp(ETAg1)[,i], 
-                            sex=sexLT)
-    e0act[i] <- LTact.i$ex[1]
-  }
+# ## testing fit and forecast by life expectancy
+# source("~/WORK/JUNK/LifeTableMatrixAlgebra/LifeTableFUN.R")
+# e0hat <- numeric(n)
+# e0act <- numeric(n1)
+# i=4
+# for(i in 1:n){
+#   LT.i <- lifetable.mx(x=a, mx=exp(ETAhat)[,i], sex=sexLT)
+#   e0hat[i] <- LT.i$ex[1]
+#   if(i<=n1& whi.ava[i]){
+#     agx.i <- G%*%LT.i$ax
+#     LTact.i <- lifetable.mx(x=ag.low, mx=exp(ETAg1)[,i], 
+#                             sex=sexLT)
+#     e0act[i] <- LTact.i$ex[1]
+#   }
+# }
+# 
+# DFe0act <- data.frame(years1=t1, e0=e0act, type="Actual")
+# DFe0act <- DFe0act[whi.ava,]
+# DFe0hat <- data.frame(years1=t, e0=e0hat, type="Fitted+Forecast")
+# DFe0 <- rbind(DFe0act, DFe0hat)
+# 
+# p <- ggplot(DFe0, aes(x=years1, y=e0, col=type))+
+#   geom_line(data=filter(DFe0, type=="Fitted+Forecast"), 
+#             aes(y=e0, col=type), size=2)+
+#   geom_point(data=filter(DFe0, type=="Fitted+Forecast"), 
+#             aes(y=e0, col=type), size=3.5)+
+#   geom_point(data=filter(DFe0, type=="Actual"), 
+#             aes(y=e0, col=type), size=3.5)+
+#   theme(legend.position = "none")+
+#   labs(x="year", y="life expectancy at birth", title=cou.j)+
+#   geom_rect(data=DFe0[1,], 
+#             aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2, 
+#                 ymin = -Inf, ymax = Inf),
+#             fill="pink", color=NA, alpha=0.2)+
+#   scale_x_continuous(breaks=seq(2010, 2021, 1), minor=FALSE)+
+#   scale_y_continuous(breaks=seq(70, 90, 0.2), minor=FALSE)
+# print(p)
+
 }
-
-DFe0act <- data.frame(years1=t1, e0=e0act, type="Actual")
-DFe0act <- DFe0act[whi.ava,]
-DFe0hat <- data.frame(years1=t, e0=e0hat, type="Fitted+Forecast")
-DFe0 <- rbind(DFe0act, DFe0hat)
-
-p <- ggplot(DFe0, aes(x=years1, y=e0, col=type))+
-  geom_line(data=filter(DFe0, type=="Fitted+Forecast"), 
-            aes(y=e0, col=type), size=2)+
-  geom_point(data=filter(DFe0, type=="Fitted+Forecast"), 
-            aes(y=e0, col=type), size=3.5)+
-  geom_point(data=filter(DFe0, type=="Actual"), 
-            aes(y=e0, col=type), size=3.5)+
-  theme(legend.position = "none")+
-  labs(x="year", y="life expectancy at birth", title=cou.j)+
-  geom_rect(data=DFe0[1,], 
-            aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2, 
-                ymin = -Inf, ymax = Inf),
-            fill="pink", color=NA, alpha=0.2)+
-  scale_x_continuous(breaks=seq(2010, 2021, 1), minor=FALSE)+
-  scale_y_continuous(breaks=seq(70, 90, 0.2), minor=FALSE)
-print(p)
-
-}
-dev.off()
+#dev.off()
 
 
 
