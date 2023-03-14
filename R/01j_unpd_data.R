@@ -425,23 +425,12 @@ dts3 %>%
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3. removing incomplete ages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-test <- 
-  dts3 %>% 
-  filter(Year < 2020) %>% 
-  group_by(Country, Code, Source, Sex, Age) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  select(Country, Code, Source, Sex, n) %>% 
-  unique() %>% 
-  group_by(Country, Code, Source, Sex) %>% 
-  summarise(grs = n()) %>% ungroup() %>% 
-  filter(grs>1)
-  
 incomp_ages <- 
   dts3 %>% 
   group_by(Country, Code, Source, Year, Sex) %>% 
   mutate(AgeSpan = ifelse(Age == max(Age), 0, AgeSpan)) %>% 
   filter(max(Age) != sum(AgeSpan)) %>% 
+  ungroup() %>% 
   select(Country, Source, Year, Sex) %>% 
   unique()
   
@@ -596,12 +585,12 @@ dts9 <- read_rds("data_inter/unpd_harmonized_test.rds")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 6. harmonize ages (same open age for all series, max closing at 100+)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-max_age <- 
-  dts9 %>% 
-  group_by(Country, Code, Source, Sex) %>% 
-  summarise(max_age = max(Age)) %>% 
-  mutate(max_age = min(max_age, 100)) %>% 
-  ungroup() 
+# max_age <- 
+#   dts9 %>% 
+#   group_by(Country, Code, Source, Sex) %>% 
+#   summarise(max_age = max(Age)) %>% 
+#   mutate(max_age = min(max_age, 100)) %>% 
+#   ungroup() 
 
 max_age <- 
   dts9 %>% 
@@ -728,3 +717,4 @@ readr::write_rds(dts13, file = "data_inter/unpd.rds")
 
 # dts12 <- read_rds("data_inter/unpd.rds") %>%
 #   select(-AgeSpan, -pre, -pan)
+
