@@ -8,6 +8,8 @@ unpd <- read_csv("data_inter/unpd.csv")
 stmf <- read_csv("data_inter/stmf.csv") 
 eurs_wk <- read_csv("data_inter/eurs_weekly.csv") 
 eurs_an <- read_csv("data_inter/eurs_annual.csv") 
+usa <- read_csv("data_inter/usa.csv") 
+
 
 bra <- read_csv("data_inter/brazil.csv") %>% mutate(Source = "direct") %>% 
   group_by(Year, Sex) %>% 
@@ -33,9 +35,7 @@ cts_exclude <- tibble(Country =
                         c("Scotland", 
                           "England and Wales", 
                           "Northern Ireland",
-                          "Kenya",
-                          "Puerto Rico",
-                          "Anguilla"))
+                          "Kenya"))
 
 # unique(out$Country)
 
@@ -55,6 +55,7 @@ all_in <-
             per,
             # mex,
             zaf,
+            usa
             # irn
             ) %>% 
   replace_na(list(Deaths = 0)) %>% 
@@ -66,7 +67,8 @@ all_in <-
   # group_by(Country, Code, Source, Year, Sex, Age, age_spn) %>% 
   # summarise(Deaths = sum(Deaths)) %>% 
   ungroup() %>% 
-  unique()
+  unique() %>% 
+  mutate(Country = ifelse(Country == "Faeroe Islands", "Faroe Islands", Country))
 
 
 # excluding sources with insufficient data
@@ -80,7 +82,7 @@ insuf_pers <-
   group_by(Country, Source, Sex) %>% 
   summarise(yrs = n()) %>% 
   ungroup() %>% 
-  filter(yrs < 3)  %>% 
+  filter(yrs < 5)  %>% 
   select(-yrs)
 
 # sources to exclude because of insufficient age groups (minimum 4 intervals)
@@ -89,7 +91,7 @@ insuf_ages <-
   group_by(Country, Source, Year, Sex) %>% 
   summarise(ages = n()) %>% 
   ungroup() %>% 
-  filter(ages < 4) %>% 
+  filter(ages < 6) %>% 
   select(-ages)
 
 # excluding cases with insufficient periods and insufficient ages
@@ -177,7 +179,6 @@ all_in3 <-
             all_in2 %>% 
               filter(Year >= 2020)) %>% 
   arrange(Country, Source, Year, Sex, Age) %>% 
-  mutate(Country = ifelse(Country == "Faeroe Islands", "Faroe Islands", Country)) %>% 
   anti_join(cts_exclude) %>% 
   select(Country, Code, Year, Sex, Age, age_spn, Source, Deaths)
   
@@ -229,12 +230,12 @@ sel_crit_pan <-
 # comparison between both selection methods
 comp2 <- 
   sel_crit_inf %>% 
-  select(Country, ages_s = ages, years_s = years, Source_s = Source, last_s = last, infd_s = infd) %>%
+  select(Country, ages_s = ages, years_bsn_s = yrs_bsn, Source_s = Source, last_s = last, infd_s = infd) %>%
   left_join(sel_crit_pan %>% 
-              select(Country, ages_c = ages, years_c = years, Source_c = Source, last_c = last, infd_c = infd)) %>% 
+              select(Country, ages_c = ages, years_bsn_c = yrs_bsn, Source_c = Source, last_c = last, infd_c = infd)) %>% 
   mutate(same = ifelse(Source_s == Source_c, 1, 0),
          ages_ratio = ages_c / ages_s,
-         years_ratio = years_c / years_s)
+         years_ratio = years_bsn_c / years_bsn_s)
 
 
 
