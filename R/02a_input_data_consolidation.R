@@ -37,12 +37,10 @@ cts_exclude <- tibble(Country =
                           "Northern Ireland",
                           "Kenya"))
 
-# unique(out$Country)
-
 unique(unpd$Country)
 unique(unpd$Source)
-# Several direct sources have been superseded by UNPD and others
 
+# Several direct sources have been superseded by UNPD and others
 # putting all together
 all_in <- 
   bind_rows(hmd,
@@ -53,29 +51,36 @@ all_in <-
             eurs_an,
             bra,
             per,
+<<<<<<< HEAD
             # mex,
             zaf,
             usa
             # irn
             ) %>% 
+=======
+            zaf) %>% 
+>>>>>>> bcce82d0c6c685f3653f04a6d001b613592f88fb
   replace_na(list(Deaths = 0)) %>% 
-  # mutate(Country = ifelse(Country == "China, Hong Kong SAR", "Hong Kong", Country)) %>% 
   group_by(Source, Country) %>% 
-  filter(max(Year) >= 2020 & min(Year) <= 2017) %>% 
-  # ungroup() %>% 
-  # mutate(Age = ifelse(Age >= 100, 100, Age)) %>% 
-  # group_by(Country, Code, Source, Year, Sex, Age, age_spn) %>% 
-  # summarise(Deaths = sum(Deaths)) %>% 
+  filter(max(Year) >= 2020 & min(Year) <= 2015) %>% 
   ungroup() %>% 
   unique() %>% 
   mutate(Country = ifelse(Country == "Faeroe Islands", "Faroe Islands", Country))
 
-
+unique(all_in$Country)
 # excluding sources with insufficient data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # sources to exclude because of insufficient periods for baseline (minimum 3 periods)
 insuf_pers <- 
-  all_in %>% 
+  bind_rows(hmd,
+            who,
+            unpd,
+            stmf,
+            eurs_wk,
+            eurs_an,
+            bra,
+            per,
+            zaf) %>% 
   select(Country, Source, Year, Sex) %>% 
   unique() %>% 
   filter(Year < 2020) %>% 
@@ -85,14 +90,22 @@ insuf_pers <-
   filter(yrs < 5)  %>% 
   select(-yrs)
 
+unique(insuf_pers$Country)
+
 # sources to exclude because of insufficient age groups (minimum 4 intervals)
 insuf_ages <- 
   all_in %>% 
   group_by(Country, Source, Year, Sex) %>% 
   summarise(ages = n()) %>% 
   ungroup() %>% 
+<<<<<<< HEAD
   filter(ages < 6) %>% 
+=======
+  filter(ages <= 7) %>% 
+>>>>>>> bcce82d0c6c685f3653f04a6d001b613592f88fb
   select(-ages)
+
+unique(insuf_ages$Country)
 
 # excluding cases with insufficient periods and insufficient ages
 all_in2 <- 
@@ -194,7 +207,7 @@ sum_all <-
          yrs_bsn = 2020 - (str_sub(period, 1, 4) %>% as.integer()))
 
 write_excel(sum_all)
-
+sum_all
 unique(sum_all$Source)
 
 
@@ -236,8 +249,6 @@ comp2 <-
   mutate(same = ifelse(Source_s == Source_c, 1, 0),
          ages_ratio = ages_c / ages_s,
          years_ratio = years_bsn_c / years_bsn_s)
-
-
 
 # selecting best source for each population
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -340,6 +351,8 @@ no_pop <-
 write_csv(inf2, "data_inter/deaths_sourced_infant_based.csv")
 write_csv(pan2, "data_inter/deaths_sourced_period_based.csv")
 
+unique(inf2$Country)
+unique(pan2$Country)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

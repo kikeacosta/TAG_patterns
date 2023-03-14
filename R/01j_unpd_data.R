@@ -307,6 +307,7 @@ dts2 %>%
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2. adjust infant and child ages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # all child ages in infant and 1-4, or 0-4
 child_ages <-
   dts2 %>% 
@@ -590,6 +591,8 @@ dts9 %>%
 
 write_rds(dts9, "data_inter/unpd_harmonized_test.rds")
 dts9 <- read_rds("data_inter/unpd_harmonized_test.rds")
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 6. harmonize ages (same open age for all series, max closing at 100+)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
