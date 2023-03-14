@@ -44,15 +44,16 @@ icd_all <-
   select(name, everything())
 
 # saving a consolidated file with all WHO data
-write_rds(icd_all, "Data/who_raw.rds")
+write_rds(icd_all, "Data/WHO/who_raw.rds")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 rm(list=ls()); gc()
+source("R/00_functions.R")
 
 db <- 
-  read_rds("Data/who_raw.rds")
+  read_rds("Data/WHO/who_raw.rds")
 
 # selecting: 
 # countries with data in 2020; data by age; all-cause mortality; data since 2015
@@ -65,7 +66,7 @@ db20 <-
   filter(max(Year) >= 2020 &  Frmat != "09") %>% 
   ungroup() %>% 
   filter(Cause %in% c("1000", "AAA"),
-         Year >= 2015) %>% 
+         Year >= 2010) %>% 
   select(-Admin1, -SubDiv, -Cause, -List) %>% 
   arrange(Country, Year)
 
@@ -110,7 +111,10 @@ db20_2 <-
   mutate(Code = countrycode(Country, origin = 'country.name', destination = 'iso3c'),
          Country = recode(Country,
                           "United Kingdom, England and Wales" = "England and Wales",
+                          "United Kingdom, Northern Ireland" = "Northern Ireland",
                           "United Kingdom, Scotland" = "Scotland",
+                          "United States of America" = "USA",
+                          "Republic of Korea" = "South Korea",
                           "Czech Republic" = "Czechia"),
          Code = case_when(Country == "England and Wales" ~ "GBR-ENW",
                           Country == "Scotland" ~ "GBR-SCO",
@@ -146,6 +150,9 @@ db20_4 <-
   do(rescale_sex(chunk = .data)) %>% 
   ungroup() %>% 
   mutate(Age = Age %>% as.double()) %>% 
-  arrange(Code, Year, Sex, Age)
+  arrange(Code, Year, Sex, Age) %>% 
+  group_by(Country, Year, Sex) %>% 
+  mutate(age_spn = ifelse(Age == max(Age), -1, lead(Age) - Age)) %>% 
+  ungroup()
 
-write_csv(db20_4, "Output/who.csv")
+write_csv(db20_4, "data_inter/who.csv")

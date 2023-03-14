@@ -2,6 +2,9 @@ library(readxl)
 library(tidyverse)
 library(countrycode)
 library(lubridate)
+library(HMDHFDplus)
+library(eurostat)
+
 
 write_excel <- function(x,row.names=FALSE,col.names=TRUE,...) {
   write.table(x,file = paste0("clipboard-", object.size(x)),sep="\t",row.names=row.names,col.names=col.names,...)
@@ -44,7 +47,7 @@ harmon_age_intervals <- function(chunk){
   
   int <- 
     ref_ages %>% 
-    semi_join(chunk, by = c("Source", "Country")) %>% 
+    semi_join(chunk, by = c("Source", "Country", "Sex")) %>% 
     pull(Age)
   
   if(max(int) <= 110){
@@ -80,33 +83,43 @@ assign_age_intervals <- function(chunk){
     ungroup()
 }
 
-# sum_source <- function(db){
-#   db %>% 
-#     group_by(Country, Year, Sex) %>% 
-#     mutate(ages = n()) %>% 
-#     ungroup() %>% 
-#     group_by(Country, Year, Age) %>% 
-#     mutate(sexs = n()) %>% 
-#     ungroup() %>% 
-#     group_by(Country, Sex, Age) %>% 
-#     mutate(years = n()) %>% 
-#     ungroup() %>% 
-#     group_by(Country) %>% 
-#     filter(!(sexs == 3 & Sex == "t")) %>% 
-#     summarise(Deaths = sum(Deaths),
-#               ages = min(ages),
-#               sexs = min(sexs),
-#               years = min(years),
-#               Source = unique(Source) %>% paste(collapse = ", ")) %>% 
-#     ungroup() %>% 
-#     unique()  
-# }
-# db <- all_in3
+
+# Grouping population using the same age intervals as mortality data
+assign_age_invals_pop <- function(chunk){
+  ct <- unique(chunk$Country)
+  yr <- unique(chunk$Year)
+  sx <- unique(chunk$Sex)
+  
+  int <- 
+    ref_ages %>% 
+    filter(Country == ct,
+           Year == yr,
+           Sex == sx) %>% 
+    pull(Age) %>% 
+    sort
+  
+  if(max(int) <= 110){
+    int <- c(int, 110)
+  }
+  
+  labs <- int[1:length(int)-1]
+  chunk %>% 
+    mutate(Age = cut(Age, breaks = int, include.lowest = TRUE, right = FALSE, labels = labs),
+           Age = as.numeric(as.character(Age))) %>% 
+    group_by(Age) %>% 
+    summarise(Population = sum(Population)) %>% 
+    ungroup()
+}
+
+# db <-
+#   all_in3
+
 sum_source <- function(db){
- # test <-
+ test <-
   db %>% 
     group_by(Source, Country, Year, Sex) %>% 
-    mutate(ages = n()) %>% 
+    mutate(ages = n(),
+           infd = ifelse(any(Age == 0 & age_spn == 1), 1, 0)) %>% 
     ungroup() %>% 
     group_by(Source, Country, Year, Age) %>% 
     mutate(sexs = n()) %>% 
@@ -120,6 +133,7 @@ sum_source <- function(db){
     group_by(Source, Country) %>% 
     filter(!(sexs == 3 & Sex == "t")) %>% 
     summarise(Deaths = sum(Deaths),
+              infd = min(infd),
               ages = min(ages),
               sexs = min(sexs),
               years = min(years),
