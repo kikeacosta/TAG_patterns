@@ -345,6 +345,12 @@ write_csv(pan2, "data_inter/deaths_sourced_period_based.csv")
 unique(inf2$Country)
 unique(pan2$Country)
 
+inf3 <- 
+  inf2 %>% 
+  filter(Age != 100)
+
+write_csv(inf3, "data_inter/deaths_sourced_infant_based_99.csv")
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
