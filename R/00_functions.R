@@ -16,6 +16,9 @@ rescale_age <- function(chunk){
     dplyr::filter(Age != "TOT") %>% 
     mutate(Deaths = (Deaths / sum(Deaths)) * TOT)
 }
+# t <-   chunk %>% 
+#   dplyr::filter(Age != "TOT") %>% 
+#   mutate(Deaths = (Deaths / sum(Deaths)) * TOT)
 
 # rescale deaths by sex to total sexes
 rescale_sex <- function(chunk){

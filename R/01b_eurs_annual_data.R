@@ -12,7 +12,7 @@ db_eurs <-
   d_y %>% 
   mutate(year = year(time)) %>% 
   # separate(time, sep = "W", into = c("year","week"), convert = TRUE) %>% 
-  filter(year %in% 2010:2021, 
+  filter(year %in% 2010:2022, 
                 age != "UNK") %>% 
   group_by(geo) %>% 
   filter(max(year) >= 2020) %>% 
@@ -40,6 +40,13 @@ db_eurs2 <-
   group_by(Country, Sex, Year) %>% 
   do(rescale_age(chunk = .data)) %>% 
   ungroup() 
+
+# chunk <- 
+#   db_eurs %>% 
+#   filter(Country == "Azerbaijan",
+#          Year == 2010,
+#          Sex == "f")
+
 
 to_scale_sex <- 
   db_eurs %>% 
@@ -78,8 +85,19 @@ if(dim(to_scale_sex)[1] == 0){
   
   }
 
-write_csv(db_eurs3, "data_inter/eurs_annual.csv")
-db_eurs3 <- read_csv("data_inter/eurs_annual.csv")
+diff_age_grs <- 
+  db_eurs3 %>% 
+  group_by(Country, Code, Year, Sex) %>% 
+  filter(n() < 101) %>% 
+  ungroup() %>% 
+  select(Country, Sex) %>% unique()
+
+db_eurs4  <-  
+  db_eurs3 %>% 
+  anti_join(diff_age_grs)
+
+write_csv(db_eurs4, "data_inter/eurs_annual.csv")
+db_eurs4 <- read_csv("data_inter/eurs_annual.csv")
 
 
 
