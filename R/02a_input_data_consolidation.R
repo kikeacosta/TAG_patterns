@@ -9,6 +9,7 @@ stmf <- read_csv("data_inter/stmf.csv")
 eurs_wk <- read_csv("data_inter/eurs_weekly.csv") 
 eurs_an <- read_csv("data_inter/eurs_annual.csv") 
 usa <- read_csv("data_inter/usa.csv") 
+twn <- read_csv("data_inter/taiwan.csv")
 
 
 bra <- read_csv("data_inter/brazil.csv") %>% mutate(Source = "direct") %>% 
@@ -37,9 +38,6 @@ cts_exclude <- tibble(Country =
                           "Northern Ireland",
                           "Kenya"))
 
-unique(unpd$Country)
-unique(unpd$Source)
-
 # Several direct sources have been superseded by UNPD and others
 # putting all together
 all_in <- 
@@ -53,7 +51,8 @@ all_in <-
             per,
             # mex,
             zaf,
-            usa
+            usa,
+            twn
             # irn
             ) %>% 
   replace_na(list(Deaths = 0)) %>% 
