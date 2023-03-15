@@ -33,7 +33,7 @@ n2 <- length(t2)
 cou <- unique(deaths$Country)
 nc <- length(cou)
 
-j=34
+j=96
 cou.j <- cou[j]
 ## select the country from deaths
 deaths.j <- subset(deaths, Country==cou.j)
@@ -148,10 +148,10 @@ str(CPSg.i)
 B <- kronecker(CPSg.i$Bt, CPSg.i$Ba)
 Veta <- B %*% CPSg.i$Valpha %*% t(B)
 SEeta <- matrix(sqrt(diag(Veta)), m, n)
-psi2 <- CPSg.i$dev/(m * n1 - CPSg.i$ed)
+#psi2 <- CPSg.i$dev/(mg * n1 - CPSg.i$ed)
 
-ETAup <- ETAhat + 2*sqrt(psi2)*SEeta
-ETAlow <- ETAhat - 2*sqrt(psi2)*SEeta
+ETAup <- ETAhat + 2*SEeta
+ETAlow <- ETAhat - 2*SEeta
 
 
 ## plotting, starting from the beginning
@@ -240,147 +240,6 @@ if(mg<=25){
   p
 }
 
-
-
-
-
-
-
-
-
-## bootstrap deaths from fitted surface
-Y1hat <- E1*exp(ETA1hat)
-Yg1hat <- G%*%Y1hat
-nb <- 100
-## where to save all bootstrap+forecast log-mortality
-ETAshat <- array(0, dim=c(m, n, nb))
-b=1
-for(b in 1:nb){
-  Yg1.b <- matrix(rpois(mg*n1, c(Yg1)), mg, n1)
-  FITi.b <- PSinfantGrouped(a.low = ag.low,
-                            Yg=Yg1.b,
-                            a=a,
-                            E=E1,
-                            WEIg=WEIg1,
-                            lambdas=OPT$par,
-                            verbose=FALSE,
-                            kappa.shape=0,
-                            infant=infantj)
-  ## compute deltas : CIs of relative derivatives
-  deltasi <- deltasFUN(FITi.b)
-  ## forecasting
-  CPSg.i.b <- CPSfunctionGrouped(a.low=ag.low, Yg1=Yg1.b, 
-                                 WEIg1=WEIg1,
-                                 a=a, E1=E1, obs.yrs=t1, 
-                                 for.hor=max(t),
-                                 ETA1hat=ETA1hat, deltas=deltasi, S=S, 
-                                 lambdas = OPT$par, verbose = FALSE,
-                                 infant = infantj,
-                                 kappa.shape=0)
-  ETAshat[,,b] <- CPSg.i.b$ETA
-  cat(b, "\n")
-}
-
-## plotting, starting from the beginning
-## actual log-mortality
-DFg <- expand.grid(list(ages=ag.low, years1=t1))
-DFg$type <- "Actual grouped"
-DFg$eta1 <- c(ETAg1)
-DFg$ages.up <- ag.up+1
-DFg$eta1.up <- c(ETAg1)
-## fitted
-DFhat <- expand.grid(list(ages=a, years1=t1))
-DFhat$type <- "Fitted"
-DFhat$eta1 <- c(ETA1hat)
-DFhat$ages.up <- NA
-DFhat$eta1.up <- NA
-## forecast
-DFfor <- expand.grid(list(ages=a, years1=t))
-DFfor$type <- "Fitted+Forecast"
-DFfor$eta1 <- c(ETAhat)
-DFfor$ages.up <- NA
-DFfor$eta1.up <- NA
-## all
-DF <- rbind(DFg, DFhat, DFfor) 
-DF$group <- factor(c(rep(ag.lab, n1),rep(rep(ag.lab, lg), n1),
-                     rep(rep(ag.lab, lg), n)), levels = ag.lab)
-DF$colo <- c(rep(ag.mid, n1), rep(a, n1), rep(a, n))
-## bootstrap
-DFboot <- expand.grid(list(ages=a, years1=t, boot=1:nb))
-DFboot$eta <- c(ETAshat)
-
-p <- ggplot(DFboot, aes(x=ages, y=eta))+
-  geom_point(aes(y=eta), size=1, col="grey")+
-  facet_wrap(~years1, 2, 6, scales="free_y")+
-  labs(x="age", y="log-mortality", title=cou.j)
-p
-
-DFbootsel <- subset(DFboot, ages%in%seq(0,90,10))
-p <- ggplot(DFbootsel, aes(x=years1, y=eta))+
-  geom_point(aes(y=eta),size=1)+
-  facet_wrap(~ages, 2, 5, scales="free_y")
-p
-  
-  geom_line(data=filter(DF, type=="Fitted+Forecast"),
-            aes(y=eta1, col=colo, group=ages),size=1)+
-  geom_point(data=filter(DF, type=="Actual grouped"),
-             aes(y=eta1, col=colo))+
-  facet_wrap(~group, 5, 5, scales="free_y")+
-  theme(legend.position = "none")+
-  scale_color_viridis(discrete=FALSE, option="inferno")+
-  labs(x="year", y="log-mortality", title=cou.j)+
-  geom_rect(data=DF[1:mg,],
-            aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2,
-                ymin = -Inf, ymax = Inf),
-            fill="cyan", alpha=0.05)
-p
-
-## over age
-p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
-  geom_segment(data=filter(DF, type=="Actual grouped"),
-               aes(x=ages, y=eta1, xend=ages.up, yend=eta1.up), size=1)+
-  geom_line(data=filter(DF, type=="Fitted+Forecast"),
-            aes(y=eta1),size=1)+
-  geom_line(data=filter(DF, type=="Fitted"),
-            aes(y=eta1),size=1, linetype="dotted")+
-  facet_wrap(~years1, 2, 6, scales="free_y")+
-  labs(x="age", y="log-mortality", title=cou.j)
-print(p)
-## over years
-if(mg<=25){
-  p <- ggplot(DF, aes(x=years1, y=eta1))+
-    geom_line(data=filter(DF, type=="Fitted+Forecast"),
-              aes(y=eta1, col=colo, group=ages),size=1)+
-    geom_point(data=filter(DF, type=="Actual grouped"),
-               aes(y=eta1, col=colo))+
-    facet_wrap(~group, 5, 5, scales="free_y")+
-    theme(legend.position = "none")+
-    scale_color_viridis(discrete=FALSE, option="inferno")+
-    labs(x="year", y="log-mortality", title=cou.j)+
-    geom_rect(data=DF[1:mg,],
-              aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2,
-                  ymin = -Inf, ymax = Inf),
-              fill="cyan", alpha=0.05)
-  p
-}else{
-  DFsel <- subset(DF, ages%in%seq(0,90,10))
-  p <- ggplot(DFsel, aes(x=years1, y=eta1))+
-    geom_line(data=filter(DFsel, type=="Fitted+Forecast"),
-              aes(y=eta1, col=colo, group=ages),size=1)+
-    geom_point(data=filter(DFsel),
-               aes(y=eta1, col=colo))+
-    facet_wrap(~group, 2, 5, scales="free_y")+
-    theme(legend.position = "none")+
-    scale_color_viridis(discrete=FALSE, option="inferno")+
-    labs(x="year", y="log-mortality", title=cou.j)+
-    geom_rect(data=DFsel[1:mg,],
-              aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2,
-                  ymin = -Inf, ymax = Inf),
-              fill="cyan", alpha=0.05)
-  p
-}
-
-
 ## estimating perturbation 
 
 ## 2020 and 2021 are treated independently 
@@ -390,8 +249,6 @@ if(mg<=25){
 ## smooth \delta and s.t. 1' \delta = 0
 
 ## let's start from 2020
-
-
 
 ## extract 2020 forecast log-mortality (~offset)
 eta20 <- ETAhat[,ncol(ETAhat)-1]
@@ -407,7 +264,6 @@ if(ag.low[2]==1){
 }else{
   ag.up <- c(ag.up1[ag.up1>0], max(a))
 }
-cbind(ag.low, ag.up)
 ag.mid <- (ag.low+ag.up)/2 
 ag.lab <- paste(ag.low, ag.up,sep="-")
 
@@ -432,19 +288,80 @@ etag20 <- log(yg20/eg20)
 C20 <- G20
 C20[G20==1] <- c(e20)
 
+## design matrix
+Ba <- MortSmooth_bbase(x=a, min(a), max(a), floor(m/7), 3)
+nb <- ncol(Ba)
+U <- cbind(1, Ba)
+kappa <- 0
 ## penalty stuff
-D <- diff(diag(m), diff=2)
+D <- diff(diag(nb), diff=2)
 tDD <- t(D)%*%D
-lambda <- 10^4
+lambdas <- 10^seq(-3, 8, 1)
+nl <- length(lambdas)
+
+
+## constraining \delta to sum up to 0
+H0 <- matrix(c(0, rep(1,m)), 1, m+1)
+H1 <- adiag(0, Ba)
+H <- H0 %*% H1
+
+QICs <- numeric(nl)
+l <- 10
+for(l in 1:nl){
+  lambda <- lambdas[l]
+  P0 <- lambda*tDD
+  P <- matrix(0,nb+1,nb+1)
+  P[-1,-1] <- P0
+  
+  ## starting eta (log-mortality minus forecast log-mortality in 2020)
+  eta <- rep(0.01,m)
+  ## PCLM regression with eta20 as offset
+  max.it <- 100
+  for(it in 1:max.it){
+    gamma   <- exp(eta + eta20)
+    mu      <- c(C20 %*% gamma)
+    X       <- (C20 * ((1 / mu) %*% t(gamma)) ) %*% U
+    w       <- as.vector(mu)
+    r       <- yg20 - mu + C20 %*% (gamma * eta)
+    tXWX    <- t(X) %*% (w * X) 
+    tXWXpP  <- tXWX + P
+    tXr     <- t(X) %*% r
+    ## adding constraints
+    LHS     <- rbind(cbind(tXWXpP, t(H)),
+                 cbind(H, 0))
+    RHS     <- matrix(c(tXr, kappa), ncol=1)
+    coeff   <- solve(LHS, RHS)
+    ##
+    betas   <- coeff[1:(nb+1)]
+    eta.old <- eta
+    eta     <- U%*%betas
+    dif.eta <- max(abs((eta - eta.old)/eta.old) )
+    if(dif.eta < 1e-04 & it > 4) break
+    #cat(it, dif.eta, "\n")
+  }
+  gamma   <- exp(eta + eta20)
+  mu      <- c(C20 %*% gamma)
+  ## computing BIC
+  Pr <- 10^-6 * diag(nb+1)
+  Hat <- solve(tXWXpP+Pr, tXWX)
+  ED <- sum(diag(Hat))
+  y1 <- yg20
+  y1[yg20 == 0] <- 10^(-4)
+  DEV <- 2 * sum( (yg20 * log(y1/mu) - (y1-mu)))
+  #BICs[l] <- DEV + log(mg)*ED
+  ## try QIC
+  psi <- DEV/(mg - ED)
+  QICs[l] <- mg + ED + mg*log(psi)
+  cat(DEV, ED, "\n")
+}
+pmin <- which.min(QICs)
+(lambda.hat <- lambdas[pmin])
+## with optimal lambda
+lambda <- lambda.hat
 P0 <- lambda*tDD
-P <- matrix(0,m+1,m+1)
+P <- matrix(0,nb+1,nb+1)
 P[-1,-1] <- P0
 
-## design matrix
-U <- cbind(1, diag(m))
-kappa <- 0
-## constraining \delta to sum up to 0
-H <- matrix(c(0, rep(1,m)), 1, m+1)
 ## starting eta (log-mortality minus forecast log-mortality in 2020)
 eta <- rep(0.01,m)
 ## PCLM regression with eta20 as offset
@@ -460,43 +377,82 @@ for(it in 1:max.it){
   tXr     <- t(X) %*% r
   ## adding constraints
   LHS     <- rbind(cbind(tXWXpP, t(H)),
-               cbind(H, 0))
+                   cbind(H, 0))
   RHS     <- matrix(c(tXr, kappa), ncol=1)
   coeff   <- solve(LHS, RHS)
   ##
-  betas   <- coeff[1:(m+1)]
+  betas   <- coeff[1:(nb+1)]
   eta.old <- eta
   eta     <- U%*%betas
   dif.eta <- max(abs((eta - eta.old)/eta.old) )
   if(dif.eta < 1e-04 & it > 4) break
   cat(it, dif.eta, "\n")
 }
+gamma   <- exp(eta + eta20)
+mu      <- c(C20 %*% gamma)
+## computing BIC
+Pr <- 10^-6 * diag(nb+1)
+Hat <- solve(tXWXpP+Pr, tXWX)
+ED <- sum(diag(Hat))
+y1 <- yg20
+y1[yg20 == 0] <- 10^(-4)
+DEV <- 2 * sum( (yg20 * log(y1/mu) - (y1-mu)))
+# psi2 <- DEV/(mg - ED)
+# psi2
+
+## fitted values
 c.hat <- coeff[1]
-delta.hat <- coeff[1:m+1]
-sum(delta.hat)
-omega <- coeff[m+2]  
-plot(a, delta.hat)
+expc.hat <- exp(c.hat)
+delta.hat <- Ba%*%coeff[1:nb+1]
+expdelta.hat <- exp(delta.hat)
 eta.hat <- eta20 + c.hat + delta.hat # U%*%betas+eta20
-plot(a, eta.hat)
+## confidence intervals
+Pr <- 10^-4 * diag(nb+1)
+H0 <- solve(tXWXpP+Pr)
+Vbetas <- H0 %*% tXWX %*% H0
+## se for exp(c)
+der.expc <- matrix(c(exp(c.hat), rep(0, nb)), 1, nb+1)
+V.expc <- der.expc %*% Vbetas %*% t(der.expc)
+se.expc <- sqrt(diag(V.expc))
+## se for exp(delta)
+bla <- cbind(0, Ba)
+der.expdelta <- diag(c(exp(delta.hat))) %*% bla
+V.expdelta <- der.expdelta %*% Vbetas %*% t(der.expdelta)
+se.expdelta <- sqrt(diag(V.expdelta))
+## se for eta
+Veta <- U %*% Vbetas %*% t(U)
+se.eta <- sqrt(diag(Veta))
+
+## 95% CIs
+expc.up <- expc.hat + 2*se.expc
+expc.low <- expc.hat - 2*se.expc
+expdelta.up <- expdelta.hat + 2*se.expdelta
+expdelta.low <- expdelta.hat - 2*se.expdelta
+eta.up <- eta.hat + 2*se.eta
+eta.low <- eta.hat - 2*se.eta
+
 
 ## observed
 DFg <- data.frame(ages=ag.low, 
                   type="Actual grouped",
                   eta1=etag20,
                   ages.up=ag.up+1,
-                  eta1.up=etag20)
+                  eta1.up=etag20,
+                  eta1.low=NA)
 ## forecast
 DFfor <- data.frame(ages=a, 
                     type="Forecast",
                     eta1=eta20,
                     ages.up=NA,
-                    eta1.up=NA)
+                    eta1.up=NA,
+                    eta1.low=NA)
 ## fitted
 DFhat <- data.frame(ages=a, 
                     type="Fitted",
                     eta1=eta.hat,
                     ages.up=NA,
-                    eta1.up=NA)
+                    eta1.up=eta.up,
+                    eta1.low=eta.low)
 ## combine
 DF <- rbind(DFg, DFfor, DFhat)
 
@@ -505,20 +461,29 @@ p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
                aes(x=ages, y=eta1, xend=ages.up, yend=eta1.up), size=1)+
   geom_line(data=filter(DF, type=="Fitted"),
             aes(y=eta1), size=1)+
+  geom_ribbon(data=filter(DF, type=="Fitted"),
+              aes(ymin=eta1.low, ymax=eta1.up), alpha=.2)+
   geom_line(data=filter(DF, type=="Forecast"),
-            aes(y=eta1),size=1, linetype="dotted")+
-  labs(x="age", y="log-mortality", title=cou.j)
+            aes(y=eta1),size=1.2)+
+  labs(x="age", y="log-mortality", title=paste(cou.j, sex))
 p
 
-DFdelta <- data.frame(ages=a, delta=delta.hat)
-DFc <- data.frame(x=-2, c=c.hat)
-p <- ggplot(DFdelta, aes(x=ages, y=delta))+
-  geom_line(size=2, colour="darkgreen")+
-  geom_hline(yintercept=0, linetype="dashed", color = "darkred")+
-  labs(x="age", y=expression(paste("c, ", delta)), title=cou.j)+
-  geom_point(aes(x=DFc$x,y=DFc$c),
-             colour="darkblue", shape=3, size=3, stroke = 2)
+DFexpdelta <- data.frame(ages=a, expdelta=expdelta.hat,
+                      expdelta.low=expdelta.low,
+                      expdelta.up=expdelta.up)
+DFexpc <- data.frame(x=-2, expc=expc.hat, expc.low=expc.low, expc.up=expc.up)
 
+p <- ggplot(DFexpdelta, aes(x=ages))+
+  geom_line(aes(y=expdelta), size=2, colour="darkgreen")+
+  geom_ribbon(aes(ymin=expdelta.low, ymax=expdelta.up), alpha=0.5)+
+  geom_pointrange(aes(x=DFexpc$x, y=DFexpc$expc, 
+                      ymin = DFexpc$expc.low, 
+                      ymax = DFexpc$expc.up),
+                  colour="darkblue", size=1.3, stroke = 1)+
+  scale_y_log10(breaks=seq(0.1, 3, 0.1))+
+  geom_hline(yintercept=1, linetype="dashed", color = "darkred")+
+  labs(x="age", y=expression(paste("exp(c), exp(", delta, ")")), title=paste(cou.j, sex))
+  
 p
 
 

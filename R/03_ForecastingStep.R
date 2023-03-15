@@ -38,7 +38,7 @@ nc <- length(cou)
 # #unique(deaths$Country[which(deaths$age_spn==5)])
 # yescou <- 1:nc
 # yescou <- yescou[-nocou]
-
+j=5
 #pdf("ForecastFemales.pdf", width = 12, height = 10)
 for(j in 81:90){
 cou.j <- cou[j]
