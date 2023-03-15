@@ -407,6 +407,7 @@ no_child <-
   select(Country, Source, Year, Sex) %>% 
   unique()
 
+# excluding countries without age 0
 dts3 <- 
   dts2 %>% 
   filter(Age >= 5) %>% 
@@ -429,6 +430,7 @@ incomp_ages <-
   group_by(Country, Code, Source, Year, Sex) %>% 
   mutate(AgeSpan = ifelse(Age == max(Age), 0, AgeSpan)) %>% 
   filter(max(Age) != sum(AgeSpan)) %>% 
+  ungroup() %>% 
   select(Country, Source, Year, Sex) %>% 
   unique()
   
@@ -564,7 +566,8 @@ dts9 <-
   dts8 %>% 
   bind_rows(dts7 %>% 
               inner_join(only_t_sex)) %>% 
-  arrange(Country, Code, Source, Year, Sex, Age) 
+  arrange(Country, Code, Source, Year, Sex, Age) %>% 
+  replace_na(list(Deaths = 0))
 
 unique(dts9$Sex)
 
@@ -582,10 +585,19 @@ dts9 <- read_rds("data_inter/unpd_harmonized_test.rds")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 6. harmonize ages (same open age for all series, max closing at 100+)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# max_age <- 
+#   dts9 %>% 
+#   group_by(Country, Code, Source, Sex) %>% 
+#   summarise(max_age = max(Age)) %>% 
+#   mutate(max_age = min(max_age, 100)) %>% 
+#   ungroup() 
+
 max_age <- 
   dts9 %>% 
-  group_by(Country, Code, Source, Year, Sex) %>% 
+  group_by(Country, Code, Source, Sex, Year) %>% 
   summarise(max_age = max(Age)) %>% 
+  group_by(Country, Code, Source, Sex) %>% 
+  summarise(max_age = min(max_age)) %>% 
   mutate(max_age = min(max_age, 100)) %>% 
   ungroup() 
 
@@ -606,18 +618,38 @@ dts10 %>%
   ungroup() %>% 
   filter(n > 1)
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 7. looking at age groups differences
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+diff_age_grs <- 
+  dts10 %>% 
+  filter(Year < 2020) %>% 
+  group_by(Country, Code, Source, Sex, Age) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  select(Country, Code, Source, Sex, n) %>% 
+  unique() %>% 
+  group_by(Country, Code, Source, Sex) %>% 
+  summarise(grs = n()) %>% ungroup() %>% 
+  filter(grs>1) %>% 
+  select(-grs)
+ 
+dts11 <- 
+  dts10 %>% 
+  anti_join(diff_age_grs)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 7. remove series with insufficient periods for baseline (min 3 years 2015-2019)
+# 8. remove series with insufficient periods for baseline (min 3 years 2015-2019)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # series with sufficient years for estimating the baseline (at least 3 within 2015-2019)
 # series with data during the pandemic 2020-2021 (at least 1)
 
-unique(dts10$Source)
+unique(dts11$Source)
 
 enough_pers <- 
-  dts10 %>% 
+  dts11 %>% 
   select(Country, Code, Source, Year, Sex) %>% 
   unique() %>% 
   mutate(pre = ifelse(Year %in% 2015:2019, 1, 0),
@@ -627,8 +659,8 @@ enough_pers <-
   ungroup() %>% 
   select(-pre, -pan)
 
-dts11 <- 
-  dts10 %>% 
+dts12 <- 
+  dts11 %>% 
   inner_join(enough_pers) %>% 
   group_by(Country, Source, Year, Sex) %>% 
   mutate(age_spn = ifelse(Age == max(Age), -1, lead(Age) - Age)) %>% 
@@ -637,32 +669,42 @@ dts11 <-
                             # Source == "WHO All-Cause Mortality Data Call" ~ "unpd_who",
                             str_detect(Source, "WHO") ~ "unpd_who",
                             Source == "Human Mortality Database" ~ "unpd_hmd",
-                            TRUE ~ "unpd_crvs"))
+                            TRUE ~ "unpd_crvs")) %>% 
+  replace_na(list(Deaths = 0))
 
-unique(dts11$Source)
+unique(dts12$Source)
 
 # test for duplicates
-dups <-
-  dts11 %>%
+dts12 %>%
   # select(Country, Code, Source2, Year, Sex, Age, age_up, Deaths) %>%
   group_by(Country, Code, Source, Year, Sex, Age, age_spn) %>%
   mutate(n = n()) %>%
   ungroup() %>%
   filter(n > 1)
 
-dts12 <-
-  dts11 %>%
+dts13 <-
+  dts12 %>%
   group_by(Country, Code, Source, Year, Sex, Age, age_spn) %>%
   filter(Deaths == max(Deaths)) %>%
   select(-AgeLabel, -AgeSpan)
 
-dts12 %>%
+dts13 %>%
   group_by(Country, Code, Source, Year, Sex, Age, age_spn) %>%
   mutate(n = n()) %>%
   ungroup() %>%
   filter(n > 1)
 
-unique(dts12$Country)
+unique(dts13$Country)
+
+incomp_ages <- 
+  dts13 %>% 
+  group_by(Country, Code, Source, Year, Sex) %>% 
+  filter(max(Age) != sum(age_spn)+1) %>% 
+  select(Country, Source, Year, Sex) %>% 
+  unique()
+
+
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -670,8 +712,9 @@ unique(dts12$Country)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-readr::write_csv(dts12, file = "data_inter/unpd.csv")
-readr::write_rds(dts12, file = "data_inter/unpd.rds")
+readr::write_csv(dts13, file = "data_inter/unpd.csv")
+readr::write_rds(dts13, file = "data_inter/unpd.rds")
 
 # dts12 <- read_rds("data_inter/unpd.rds") %>%
 #   select(-AgeSpan, -pre, -pan)
+
