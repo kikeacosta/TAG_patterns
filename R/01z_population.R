@@ -8,10 +8,13 @@ source("R/00_functions.R")
 pop_f1 <- 
   read_xlsx("Data/WPP2022_POP_F01_3_POPULATION_SINGLE_AGE_FEMALE.xlsx",
             skip = 16) %>% 
-  select(3, 11:112) %>% 
+  select(3, 9, 11:112) %>% 
   rename(Country = 1, 
-         Year = 2) %>% 
-  filter(Year >= 2010) %>% 
+         type = 2,
+         Year = 3) %>% 
+  filter(Year >= 2010,
+         type == "Country/Area") %>% 
+  select(-type) %>% 
   gather(-Country, -Year, key = "Age", value = "Population") %>% 
   mutate(Sex = "f") %>% 
   arrange(Country, Age)
@@ -20,10 +23,13 @@ pop_f2 <-
   read_xlsx("Data/WPP2022_POP_F01_3_POPULATION_SINGLE_AGE_FEMALE.xlsx",
             sheet = 2,
             skip = 16) %>% 
-  select(3, 11:112) %>% 
+  select(3, 9, 11:112) %>% 
   rename(Country = 1, 
-         Year = 2) %>% 
-  filter(Year <= 2025) %>% 
+         type = 2,
+         Year = 3) %>% 
+  filter(Year <= 2025,
+         type == "Country/Area") %>% 
+  select(-type) %>% 
   gather(-Country, -Year, key = "Age", value = "Population") %>% 
   mutate(Sex = "f") %>% 
   arrange(Country, Age)
@@ -31,10 +37,13 @@ pop_f2 <-
 pop_m1 <- 
   read_xlsx("Data/WPP2022_POP_F01_2_POPULATION_SINGLE_AGE_MALE.xlsx",
             skip = 16) %>% 
-  select(3, 11:112) %>% 
+  select(3, 9, 11:112) %>% 
   rename(Country = 1, 
-         Year = 2) %>% 
-  filter(Year >= 2010) %>% 
+         type = 2,
+         Year = 3) %>% 
+  filter(Year >= 2010,
+         type == "Country/Area") %>% 
+  select(-type) %>% 
   gather(-Country, -Year, key = "Age", value = "Population") %>% 
   mutate(Sex = "m") %>% 
   arrange(Country, Age)
@@ -43,10 +52,13 @@ pop_m2 <-
   read_xlsx("Data/WPP2022_POP_F01_2_POPULATION_SINGLE_AGE_MALE.xlsx",
             sheet = 2,
             skip = 16) %>% 
-  select(3, 11:112) %>% 
+  select(3, 9, 11:112) %>% 
   rename(Country = 1, 
-         Year = 2) %>% 
-  filter(Year <= 2025) %>% 
+         type = 2,
+         Year = 3) %>% 
+  filter(Year <= 2025,
+         type == "Country/Area") %>% 
+  select(-type) %>% 
   gather(-Country, -Year, key = "Age", value = "Population") %>% 
   mutate(Sex = "m") %>% 
   arrange(Country, Age)
