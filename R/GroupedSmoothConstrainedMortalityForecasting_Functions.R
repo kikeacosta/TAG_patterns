@@ -170,7 +170,7 @@ PSinfant <- function(Y, E, lambdas, WEI, infant=TRUE, verbose=FALSE){
   ed <- sum(h)
   y0 <- y
   y0[y==0] <- 10^-8
-  dev <- 2 * sum(wei * (y * log(y0/mu)))
+  dev <- 2 * sum(wei * (y * log(y0/mu) - (y0-mu)))
   bic <- dev + log(sum(wei))*ed
   # ## deviance residuals
   # res0 <- sign(Y - Y.hat)
@@ -327,7 +327,7 @@ PSinfantGrouped <- function(a.low, Yg, a, E, WEIg, lambdas,
   nbt <- ncol(Bt)
   ## basis for the derivatives
   Ct <- BCt$C
-
+  
   ## complete composite matrix, only for observed period
   ## with fitted ungrouped exposures
   a.up  <- c(a.low[-1]-1, max(a))
@@ -455,7 +455,7 @@ PSinfantGrouped <- function(a.low, Yg, a, E, WEIg, lambdas,
   ed <- sum(h)
   y0 <- yg
   y0[yg==0] <- 10^-8
-  dev <- 2 * sum(weig * (yg * log(y0/mu)))
+  dev <- 2 * sum(weig * (yg * log(y0/mu) - (y0-mu)))
   bic <- dev + log(sum(weig))*ed
   ## return objects
   out <- list(
@@ -596,8 +596,8 @@ deltasFUN <- function(object, levels=c(95,50)){
 # st.alphas=NULL
 # upper.der=0.15
 
-a.low=ag.low
-Yg1=Yg1
+#a.low=ag.low
+#Yg1=Yg1
 # WEIg1=WEIg1
 # a=a
 # E1=E1
@@ -632,7 +632,7 @@ CPSfunctionGrouped <- function(a.low, Yg1, WEIg1,
   t1 <- 1:n1
   t <- 1:n
   tF <- (n1+1):n
-
+  
   ## arbitrary values for forecasting
   Yg <- matrix(10, mg, n)
   Yg[1:mg,1:n1] <- Yg1
@@ -681,7 +681,7 @@ CPSfunctionGrouped <- function(a.low, Yg1, WEIg1,
     ## basis for the derivatives
     Ca <- BCa$C
   }
-
+  
   
   ## over years
   tmin <- min(t)
@@ -826,10 +826,10 @@ CPSfunctionGrouped <- function(a.low, Yg1, WEIg1,
     v.a.upper.der <- CaBt.alphas > G.a.upper.der
     v.a.upper.der <- v.a.upper.der * Sshape
     P.a.upper.der <- MortSmooth_BWB(RTCa, RTBt,
-                             nba, nbt, v.a.upper.der)
+                                    nba, nbt, v.a.upper.der)
     P.a.upper.der <- kappa.shape * P.a.upper.der
     p.a.upper.der <- MortSmooth_BcoefB(t(Ca), t(Bt),
-                                v.a.upper.der*G.a.upper.der)
+                                       v.a.upper.der*G.a.upper.der)
     p.a.upper.der <- kappa.shape * c(p.a.upper.der)
     
     P.a <- P.a.up + P.a.low + P.a.mon + P.a.upper.der
@@ -898,7 +898,7 @@ CPSfunctionGrouped <- function(a.low, Yg1, WEIg1,
   y0 <- yg
   y0[yg==0] <- 10^-8
   dev <- 2 * sum(weig * (yg * log(y0/mu) - (y0-mu)))
-   
+  
   ## return objects
   out <- list(
     ## original data
@@ -1142,7 +1142,7 @@ CPSfunction <- function(Y, E, lambdas, WEI,
   ed <- sum(h)
   y0 <- y
   y0[y==0] <- 10^-8
-  dev <- 2 * sum(wei * (y * log(y0/mu)))
+  dev <- 2 * sum(wei * (y * log(y0/mu) - (y0-mu)))
   bic <- dev + log(sum(wei))*ed
   
   ## variance-covariance matrix for the coefficients alpha
