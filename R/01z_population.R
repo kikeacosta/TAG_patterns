@@ -79,3 +79,8 @@ pop2 <-
 
 write_csv(pop2, file = "data_inter/offsets.csv")
 
+pop3 <- 
+  pop2 %>% 
+  filter(Age < 100)
+
+write_csv(pop3, file = "data_inter/offsets_99.csv")
