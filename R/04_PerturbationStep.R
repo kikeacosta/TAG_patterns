@@ -11,8 +11,6 @@ library(ggplot2)
 library(plotly)
 library(viridis)
 
-## for a single country: Colombia (18)
-
 ## loading deaths
 deaths <- read.csv("data_inter/deaths_sourced_infant_based.csv", header=TRUE)
 ## loading population
@@ -33,7 +31,7 @@ n2 <- length(t2)
 cou <- unique(deaths$Country)
 nc <- length(cou)
 
-j=96
+j=34
 cou.j <- cou[j]
 ## select the country from deaths
 deaths.j <- subset(deaths, Country==cou.j)
@@ -140,7 +138,7 @@ CPSg.i <- CPSfunctionGrouped(a.low=ag.low, Yg1=Yg1, WEIg1=WEIg1,
                              ETA1hat=ETA1hat, deltas=deltasi, S=S, 
                              lambdas = OPT$par, verbose = TRUE,
                              infant = infantj,
-                             kappa.shape=0)
+                             kappa.shape=10^4)
 
 ETAhat <- CPSg.i$ETA
 str(CPSg.i)
@@ -194,7 +192,7 @@ p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
   geom_line(data=filter(DF, type=="Fitted+Forecast"),
             aes(y=eta1.low),size=1, linetype="dotted")+
   facet_wrap(~years1, 2, 6, scales="free_y")+
-  labs(x="age", y="log-mortality", title=cou.j)
+  labs(x="age", y="log-mortality", title=paste(cou.j, sex))
 print(p)
 
 
@@ -290,13 +288,16 @@ C20[G20==1] <- c(e20)
 
 ## design matrix
 Ba <- MortSmooth_bbase(x=a, min(a), max(a), floor(m/7), 3)
+Ba <- zapsmall(Ba, 8)
+matplot(a, Ba, t="l")
+
 nb <- ncol(Ba)
 U <- cbind(1, Ba)
 kappa <- 0
 ## penalty stuff
 D <- diff(diag(nb), diff=2)
 tDD <- t(D)%*%D
-lambdas <- 10^seq(-3, 8, 1)
+lambdas <- 10^seq(-1, 8, 0.1)
 nl <- length(lambdas)
 
 
@@ -352,10 +353,11 @@ for(l in 1:nl){
   ## try QIC
   psi <- DEV/(mg - ED)
   QICs[l] <- mg + ED + mg*log(psi)
-  cat(DEV, ED, "\n")
+  #cat(DEV, ED, "\n")
 }
-pmin <- which.min(QICs)
+pmin <- which.min(QICs)+2
 (lambda.hat <- lambdas[pmin])
+plot(log10(lambdas), QICs)
 ## with optimal lambda
 lambda <- lambda.hat
 P0 <- lambda*tDD
@@ -391,7 +393,7 @@ for(it in 1:max.it){
 gamma   <- exp(eta + eta20)
 mu      <- c(C20 %*% gamma)
 ## computing BIC
-Pr <- 10^-6 * diag(nb+1)
+Pr <- 10^-4 * diag(nb+1)
 Hat <- solve(tXWXpP+Pr, tXWX)
 ED <- sum(diag(Hat))
 y1 <- yg20
@@ -407,7 +409,7 @@ delta.hat <- Ba%*%coeff[1:nb+1]
 expdelta.hat <- exp(delta.hat)
 eta.hat <- eta20 + c.hat + delta.hat # U%*%betas+eta20
 ## confidence intervals
-Pr <- 10^-4 * diag(nb+1)
+Pr <- 10^-3 * diag(nb+1)
 H0 <- solve(tXWXpP+Pr)
 Vbetas <- H0 %*% tXWX %*% H0
 ## se for exp(c)
@@ -480,7 +482,7 @@ p <- ggplot(DFexpdelta, aes(x=ages))+
                       ymin = DFexpc$expc.low, 
                       ymax = DFexpc$expc.up),
                   colour="darkblue", size=1.3, stroke = 1)+
-  scale_y_log10(breaks=seq(0.1, 3, 0.1))+
+  scale_y_log10(breaks=seq(0.1, 10, 0.1))+
   geom_hline(yintercept=1, linetype="dashed", color = "darkred")+
   labs(x="age", y=expression(paste("exp(c), exp(", delta, ")")), title=paste(cou.j, sex))
   
