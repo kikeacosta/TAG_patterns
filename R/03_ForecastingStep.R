@@ -53,7 +53,14 @@ nc  <- length(cou)
 ## questions:
 ## FEMALES
 
+
 nocou <- cou %in% c("Andorra","Faroe Islands", "Montserrat", "Seychelles")
+
+# nocou <- c(3,29,61,77)
+# #unique(deaths$Country[which(deaths$age_spn==5)])
+# yescou <- 1:nc
+# yescou <- yescou[-nocou]
+
 cou[nocou]
 #unique(deaths$Country[which(deaths$age_spn==5)])
 # yescou = cou; nocou = c(0)
@@ -61,8 +68,10 @@ yescou <- 1:nc
 yescou <- yescou[!nocou]
 
 
-#pdf("ForecastFemales.pdf", width = 12, height = 10)
-#for(j in yescou){
+j=1
+
+
+
 cou.j    <- cou[j]
 dfcs<-deaths.j <- subset(deaths, Country == cou.j)
 
@@ -228,7 +237,7 @@ get_forecast_rough <- function(deaths.j, offset){
 #                        "offset",
 #                        "cleversearch2",
 #                        "BICfun","PSinfant","deltasFUN","CPSfunctionGrouped"))
-for (c in )
+# for (c in )
 attempt <-
   deaths |> 
   group_by(Country, Sex) %>% 
