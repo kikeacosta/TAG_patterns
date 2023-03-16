@@ -40,6 +40,7 @@ nc <- length(cou)
 # yescou <- yescou[-nocou]
 
 
+
 ## too few data
 ##  3) Andorra is missing age 30-35 in 2015
 ## 30) French Polynesia: 3 available years are too few (unless I modified the whole forecasting model)
@@ -128,6 +129,7 @@ yescou <- 1:nc
 yescou <- yescou[-nocou]
 
 j=1
+
 #pdf("ForecastFemales.pdf", width = 12, height = 10)
 #for(j in 1:nc){
 #pdf("ForecastFemales.pdf", width = 12, height = 10)
