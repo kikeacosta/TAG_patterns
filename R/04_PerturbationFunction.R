@@ -34,9 +34,6 @@ deaths <- read.csv("data_inter/deaths_sourced_infant_based_99.csv", header=TRUE)
 ## loading population
 offset <- read.csv("data_inter/offsets_99.csv", header=TRUE)
 
-
-deaths.j <- subset(deaths, Country=="Saint Vincent and Grenadines" & Sex == "f")
-
 # start body here
 fit_excess <- function(deaths.j, offset){
 
@@ -86,12 +83,14 @@ ag.lab <- paste(ag.low, ag.up, sep = "-")
 Yg1    <- matrix(0, mg, n1)
 Yg1[, whi.ava] <- matrix(Y.j$Deaths, mg, length(t1.ava))
 
-## working on the offset
+## select offset
 E.j <-
-  offset |> 
-  filter(Country == cou.j,
-         Year %in% t1.ava,
-         Sex == sex.s)
+  deaths.j |> 
+  filter(Year < t2[1]) |> 
+  select(Country, Year, Sex) |> 
+  distinct() |> 
+  left_join(offset, by = c("Country","Year","Sex"),multiple = "all")
+
  
 E1            <- matrix(0, m, n1)
 E1[, whi.ava] <- matrix(E.j$Population, m, length(t1.ava))
@@ -338,8 +337,10 @@ DFTRpert <- dplyr::bind_rows(list.out)
 DFTR <- rbind(DFTR, DFTRpert)
 DFTR
 }
-subset(deaths, Country=="Faroe Islands" & Sex == "f") |> 
-  fit_excess(offset)
+
+# for spot testing
+deaths.j <-
+  subset(deaths, Country=="Germany" & Sex == "m") 
 
 big_test<-
 deaths |> 
@@ -347,4 +348,68 @@ deaths |>
   group_by(Country, Sex) |> 
   do(fit_excess(deaths.j = .data, offset = offset)) |> 
   ungroup()
+
+big_test |> head()
+big_test |> pull(Country) |> unique()
+big_test |> 
+  mutate(Sex = case_when(Sex == "m" ~ "male",
+                         Sex == "f" ~ "female",
+                         Sex == "t" ~ "total")) |> 
+  write_csv("data_inter/eta_all.csv")
+
+big_test <-
+big_test |> 
+  mutate(Sex = case_when(Sex == "m" ~ "male",
+                         Sex == "f" ~ "female",
+                         Sex == "t" ~ "total")) 
+big_test |> 
+  filter(type == "Delta",
+         Country!="Armenia") |> 
+  ggplot(aes(x=ages,y=value,group = Country)) +
+  geom_line(alpha = .5) +
+  facet_grid(vars(Sex), vars(years)) +
+  labs(x = "Age", y = "Delta") 
+
+big_test |> 
+  filter(type == "Delta",
+        value > 1) |> 
+  pull(Country) |> unique()
+
+big_test |> 
+  filter(type == "Delta") |> 
+  #group_by(ages) |> 
+  mutate(q01 = quantile(value,.001),
+         q99 = quantile(value,.999)) |> 
+  #ungroup() |> 
+  filter(value < q01 | value > q99) |> 
+  pull(Country) |> unique()
+
+cou.j <- "Belgium"
+sex <- "male"
+yr = 2020
+DF <-
+  big_test |> 
+  filter(Country == cou.j,
+         Sex == sex,
+         years == yr)
+
+DFobs <- DF |> 
+  filter(type == "Obs Logrates") |> 
+  mutate(ageup = ages + DemoTools::age2int(ages, OAvalue = 1)) |> 
+  ungroup()
+
+ggplot(DF, aes(x = ages, y = value, color = type)) +
+  geom_segment(data = DFobs,
+               aes(x = ages, y = value, xend = ageup, yend = value), size = 1) +
+  geom_line(data = filter(DF, type == "Fitted Logrates"), linewidth = 1) +
+  geom_ribbon(data = filter(DF, type == "Fitted Logrates"),
+              aes(ymin = low, ymax = up), alpha = .2) +
+  geom_line(data = filter(DF, type == "Forecast"),
+            aes(y = value), linewidth = 1.2) +
+  labs(x = "age", y = "log-mortality", title = paste(cou.j,sex)) 
+DF$type |> unique()
+
+ggplot(DF, aes(x = ages, y = value, color = type)) +
+  geom_line(data = filter(DF, type == "Delta"), linewidth = 1) +
+  geom_line()
 
