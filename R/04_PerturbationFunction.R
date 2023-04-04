@@ -355,30 +355,59 @@ fit_excess <- function(deaths.j, offset){
 }
 
 
-source("R/temp_function.r")
+# source("R/temp_function.r")
 # for spot testing
-DF <-
+deaths.j <- 
 deaths |> 
-  filter(Country=="American Samoa" & Sex == "f") |> 
+  filter(Country=="Andorra" & Sex == "m") 
   fit_excess(offset = offset)
 
-# Multiple warnings:
-# In C20[G20 == 1] <- c(obs.e) :
-#   number of items to replace is not a multiple of replacement length
-# This warning happens multiple times per subset.
 # "Andorra" computationally singular
+library(parallel)
 
-big_test<-
+fit_excess_wrap <- function(deaths.j, offset){
+  out <- try(fit_excess(deaths.j = deaths.j,
+                 offset = offset))
+  if (class(out) == "try-error"){
+    return(NULL)
+  } else {
+    return(out)
+  }
+}
+
+big_L <-
 deaths |> 
-  filter(!Country %in% c("Andorra","Faroe Islands", "Montserrat", "Seychelles","Saint Vincent and Grenadines"),
-         Sex != "t") |> 
+  filter(Sex != "t") |> 
   group_by(Country, Sex) |> 
-  do(fit_excess(deaths.j = .data, offset = offset)) |> 
-  ungroup()|> 
+  group_split()
+
+N <- length(big_L)
+out_L <- vector("list", N)
+for (n in 1:N){
+  ctr  <- big_L[[n]]$Country[1]
+  sx   <- big_L[[n]]$Sex[1]
+  outn <- try(fit_excess(big_L[[n]], offset = offset))
+   if (class(outn)[1] == "try-error"){
+     outn <- tibble(ages=integer(),
+                    years=integer(),
+                    up=double(),
+                    low=double(),
+                    type=character(),
+                    value=double())
+   }
+   outn <-outn |> 
+     mutate(Country = ctr,.before=1) |> 
+     mutate(Sex = sx,.after=1)
+     
+   out_L[[n]] <- outn
+}
+
+big_test <- 
+  out_L |> 
+  bind_rows() |> 
   mutate(Sex = case_when(Sex == "m" ~ "male",
                          Sex == "f" ~ "female",
                          Sex == "t" ~ "total"))
-
 
 big_test |> 
   write_csv("data_inter/eta_all.csv")
@@ -419,10 +448,54 @@ for (cou.j in ctry){
                   aes(ymin = low, ymax = up), alpha = .2) +
       geom_line(data = filter(DF, type == "Baseline Logrates"),
                 aes(y = value), linewidth = 1.2) +
-      labs(x = "age", y = "log-mortality", title = paste(cou.j,sex)) 
-    
+      labs(x = "age", y = "log-mortality", title = paste(cou.j,sex)) +
+      theme_minimal()
     print(p)
   }
 }
 
 dev.off()
+
+yr <- 2020
+ctry <- big_test |> 
+  filter(years == yr) |> 
+  pull(Country) |> unique()
+
+pdf(paste0("Figures/Deltas",yr,"all.pdf"))
+
+for (cou.j in ctry){
+  
+  sexes <- big_test |> 
+    filter(Country == cou.j,
+           years == yr) |> 
+    pull(Sex) |> 
+    unique()
+  for (sex in sexes){
+    DFa <-
+      big_test |> 
+      filter(Country == cou.j,
+             Sex == sex,
+             years == yr,
+             type %in% c("c","Delta"))
+    
+    .c  <-  DFa |> 
+      filter(type == "c") |> 
+      mutate(ages=0)
+    
+    DFd <- DFa |> 
+      filter(type == "Delta") 
+    
+    p <-
+      ggplot(DFa, aes(x = ages, y = value, color = type)) +
+      geom_line(data=DFd,linewidth = 1) +
+      geom_ribbon(data=DFd,mapping=aes(ymin = low, ymax = up), alpha = .2) +
+      geom_point(data=.c, mapping=aes(x=ages,y=value),color="red",size=2) +
+      geom_segment(data=.c, mapping=aes(x=ages,xend=ages,y=low,yend=up),color="red") +
+      labs(x = "age", y = "log difference", title = paste(cou.j,sex)) +
+      theme_minimal()
+    print(p)
+  }
+}
+
+dev.off()
+
