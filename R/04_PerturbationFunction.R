@@ -9,6 +9,7 @@ library(ggplot2)
 library(plotly)
 library(viridis)
 library(Matrix)
+library(tidyverse)
 source("R/GroupedSmoothConstrainedMortalityForecasting_Functions.R")
 source("R/cleversearch.R")
 BICfun <- function(par, ag.low, Yg1, a, E1, WEIg1, infantj) {
@@ -339,77 +340,69 @@ DFTR
 }
 
 # for spot testing
-deaths.j <-
-  subset(deaths, Country=="Germany" & Sex == "m") 
 
+  filter(deaths, Country=="Germany" & Sex == "m") |> 
+  fit_excess(offset = offset)
+
+# Multiple warnings:
+# In C20[G20 == 1] <- c(obs.e) :
+#   number of items to replace is not a multiple of replacement length
+# This warning happens multiple times per subset.
 big_test<-
 deaths |> 
-  filter(!Country %in% c("Andorra", "Faroe Islands", "Montserrat", "Seychelles","Saint Vincent and Grenadines")) |> 
+  filter(!Country %in% c("Andorra", "Faroe Islands", "Montserrat", "Seychelles","Saint Vincent and Grenadines"),
+         Sex != "t") |> 
   group_by(Country, Sex) |> 
   do(fit_excess(deaths.j = .data, offset = offset)) |> 
-  ungroup()
-
-big_test |> head()
-big_test |> pull(Country) |> unique()
-big_test |> 
+  ungroup()|> 
   mutate(Sex = case_when(Sex == "m" ~ "male",
                          Sex == "f" ~ "female",
-                         Sex == "t" ~ "total")) |> 
+                         Sex == "t" ~ "total"))
+
+
+big_test |> 
   write_csv("data_inter/eta_all.csv")
 
-big_test <-
-big_test |> 
-  mutate(Sex = case_when(Sex == "m" ~ "male",
-                         Sex == "f" ~ "female",
-                         Sex == "t" ~ "total")) 
-big_test |> 
-  filter(type == "Delta",
-         Country!="Armenia") |> 
-  ggplot(aes(x=ages,y=value,group = Country)) +
-  geom_line(alpha = .5) +
-  facet_grid(vars(Sex), vars(years)) +
-  labs(x = "Age", y = "Delta") 
 
-big_test |> 
-  filter(type == "Delta",
-        value > 1) |> 
+yr <- 2021
+ctry <- big_test |> 
+  filter(years == yr) |> 
   pull(Country) |> unique()
 
-big_test |> 
-  filter(type == "Delta") |> 
-  #group_by(ages) |> 
-  mutate(q01 = quantile(value,.001),
-         q99 = quantile(value,.999)) |> 
-  #ungroup() |> 
-  filter(value < q01 | value > q99) |> 
-  pull(Country) |> unique()
+pdf(paste0("Figures/Fitted",yr,"all.pdf"))
 
-cou.j <- "Belgium"
-sex <- "male"
-yr = 2020
-DF <-
-  big_test |> 
-  filter(Country == cou.j,
-         Sex == sex,
-         years == yr)
+for (cou.j in ctry){
 
-DFobs <- DF |> 
-  filter(type == "Obs Logrates") |> 
-  mutate(ageup = ages + DemoTools::age2int(ages, OAvalue = 1)) |> 
-  ungroup()
+  sexes <- big_test |> 
+    filter(Country == cou.j,
+           years == yr) |> 
+    pull(Sex) |> 
+    unique()
+  for (sex in sexes){
+    DF <-
+      big_test |> 
+      filter(Country == cou.j,
+             Sex == sex,
+             years == yr)
+    
+    DFobs <- DF |> 
+      filter(type == "Obs Logrates") |> 
+      mutate(ageup = ages + DemoTools::age2int(ages, OAvalue = 1)) |> 
+      ungroup()
+    
+    p <-
+      ggplot(DF, aes(x = ages, y = value, color = type)) +
+      geom_segment(data = DFobs,
+                   aes(x = ages, y = value, xend = ageup, yend = value), linewidth = 1) +
+      geom_line(data = filter(DF, type == "Fitted Logrates"), linewidth = 1) +
+      geom_ribbon(data = filter(DF, type == "Fitted Logrates"),
+                  aes(ymin = low, ymax = up), alpha = .2) +
+      geom_line(data = filter(DF, type == "Baseline Logrates"),
+                aes(y = value), linewidth = 1.2) +
+      labs(x = "age", y = "log-mortality", title = paste(cou.j,sex)) 
+    
+    print(p)
+  }
+}
 
-ggplot(DF, aes(x = ages, y = value, color = type)) +
-  geom_segment(data = DFobs,
-               aes(x = ages, y = value, xend = ageup, yend = value), size = 1) +
-  geom_line(data = filter(DF, type == "Fitted Logrates"), linewidth = 1) +
-  geom_ribbon(data = filter(DF, type == "Fitted Logrates"),
-              aes(ymin = low, ymax = up), alpha = .2) +
-  geom_line(data = filter(DF, type == "Forecast"),
-            aes(y = value), linewidth = 1.2) +
-  labs(x = "age", y = "log-mortality", title = paste(cou.j,sex)) 
-DF$type |> unique()
-
-ggplot(DF, aes(x = ages, y = value, color = type)) +
-  geom_line(data = filter(DF, type == "Delta"), linewidth = 1) +
-  geom_line()
-
+dev.off()
