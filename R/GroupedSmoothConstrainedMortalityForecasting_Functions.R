@@ -1188,21 +1188,40 @@ PertubFUN <- function(ag.low, obs.y, obs.e, a, eta.for,
   ag.mid <- (ag.low+ag.up)/2 
   ag.lab <- paste(ag.low, ag.up,sep="-")
   
-  lg <- ag.up-ag.low+1
+  # lg <- ag.up-ag.low+1
   mg <- length(ag.low)
-  G20 <- matrix(0, mg, m)
-  rownames(G20) <- ag.mid
-  colnames(G20) <- a
-  for(i in 1:mg){
-    ag.low.i <- ag.low[i]
-    ag.up.i <- ag.up[i]
-    wc <- which(a>=ag.low.i & a<=ag.up.i)
-    G20[i,wc] <- 1
-  }
+  # G20 <- matrix(0, mg, m)
+  # rownames(G20) <- ag.mid
+  # colnames(G20) <- a
+  # for(ii in 1:mg){
+  #   ag.low.i <- ag.low[ii]
+  #   ag.up.i <- ag.up[ii]
+  #   wc <- which(a>=ag.low.i & a<=ag.up.i)
+  #   G20[ii,wc] <- 1
+  # }
+  # ag.low <- seq(0,95,by=5)
+  # mg <- length(ag.low)
+  A1 <- tibble(age = a, exposure = obs.e)
+  B  <- tibble(age = ag.low, value = rep(1, mg))
+  C20  <- left_join(A1, B, by = "age") |> 
+    mutate(ag = age * value) |> 
+    fill(ag,.direction = "down") |> 
+    select(-value) |> 
+    pivot_wider(names_from=age, values_from = exposure, values_fill = 0) |> 
+    column_to_rownames("ag") |> 
+    as.matrix()
+
+  # 
+  # TR: note to self, create G20 more efficiently
+  # rows age groups
+  # cols single ages
+  # cells exposures
+  
+  
   #all(colSums(G20)==1)
   ## create C matrix with e20
-  C20 <- G20
-  C20[G20==1] <- c(obs.e)
+  # C20 <- G20
+  # C20[G20==1] <- c(obs.e)
   
   ## design matrix
   Ba <- MortSmooth_bbase(x=a, min(a), max(a), floor(m/7), 3)
