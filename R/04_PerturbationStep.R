@@ -460,7 +460,6 @@ for(j in 1:length(tF.ava)){
   p <- ggplot(DFexpdelta, aes(x=ages))+
     geom_line(aes(y=expdelta), size=2, colour="darkgreen")+
     geom_ribbon(aes(ymin=expdelta.low, ymax=expdelta.up), alpha=0.5)+
-    geom_ribbon(data=DFoptlambda, aes(x=ages, ymin=expdelta.low, ymax=expdelta.up), alpha=0.5, col=5)+
     geom_pointrange(aes(x=DFexpc$x, y=DFexpc$expc, 
                         ymin = DFexpc$expc.low, 
                         ymax = DFexpc$expc.up),
