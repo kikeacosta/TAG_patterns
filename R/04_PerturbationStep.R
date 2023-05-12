@@ -1,28 +1,25 @@
-## clearing workspace
-rm(list = ls())
-## plotting in a difference device
-options(device="X11")
-## !!!! to be changed
-setwd("~/WORK/TAG_patterns/")
 library(MortalitySmooth)
 library(magic)
 library(colorspace)
 library(ggplot2)
 library(plotly)
 library(viridis)
+library(Matrix)
+library(tidyverse)
+source("R/04_PerturbationFunction.R")
 
-## loading deaths
-deaths <- read.csv("data_inter/deaths_sourced_infant_based.csv", header=TRUE)
+deaths <- read.csv("data_inter/deaths_sourced_infant_based_99.csv", header=TRUE)
 ## loading population
-offset <- read.csv("data_inter/offsets.csv", header=TRUE)
+offset <- read.csv("data_inter/offsets_99.csv", header=TRUE)
+
 ## sex
-sex <- "m"
-sexLT <- "M"
+sex <- "f"
+sexLT <- "F"
 deaths <- subset(deaths, Sex==sex)
 offset <- subset(offset, Sex==sex)
 
 ## ages and dimensions
-a <- 0:100
+a <- 0:99
 m <- length(a)
 ## pandemic years for the first forecasting part
 t2 <- 2020:2021
@@ -31,7 +28,7 @@ n2 <- length(t2)
 cou <- unique(deaths$Country)
 nc <- length(cou)
 
-j=34
+j=21
 cou.j <- cou[j]
 ## select the country from deaths
 deaths.j <- subset(deaths, Country==cou.j)
@@ -82,74 +79,15 @@ Eg1 <- G%*%E1
 ETAg1 <- log(Yg1/Eg1)
 
 
-source("~/WORK/ConstrainedMortalityForecast/GroupedData/FUNCTIONS/GroupedSmoothConstrainedMortalityForecasting_Functions.R")
-
-## weights for grouped-exposures
-WEIg1 <- matrix(1, mg,n1)
-WEIg1[,!whi.ava] <- 0
-## there is age 0?
-infantj <- ifelse(ag.up[1]==0, TRUE, FALSE)
-
-BICfun <- function(par){
-  FIT <- PSinfantGrouped(a.low = ag.low,
-                         Yg=Yg1,
-                         a=a,
-                         E=E1,
-                         WEIg=WEIg1,
-                         lambdas=par,
-                         verbose=TRUE,
-                         kappa.shape=0,
-                         infant=infantj)
-  FIT$bic
-}
-## optimizing lambdas using greedy grid search
-tim1 <- Sys.time()
-OPT <- cleversearch(BICfun, lower=c(-1, 1), upper=c(3, 5),
-                    ngrid=5, logscale=TRUE, startvalue=c(10^4,10^5),
-                    verbose=TRUE)
-tim2 <- Sys.time()
-tim2-tim1
-
-
-## estimating mortality with optimal lambdas
-FITi <- PSinfantGrouped(a.low = ag.low,
-                        Yg=Yg1,
-                        a=a,
-                        E=E1,
-                        WEIg=WEIg1,
-                        lambdas=OPT$par,
-                        verbose=TRUE,
-                        kappa.shape=0,
-                        infant=infantj)
-
-## estimated/smooth log-mortality on the pre-pandemic years
-ETA1hat <- FITi$ETA
-
-## FORECASTING STEP ## FORECASTING STEP ## FORECASTING STEP 
-## where to apply the constraints
-S <- matrix(1, m, n)
-S[,1:n1] <- 0
-## compute deltas : CIs of relative derivatives
-deltasi <- deltasFUN(FITi)
-## forecasting
-CPSg.i <- CPSfunctionGrouped(a.low=ag.low, Yg1=Yg1, WEIg1=WEIg1,
-                             a=a, E1=E1, obs.yrs=t1, 
-                             for.hor=max(t),
-                             ETA1hat=ETA1hat, deltas=deltasi, S=S, 
-                             lambdas = OPT$par, verbose = TRUE,
-                             infant = infantj,
-                             kappa.shape=10^4)
-
 ETAhat <- CPSg.i$ETA
 str(CPSg.i)
 ## analytic confidence intervals
 B <- kronecker(CPSg.i$Bt, CPSg.i$Ba)
-Veta <- B %*% CPSg.i$Valpha %*% t(B)
-SEeta <- matrix(sqrt(diag(Veta)), m, n)
-#psi2 <- CPSg.i$dev/(mg * n1 - CPSg.i$ed)
+Veta.for <- B %*% CPSg.i$Valpha %*% t(B)
+SEeta.for <- matrix(sqrt(diag(Veta.for)), m, n)
 
-ETAup <- ETAhat + 2*SEeta
-ETAlow <- ETAhat - 2*SEeta
+ETAup <- ETAhat + 2*SEeta.for
+ETAlow <- ETAhat - 2*SEeta.for
 
 
 ## plotting, starting from the beginning
@@ -160,13 +98,6 @@ DFg$eta1 <- c(ETAg1)
 DFg$ages.up <- ag.up+1
 DFg$eta1.up <- c(ETAg1)
 DFg$eta1.low <- NA
-## fitted
-DFhat <- expand.grid(list(ages=a, years1=t1))
-DFhat$type <- "Fitted"
-DFhat$eta1 <- c(ETA1hat)
-DFhat$ages.up <- NA
-DFhat$eta1.up <- NA
-DFhat$eta1.low <- NA
 ## forecast
 DFfor <- expand.grid(list(ages=a, years1=t))
 DFfor$type <- "Fitted+Forecast"
@@ -176,10 +107,10 @@ DFfor$eta1.up <- c(ETAup)
 DFfor$eta1.low <- c(ETAlow)
 
 ## all
-DF <- rbind(DFg, DFhat, DFfor) 
-DF$group <- factor(c(rep(ag.lab, n1),rep(rep(ag.lab, lg), n1),
+DF <- rbind(DFg, DFfor) 
+DF$group <- factor(c(rep(ag.lab, n1),
                      rep(rep(ag.lab, lg), n)), levels = ag.lab)
-DF$colo <- c(rep(ag.mid, n1), rep(a, n1), rep(a, n))
+DF$colo <- c(rep(ag.mid, n1), rep(a, n))
 
 ## over age
 p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
@@ -210,7 +141,7 @@ if(mg<=25){
     facet_wrap(~group, 5, 5, scales="free_y")+
     theme(legend.position = "none")+
     scale_color_viridis(discrete=FALSE, option="inferno")+
-    labs(x="year", y="log-mortality", title=cou.j)+
+    labs(x="year", y="log-mortality", title=paste(cou.j, sex))+
     geom_rect(data=DF[1:mg,],
               aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2,
                   ymin = -Inf, ymax = Inf),
@@ -230,7 +161,7 @@ if(mg<=25){
     facet_wrap(~group, 2, 5, scales="free_y")+
     theme(legend.position = "none")+
     scale_color_viridis(discrete=FALSE, option="inferno")+
-    labs(x="year", y="log-mortality", title=cou.j)+
+    labs(x="year", y="log-mortality", title=paste(cou.j, sex))+
     geom_rect(data=DFsel[1:mg,],
               aes(xmin = min(t2)-0.2, xmax = max(t2)+0.2,
                   ymin = -Inf, ymax = Inf),
@@ -238,259 +169,363 @@ if(mg<=25){
   p
 }
 
-## estimating perturbation 
 
-## 2020 and 2021 are treated independently 
 
 ## y_2020 ~ Poi(C mu)
 ## log(mu) = eta^for_2020 + c + \delta
 ## smooth \delta and s.t. 1' \delta = 0
 
-## let's start from 2020
-
-## extract 2020 forecast log-mortality (~offset)
-eta20 <- ETAhat[,ncol(ETAhat)-1]
-
-## extract deaths and exposures for 2020
-Y.j20 <- subset(deaths.j, Year==2020)
-yg20 <- Y.j20$Deaths
-e20 <- subset(offset, Country==cou.j & Year==2020)$Population
-ag.low <- unique(Y.j20$Age)
-ag.up1  <- ag.low-1
-if(ag.low[2]==1){
-  ag.up <- c(0, ag.up1[ag.up1>0], max(a))
-}else{
-  ag.up <- c(ag.up1[ag.up1>0], max(a))
-}
-ag.mid <- (ag.low+ag.up)/2 
-ag.lab <- paste(ag.low, ag.up,sep="-")
-
-lg <- ag.up-ag.low+1
-mg <- length(ag.low)
-G20 <- matrix(0, mg, m)
-rownames(G20) <- ag.mid
-colnames(G20) <- a
-for(i in 1:mg){
-  ag.low.i <- ag.low[i]
-  ag.up.i <- ag.up[i]
-  wc <- which(a>=ag.low.i & a<=ag.up.i)
-  G20[i,wc] <- 1
-}
-all(colSums(G20)==1)
-
-
-## only for plotting
-eg20 <- G20 %*% e20 
-etag20 <- log(yg20/eg20)
-## create C matrix with e20
-C20 <- G20
-C20[G20==1] <- c(e20)
-
-## design matrix
-Ba <- MortSmooth_bbase(x=a, min(a), max(a), floor(m/7), 3)
-Ba <- zapsmall(Ba, 8)
-matplot(a, Ba, t="l")
-
-nb <- ncol(Ba)
-U <- cbind(1, Ba)
-kappa <- 0
-## penalty stuff
-D <- diff(diag(nb), diff=2)
-tDD <- t(D)%*%D
-lambdas <- 10^seq(-1, 8, 0.1)
-nl <- length(lambdas)
-
-
-## constraining \delta to sum up to 0
-H0 <- matrix(c(0, rep(1,m)), 1, m+1)
-H1 <- adiag(0, Ba)
-H <- H0 %*% H1
-
-QICs <- numeric(nl)
-l <- 10
-for(l in 1:nl){
-  lambda <- lambdas[l]
-  P0 <- lambda*tDD
-  P <- matrix(0,nb+1,nb+1)
-  P[-1,-1] <- P0
+## which pandemic years are available
+tF.ava <- t.ava.dea[!t.ava.dea%in%t1.ava]
+n.boot <- 500
+j=1
+list.out <- list()
+for(j in 1:length(tF.ava)){
   
-  ## starting eta (log-mortality minus forecast log-mortality in 2020)
-  eta <- rep(0.01,m)
-  ## PCLM regression with eta20 as offset
-  max.it <- 100
-  for(it in 1:max.it){
-    gamma   <- exp(eta + eta20)
-    mu      <- c(C20 %*% gamma)
-    X       <- (C20 * ((1 / mu) %*% t(gamma)) ) %*% U
-    w       <- as.vector(mu)
-    r       <- yg20 - mu + C20 %*% (gamma * eta)
-    tXWX    <- t(X) %*% (w * X) 
-    tXWXpP  <- tXWX + P
-    tXr     <- t(X) %*% r
-    ## adding constraints
-    LHS     <- rbind(cbind(tXWXpP, t(H)),
-                 cbind(H, 0))
-    RHS     <- matrix(c(tXr, kappa), ncol=1)
-    coeff   <- solve(LHS, RHS)
-    ##
-    betas   <- coeff[1:(nb+1)]
-    eta.old <- eta
-    eta     <- U%*%betas
-    dif.eta <- max(abs((eta - eta.old)/eta.old) )
-    if(dif.eta < 1e-04 & it > 4) break
-    #cat(it, dif.eta, "\n")
+  ## for a given pandemic year
+  
+  ## extract deaths and exposures for tF.ava[j] 
+  obs.y0 <- subset(DFTR, type=="Obs Deaths" & years==tF.ava[j])
+  obs.y <- obs.y0$value
+  obs.e0 <- subset(DFTR, type=="Obs Offset" & years==tF.ava[j])
+  obs.e <- obs.e0$value
+  
+  ## extract tF.ava[j] forecast log-mortality (~offset in this analysis)
+  eta.for0 <- subset(DFTR, type=="Baseline Logrates" & years==tF.ava[j])
+  eta.for <- eta.for0$value 
+  
+  ## age-structure
+  ag.low <- obs.y0$ages
+  
+  ## optimizing lambda for delta
+  QIC_Pert <- function(par){
+    FIT <- PertubFUN(ag.low=ag.low,
+                     obs.y=obs.y,
+                     obs.e=obs.e,
+                     a=a,
+                     eta.for=eta.for,
+                     lambda=par)
+    FIT$QIC
   }
-  gamma   <- exp(eta + eta20)
-  mu      <- c(C20 %*% gamma)
-  ## computing BIC
-  Pr <- 10^-6 * diag(nb+1)
-  Hat <- solve(tXWXpP+Pr, tXWX)
-  ED <- sum(diag(Hat))
-  y1 <- yg20
-  y1[yg20 == 0] <- 10^(-4)
-  DEV <- 2 * sum( (yg20 * log(y1/mu) - (y1-mu)))
-  #BICs[l] <- DEV + log(mg)*ED
-  ## try QIC
-  psi <- DEV/(mg - ED)
-  QICs[l] <- mg + ED + mg*log(psi)
-  #cat(DEV, ED, "\n")
-}
-pmin <- which.min(QICs)+2
-(lambda.hat <- lambdas[pmin])
-plot(log10(lambdas), QICs)
-## with optimal lambda
-lambda <- lambda.hat
-P0 <- lambda*tDD
-P <- matrix(0,nb+1,nb+1)
-P[-1,-1] <- P0
-
-## starting eta (log-mortality minus forecast log-mortality in 2020)
-eta <- rep(0.01,m)
-## PCLM regression with eta20 as offset
-max.it <- 100
-for(it in 1:max.it){
-  gamma   <- exp(eta + eta20)
-  mu      <- c(C20 %*% gamma)
-  X       <- (C20 * ((1 / mu) %*% t(gamma)) ) %*% U
-  w       <- as.vector(mu)
-  r       <- yg20 - mu + C20 %*% (gamma * eta)
-  tXWX    <- t(X) %*% (w * X) 
-  tXWXpP  <- tXWX + P
-  tXr     <- t(X) %*% r
-  ## adding constraints
-  LHS     <- rbind(cbind(tXWXpP, t(H)),
-                   cbind(H, 0))
-  RHS     <- matrix(c(tXr, kappa), ncol=1)
-  coeff   <- solve(LHS, RHS)
-  ##
-  betas   <- coeff[1:(nb+1)]
-  eta.old <- eta
-  eta     <- U%*%betas
-  dif.eta <- max(abs((eta - eta.old)/eta.old) )
-  if(dif.eta < 1e-04 & it > 4) break
-  cat(it, dif.eta, "\n")
-}
-gamma   <- exp(eta + eta20)
-mu      <- c(C20 %*% gamma)
-## computing BIC
-Pr <- 10^-4 * diag(nb+1)
-Hat <- solve(tXWXpP+Pr, tXWX)
-ED <- sum(diag(Hat))
-y1 <- yg20
-y1[yg20 == 0] <- 10^(-4)
-DEV <- 2 * sum( (yg20 * log(y1/mu) - (y1-mu)))
-# psi2 <- DEV/(mg - ED)
-# psi2
-
-## fitted values
-c.hat <- coeff[1]
-expc.hat <- exp(c.hat)
-delta.hat <- Ba%*%coeff[1:nb+1]
-expdelta.hat <- exp(delta.hat)
-eta.hat <- eta20 + c.hat + delta.hat # U%*%betas+eta20
-## confidence intervals
-Pr <- 10^-3 * diag(nb+1)
-H0 <- solve(tXWXpP+Pr)
-Vbetas <- H0 %*% tXWX %*% H0
-## se for exp(c)
-der.expc <- matrix(c(exp(c.hat), rep(0, nb)), 1, nb+1)
-V.expc <- der.expc %*% Vbetas %*% t(der.expc)
-se.expc <- sqrt(diag(V.expc))
-## se for exp(delta)
-bla <- cbind(0, Ba)
-der.expdelta <- diag(c(exp(delta.hat))) %*% bla
-V.expdelta <- der.expdelta %*% Vbetas %*% t(der.expdelta)
-se.expdelta <- sqrt(diag(V.expdelta))
-## se for eta
-Veta <- U %*% Vbetas %*% t(U)
-se.eta <- sqrt(diag(Veta))
-
-## 95% CIs
-expc.up <- expc.hat + 2*se.expc
-expc.low <- expc.hat - 2*se.expc
-expdelta.up <- expdelta.hat + 2*se.expdelta
-expdelta.low <- expdelta.hat - 2*se.expdelta
-eta.up <- eta.hat + 2*se.eta
-eta.low <- eta.hat - 2*se.eta
-
-
-## observed
-DFg <- data.frame(ages=ag.low, 
-                  type="Actual grouped",
-                  eta1=etag20,
-                  ages.up=ag.up+1,
-                  eta1.up=etag20,
-                  eta1.low=NA)
-## forecast
-DFfor <- data.frame(ages=a, 
-                    type="Forecast",
-                    eta1=eta20,
-                    ages.up=NA,
-                    eta1.up=NA,
-                    eta1.low=NA)
-## fitted
-DFhat <- data.frame(ages=a, 
-                    type="Fitted",
-                    eta1=eta.hat,
-                    ages.up=NA,
-                    eta1.up=eta.up,
-                    eta1.low=eta.low)
-## combine
-DF <- rbind(DFg, DFfor, DFhat)
-
-p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
-  geom_segment(data=filter(DF, type=="Actual grouped"),
-               aes(x=ages, y=eta1, xend=ages.up, yend=eta1.up), size=1)+
-  geom_line(data=filter(DF, type=="Fitted"),
-            aes(y=eta1), size=1)+
-  geom_ribbon(data=filter(DF, type=="Fitted"),
-              aes(ymin=eta1.low, ymax=eta1.up), alpha=.2)+
-  geom_line(data=filter(DF, type=="Forecast"),
-            aes(y=eta1),size=1.2)+
-  labs(x="age", y="log-mortality", title=paste(cou.j, sex))
-p
-
-DFexpdelta <- data.frame(ages=a, expdelta=expdelta.hat,
-                      expdelta.low=expdelta.low,
-                      expdelta.up=expdelta.up)
-DFexpc <- data.frame(x=-2, expc=expc.hat, expc.low=expc.low, expc.up=expc.up)
-
-p <- ggplot(DFexpdelta, aes(x=ages))+
-  geom_line(aes(y=expdelta), size=2, colour="darkgreen")+
-  geom_ribbon(aes(ymin=expdelta.low, ymax=expdelta.up), alpha=0.5)+
-  geom_pointrange(aes(x=DFexpc$x, y=DFexpc$expc, 
-                      ymin = DFexpc$expc.low, 
-                      ymax = DFexpc$expc.up),
-                  colour="darkblue", size=1.3, stroke = 1)+
-  scale_y_log10(breaks=seq(0.1, 10, 0.1))+
-  geom_hline(yintercept=1, linetype="dashed", color = "darkred")+
-  labs(x="age", y=expression(paste("exp(c), exp(", delta, ")")), title=paste(cou.j, sex))
+  ## optimizing lambdas using greedy grid search
+  OPT <- cleversearch(QIC_Pert, lower=-1, upper=8,
+                      ngrid=19, logscale=TRUE, startvalue=10^4,
+                      verbose=FALSE)
+  lambda <- OPT$par
   
-p
+  ## estimating perturbation with optimal lambdas
+  PertOPT <- PertubFUN(ag.low=ag.low,
+                       obs.y=obs.y,
+                       obs.e=obs.e,
+                       a=a,
+                       eta.for=eta.for,
+                       lambda=lambda)
+  nb <- ncol(PertOPT$Ba)
+  ## fitted values
+  c.hat <- PertOPT$coeff[1]
+  expc.hat <- exp(c.hat)
+  delta.hat <- PertOPT$Ba%*%PertOPT$coeff[1:nb+1]
+  expdelta.hat <- exp(delta.hat)
+  pert.hat <- c.hat + delta.hat
+  exppert.hat <- exp(pert.hat)
+  eta.hat <- eta.for + pert.hat
+  
+  ## given the optimized lambda bootstrapping
+  cs.hat <- numeric(n.boot)
+  DELTAs.hat <- PERTs.hat <- ETAs.hat <- matrix(0, m, n.boot)
+  for(b in 1:n.boot){
+    ## sample new observation
+    obs.y.b <- rpois(n=length(obs.y), lambda = obs.y)
+    ## simulate a new forecast log-mortality
+    eta.for.b <- rnorm(m, mean=eta.for, sd=SEeta.for[, which(t==tF.ava[j])])
+    ## permutation step with optimized lambda and bootstrapped data
+    PertOPT.b <- PertubFUN(ag.low=ag.low,
+                           obs.y=obs.y.b,
+                           obs.e=obs.e,
+                           a=a,
+                           eta.for=eta.for.b,
+                           lambda=lambda)
+    nb <- ncol(PertOPT.b$Ba)
+    ## save useful objects
+    c.hat.b <- PertOPT.b$coeff[1]
+    delta.hat.b <- PertOPT.b$Ba %*% PertOPT.b$coeff[1:nb+1]
+    pert.hat.b <- c.hat.b + delta.hat.b
+    eta.hat.b <- eta.for.b + pert.hat.b
+    cs.hat[b] <- c.hat.b
+    DELTAs.hat[,b] <- delta.hat.b
+    PERTs.hat[,b] <- pert.hat.b
+    ETAs.hat[,b] <- eta.hat.b
+  }
+  ## 95% CIs (now including both sources of uncertainty)
+  c.up <- quantile(cs.hat, probs = 0.975)
+  c.low <- quantile(cs.hat, probs = 0.025)
+  delta.up <- apply(DELTAs.hat, 1, quantile, probs = 0.975)
+  delta.low <- apply(DELTAs.hat, 1, quantile, probs = 0.025)
+  expc.up <- quantile(exp(cs.hat), probs = 0.975)
+  expc.low <- quantile(exp(cs.hat), probs = 0.025)
+  expdelta.up <- apply(exp(DELTAs.hat), 1, quantile, probs = 0.975)
+  expdelta.low <- apply(exp(DELTAs.hat), 1, quantile, probs = 0.025)
+  pert.up <- apply(PERTs.hat, 1, quantile, probs = 0.975)
+  pert.low <- apply(PERTs.hat, 1, quantile, probs = 0.025)
+  exppert.up <- apply(exp(PERTs.hat), 1, quantile, probs = 0.975)
+  exppert.low <- apply(exp(PERTs.hat), 1, quantile, probs = 0.025)
+  eta.up <- apply(ETAs.hat, 1, quantile, probs = 0.975)
+  eta.low <- apply(ETAs.hat, 1, quantile, probs = 0.025)
+  ## for fitted values I take the median of the bootstrapped values?
+  ## summation constrain for delta doesn't hold!
+  #c.hat <- quantile(cs.hat, probs = 0.5)
+  #delta.hat <- apply(DELTAs.hat, 1, quantile, probs = 0.5)
+  #expc.hat <- quantile(exp(cs.hat), probs = 0.5)
+  #expdelta.hat <- apply(exp(DELTAs.hat), 1, quantile, probs = 0.5)
+  #pert.hat <- apply(PERTs.hat, 1, quantile, probs = 0.5)
+  #exppert.hat <- apply(exp(PERTs.hat), 1, quantile, probs = 0.5)
+  #eta.hat <- apply(ETAs.hat, 1, quantile, probs = 0.5)
+  
+  
+  DFTRdelta <- expand.grid(ages=a, years=tF.ava[j],
+                           type=c("Delta", "Exp Delta"))
+  DFTRdelta$value <- c(delta.hat, expdelta.hat)
+  DFTRdelta$up <- c(delta.up, expdelta.up)
+  DFTRdelta$low <- c(delta.low, expdelta.low)
+  
+  DFTRc <- expand.grid(ages=NA, years=tF.ava[j],
+                       type=c("c", "Exp c"))
+  DFTRc$value <- c(c.hat, expc.hat)
+  DFTRc$up <- c(c.up, expc.up)
+  DFTRc$low <- c(c.low, expc.low)
+  
+  DFTRpert <- expand.grid(ages=a, years=tF.ava[j],
+                           type=c("Perturbation", "Exp Perturbation"))
+  DFTRpert$value <- c(pert.hat, exppert.hat)
+  DFTRpert$up <- c(pert.up, exppert.up)
+  DFTRpert$low <- c(pert.low, exppert.low)
+  
+  DFTReta <- expand.grid(ages=a, years=tF.ava[j],
+                         type=c("Fitted Logrates"))
+  DFTReta$value <- c(eta.hat)
+  DFTReta$up <- c(eta.up)
+  DFTReta$low <- c(eta.low)
+  
+  list.out[[j]] <- rbind(DFTRdelta, DFTRc, DFTRpert, DFTReta)
+  
+  ## observed for plotting 
+  eta.obs <- subset(DFTR, type=="Obs Logrates" & years==tF.ava[j])$value
+  
+  DFg <- data.frame(ages=ag.low, 
+                    type="Actual grouped",
+                    eta1=eta.obs,
+                    ages.up=ag.up+1,
+                    eta1.up=eta.obs,
+                    eta1.low=NA)
+  ## forecast
+  DFfor <- data.frame(ages=a, 
+                      type="Forecast",
+                      eta1=eta.for,
+                      ages.up=NA,
+                      eta1.up=NA,
+                      eta1.low=NA)
+  ## fitted
+  DFhat <- data.frame(ages=a, 
+                      type="Fitted",
+                      eta1=eta.hat,
+                      ages.up=NA,
+                      eta1.up=eta.up,
+                      eta1.low=eta.low)
+  ## combine
+  DF <- rbind(DFg, DFfor, DFhat)
+  
+  p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
+    geom_segment(data=filter(DF, type=="Actual grouped"),
+                 aes(x=ages, y=eta1, xend=ages.up, yend=eta1.up), size=1)+
+    geom_line(data=filter(DF, type=="Fitted"),
+              aes(y=eta1), size=1)+
+    geom_ribbon(data=filter(DF, type=="Fitted"),
+                aes(ymin=eta1.low, ymax=eta1.up), alpha=.2)+
+    geom_line(data=filter(DF, type=="Forecast"),
+              aes(y=eta1),size=1.2)+
+    labs(x="age", y="log-mortality", title=paste(cou.j, sex))
+  p
+  
+  DFexpdelta <- data.frame(ages=a, expdelta=expdelta.hat,
+                           expdelta.low=expdelta.low,
+                           expdelta.up=expdelta.up)
+  DFexpc <- data.frame(x=-2, expc=expc.hat, expc.low=expc.low, expc.up=expc.up)
+  
+  p <- ggplot(DFexpdelta, aes(x=ages))+
+    geom_line(aes(y=expdelta), size=2, colour="darkgreen")+
+    geom_ribbon(aes(ymin=expdelta.low, ymax=expdelta.up), alpha=0.5)+
+    geom_pointrange(aes(x=DFexpc$x, y=DFexpc$expc, 
+                        ymin = DFexpc$expc.low, 
+                        ymax = DFexpc$expc.up),
+                    colour="darkblue")+
+    scale_y_log10(breaks=seq(0.1, 10, 0.1))+
+    geom_hline(yintercept=1, linetype="dashed", color = "darkred")+
+    labs(x="age", y=expression(paste("exp(c), exp(", delta, ")")), title=paste(cou.j, sex))
+  
+  p
+  
+}  
+
+
+## old version in which forecast uncertainty is not accounted, 
+## but everything is analytic
+
+# tF.ava <- t.ava.dea[!t.ava.dea%in%t1.ava]
+# j=1
+# list.out <- list()
+# for(j in 1:length(tF.ava)){
+#   
+#   ## extract tF.ava[j] forecast log-mortality (~offset in this analysis)
+#   eta.for0 <- subset(DFTR, type=="Baseline Logrates" & years==tF.ava[j])
+#   eta.for <- eta.for0$value
+# 
+#   ## extract deaths and exposures for tF.ava[j] 
+#   obs.y0 <- subset(DFTR, type=="Obs Deaths" & years==tF.ava[j])
+#   obs.y <- obs.y0$value
+#   obs.e0 <- subset(DFTR, type=="Obs Offset" & years==tF.ava[j])
+#   obs.e <- obs.e0$value
+#   ## age-structure
+#   ag.low <- obs.y0$ages
+# 
+#   QIC_Pert <- function(par){
+#     FIT <- PertubFUN(ag.low=ag.low,
+#                      obs.y=obs.y,
+#                      obs.e=obs.e,
+#                      a=a,
+#                      eta.for=eta.for,
+#                      lambda=par)
+#     FIT$QIC
+#   }
+#   ## optimizing lambdas using greedy grid search
+#   OPT <- cleversearch(QIC_Pert, lower=-1, upper=8,
+#                       ngrid=19, logscale=TRUE, startvalue=10^4,
+#                       verbose=TRUE)
+# 
+#   ## estimating perturbation with optimal lambdas
+#   PertOPT <- PertubFUN(ag.low=ag.low,
+#                        obs.y=obs.y,
+#                        obs.e=obs.e,
+#                        a=a,
+#                        eta.for=eta.for,
+#                        lambda=OPT$par)
+#   nb <- ncol(PertOPT$Ba)
+#   ## fitted values
+#   c.hat <- PertOPT$coeff[1]
+#   expc.hat <- exp(c.hat)
+#   delta.hat <- PertOPT$Ba%*%PertOPT$coeff[1:nb+1]
+#   expdelta.hat <- exp(delta.hat)
+#   eta.hat <- eta.for + c.hat + delta.hat # U%*%betas+eta20
+#   ## se for c
+#   se.c <- sqrt(PertOPT$Vbetas[1,1])
+#   ## se for delta
+#   V.delta <- cbind(0, PertOPT$Ba) %*% PertOPT$Vbetas %*% t(cbind(0, PertOPT$Ba))
+#   se.delta <- sqrt(diag(V.delta))
+#   ## se for exp(c)
+#   der.expc <- matrix(c(exp(c.hat), rep(0, nb)), 1, nb+1)
+#   V.expc <- der.expc %*% PertOPT$Vbetas %*% t(der.expc)
+#   se.expc <- sqrt(diag(V.expc))
+#   ## se for exp(delta)
+#   der.expdelta0 <- cbind(0, PertOPT$Ba)
+#   der.expdelta <- diag(c(exp(delta.hat))) %*% der.expdelta0
+#   V.expdelta <- der.expdelta %*% PertOPT$Vbetas %*% t(der.expdelta)
+#   se.expdelta <- sqrt(diag(V.expdelta))
+#   ## se for eta
+#   Veta.pert <- PertOPT$U %*% PertOPT$Vbetas %*% t(PertOPT$U)
+#   se.eta.pert <- sqrt(diag(Veta.pert))
+#   
+#   ## 95% CIs
+#   c.up <- c.hat + 1.96*se.c
+#   c.low <- c.hat - 1.96*se.c
+#   delta.up <- delta.hat + 1.96*se.delta
+#   delta.low <- delta.hat - 1.96*se.delta
+#   expc.up <- expc.hat + 1.96*se.expc
+#   expc.low <- expc.hat - 1.96*se.expc
+#   expdelta.up <- expdelta.hat + 1.96*se.expdelta
+#   expdelta.low <- expdelta.hat - 1.96*se.expdelta
+#   eta.up <- eta.hat + 1.96*se.eta.pert
+#   eta.low <- eta.hat - 1.96*se.eta.pert
+# 
+#   DFTRdelta <- expand.grid(ages=a, years=tF.ava[j],
+#                            type=c("Delta", "Exp Delta"))
+#   DFTRdelta$value <- c(delta.hat, expdelta.hat)
+#   DFTRdelta$up <- c(delta.up, expdelta.up)
+#   DFTRdelta$low <- c(delta.low, expdelta.low)
+#   
+#   DFTRc <- expand.grid(ages=NA, years=tF.ava[j],
+#                        type=c("c", "Exp c"))
+#   DFTRc$value <- c(c.hat, expc.hat)
+#   DFTRc$up <- c(c.up, expc.up)
+#   DFTRc$low <- c(c.low, expc.low)
+#   
+#   DFTReta <- expand.grid(ages=a, years=tF.ava[j],
+#                            type=c("Fitted Logrates"))
+#   DFTReta$value <- c(eta.hat)
+#   DFTReta$up <- c(eta.up)
+#   DFTReta$low <- c(eta.low)
+#   
+#   list.out[[j]] <- rbind(DFTRdelta, DFTRc, DFTReta)
+#   
+#   ## observed
+#   
+#   eta.obs <- subset(DFTR, type=="Obs Logrates" & years==tF.ava[j])$value
+#   DFg <- data.frame(ages=ag.low, 
+#                     type="Actual grouped",
+#                     eta1=eta.obs,
+#                     ages.up=ag.up+1,
+#                     eta1.up=eta.obs,
+#                     eta1.low=NA)
+#   ## forecast
+#   DFfor <- data.frame(ages=a, 
+#                       type="Forecast",
+#                       eta1=eta.for,
+#                       ages.up=NA,
+#                       eta1.up=NA,
+#                       eta1.low=NA)
+#   ## fitted
+#   DFhat <- data.frame(ages=a, 
+#                       type="Fitted",
+#                       eta1=eta.hat,
+#                       ages.up=NA,
+#                       eta1.up=eta.up,
+#                       eta1.low=eta.low)
+#   ## combine
+#   DF <- rbind(DFg, DFfor, DFhat)
+#   
+#   p <- ggplot(DF, aes(x=ages, y=eta1, color=type)) +
+#     geom_segment(data=filter(DF, type=="Actual grouped"),
+#                  aes(x=ages, y=eta1, xend=ages.up, yend=eta1.up), size=1)+
+#     geom_line(data=filter(DF, type=="Fitted"),
+#               aes(y=eta1), size=1)+
+#     geom_ribbon(data=filter(DF, type=="Fitted"),
+#                 aes(ymin=eta1.low, ymax=eta1.up), alpha=.2)+
+#     geom_line(data=filter(DF, type=="Forecast"),
+#               aes(y=eta1),size=1.2)+
+#     labs(x="age", y="log-mortality", title=paste(cou.j, sex))
+#   p
+#   
+#   DFexpdelta <- data.frame(ages=a, expdelta=expdelta.hat,
+#                            expdelta.low=expdelta.low,
+#                            expdelta.up=expdelta.up)
+#   DFexpc <- data.frame(x=-2, expc=expc.hat, expc.low=expc.low, expc.up=expc.up)
+#   
+#   p <- ggplot(DFexpdelta, aes(x=ages))+
+#     geom_line(aes(y=expdelta), size=2, colour="darkgreen")+
+#     geom_ribbon(aes(ymin=expdelta.low, ymax=expdelta.up), alpha=0.5)+
+#     geom_pointrange(aes(x=DFexpc$x, y=DFexpc$expc, 
+#                         ymin = DFexpc$expc.low, 
+#                         ymax = DFexpc$expc.up),
+#                     colour="darkblue", size=0.8)+
+#     scale_y_log10(breaks=seq(0.1, 10, 0.1))+
+#     geom_hline(yintercept=1, linetype="dashed", color = "darkred")+
+#     labs(x="age", y=expression(paste("exp(c), exp(", delta, ")")), title=paste(cou.j, sex))
+#   
+#   p
+#   
+# }
+# 
+# DFTRpert <- dplyr::bind_rows(list.out)
+# 
+# DFTR <- rbind(DFTR, DFTRpert)
 
 
 ## END
-
-
-
-

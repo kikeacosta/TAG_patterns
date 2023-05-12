@@ -1175,3 +1175,121 @@ CPSfunction <- function(Y, E, lambdas, WEI,
 
 
 
+## function to estimate \delta and c
+PertubFUN <- function(ag.low, obs.y, obs.e, a, eta.for,
+                      lambda){
+  m <- length(a)
+  ag.up1  <- ag.low-1
+  if(ag.low[2]==1){
+    ag.up <- c(0, ag.up1[ag.up1>0], max(a))
+  }else{
+    ag.up <- c(ag.up1[ag.up1>0], max(a))
+  }
+  ag.mid <- (ag.low+ag.up)/2 
+  ag.lab <- paste(ag.low, ag.up,sep="-")
+  
+  # lg <- ag.up-ag.low+1
+  mg <- length(ag.low)
+  # G20 <- matrix(0, mg, m)
+  # rownames(G20) <- ag.mid
+  # colnames(G20) <- a
+  # for(ii in 1:mg){
+  #   ag.low.i <- ag.low[ii]
+  #   ag.up.i <- ag.up[ii]
+  #   wc <- which(a>=ag.low.i & a<=ag.up.i)
+  #   G20[ii,wc] <- 1
+  # }
+  # ag.low <- seq(0,95,by=5)
+  # mg <- length(ag.low)
+  A1 <- tibble(age = a, exposure = obs.e)
+  B  <- tibble(age = ag.low, value = rep(1, mg))
+  C20  <- left_join(A1, B, by = "age") |> 
+    mutate(ag = age * value) |> 
+    fill(ag,.direction = "down") |> 
+    select(-value) |> 
+    pivot_wider(names_from=age, values_from = exposure, values_fill = 0) |> 
+    column_to_rownames("ag") |> 
+    as.matrix()
+
+  # 
+  # TR: note to self, create G20 more efficiently
+  # rows age groups
+  # cols single ages
+  # cells exposures
+  
+  
+  #all(colSums(G20)==1)
+  ## create C matrix with e20
+  # C20 <- G20
+  # C20[G20==1] <- c(obs.e)
+  
+  ## design matrix
+  Ba <- MortSmooth_bbase(x=a, min(a), max(a), floor(m/7), 3)
+  Ba <- zapsmall(Ba, 8)
+  
+  nb <- ncol(Ba)
+  U <- cbind(1, Ba)
+  kappa <- 0
+  ## penalty stuff
+  D <- diff(diag(nb), diff=2)
+  tDD <- t(D)%*%D
+  
+  ## constraining \delta to sum up to 0
+  H0 <- matrix(c(0, rep(1,m)), 1, m+1)
+  H1 <- adiag(0, Ba)
+  H <- H0 %*% H1
+  
+  P0 <- lambda*tDD
+  P <- matrix(0,nb+1,nb+1)
+  P[-1,-1] <- P0
+  
+  ## starting eta (log-mortality minus forecast log-mortality in 2020)
+  eta <- rep(0.01,m)
+  ## PCLM regression with eta20 as offset
+  max.it <- 100
+  for(it in 1:max.it){
+    gamma   <- exp(eta + eta.for)
+    mu      <- c(C20 %*% gamma)
+    X       <- (C20 * ((1 / mu) %*% t(gamma)) ) %*% U
+    w       <- as.vector(mu)
+    r       <- obs.y - mu + C20 %*% (gamma * eta)
+    tXWX    <- t(X) %*% (w * X) 
+    tXWXpP  <- tXWX + P
+    tXr     <- t(X) %*% r
+    ## adding constraints
+    LHS     <- rbind(cbind(tXWXpP, t(H)),
+                     cbind(H, 0))
+    RHS     <- matrix(c(tXr, kappa), ncol=1)
+    coeff   <- solve(LHS, RHS)
+    ##
+    betas   <- coeff[1:(nb+1)]
+    eta.old <- eta
+    eta     <- U%*%betas
+    dif.eta <- max(abs((eta - eta.old)/eta.old) )
+    if(dif.eta < 1e-04 & it > 4) break
+    #cat(it, dif.eta, "\n")
+  }
+  gamma   <- exp(eta + eta.for)
+  mu      <- c(C20 %*% gamma)
+  ## computing BIC
+  Pr <- 10^-6 * diag(nb+1)
+  Hat <- solve(tXWXpP+Pr, tXWX)
+  ED <- sum(diag(Hat))
+  y1 <- obs.y
+  y1[obs.y == 0] <- 10^(-4)
+  DEV <- 2 * sum( (obs.y * log(y1/mu) - (y1-mu)))
+  #BICs[l] <- DEV + log(mg)*ED
+  ## try QIC
+  psi <- DEV/(mg - ED)
+  QIC <- mg + ED + mg*log(psi)
+  
+  ## variance-covariance matrix
+  Pr <- 10^-3 * diag(nb+1)
+  H0 <- solve(tXWXpP+Pr)
+  Vbetas <- H0 %*% tXWX %*% H0
+  
+  ## returning object   
+  out <- list(QIC=QIC, Vbetas=Vbetas,
+              coeff=coeff, Ba=Ba, U=U)
+  return(out)
+}
