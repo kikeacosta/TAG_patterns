@@ -65,7 +65,7 @@ all_in <-
 unique(all_in$Country)
 # excluding sources with insufficient data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# sources to exclude because of insufficient periods for baseline (minimum 3 periods)
+# sources to exclude because of insufficient periods for baseline (minimum 5 periods)
 insuf_pers <- 
   bind_rows(hmd,
             who,
@@ -87,7 +87,7 @@ insuf_pers <-
 
 unique(insuf_pers$Country)
 
-# sources to exclude because of insufficient age groups (minimum 4 intervals)
+# sources to exclude because of insufficient age groups (minimum 8 intervals)
 insuf_ages <- 
   all_in %>% 
   group_by(Country, Source, Year, Sex) %>% 
